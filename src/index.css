@@ -1,0 +1,356 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', 'Niveau Grotesk', sans-serif;
+  --font-anton: 'Anton', sans-serif;
+  --font-display: 'TANAMERA', sans-serif;
+  --color-juow-accent: #feec93;
+  --color-juow-soft: #f5f5fc;
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply antialiased text-foreground;
+    margin: 0;
+    background: #000;
+    color: var(--color-juow-soft);
+    font-family: var(--font-sans);
+  }
+  html {
+    @apply font-sans scroll-smooth;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-juow-accent);
+    color: #000;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0.4em;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #fff;
+    border-radius: 0.3em;
+  }
+
+  /* Every clickable control shows a pointer cursor by default - buttons don't
+     get this for free from the browser (only <a href> does), and this project
+     has a lot of icon-only / div-as-button style controls. */
+  button:not(:disabled),
+  a[href],
+  [role='button'],
+  [role='link'],
+  summary,
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='range'],
+  select,
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /* Matches css/lyrics.css .lyric rules 1:1 so the raw lyricHtml (dangerouslySetInnerHTML)
+     renders with the original spacing: only the heading <span> and stray <i> icons get
+     margin-bottom, individual lyric <p> lines just get line-height (no extra gaps). */
+  .lyric {
+    font-size: 1.3em;
+  }
+
+  .lyric span,
+  .lyric i {
+    @apply text-black;
+    font-size: 0.8em;
+    margin-bottom: 3em;
+  }
+
+  .lyric p {
+    @apply text-black;
+    line-height: 1.6em;
+  }
+
+  .lyric b,
+  .lyric strong {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 0.1em;
+    text-underline-offset: 0.15em;
+  }
+
+  .lyric q {
+    quotes: '[' ']';
+  }
+
+  .section-heading {
+    @apply text-center font-light tracking-wide text-juow-soft;
+    font-family: var(--font-anton);
+    font-size: clamp(3rem, 6vw, 5rem);
+  }
+
+  .nav-link-underline {
+    @apply relative inline-block px-1 py-0.5 text-juow-soft transition-colors hover:text-juow-accent;
+  }
+
+  .nav-link-underline::before {
+    content: '';
+    @apply absolute right-0 -bottom-0.5 h-0.5 w-0 bg-juow-accent transition-all duration-300;
+  }
+
+  .nav-link-underline:hover::before,
+  .nav-link-underline.active::before {
+    @apply left-0 w-full;
+  }
+
+  /* Custom-styled native <input type="range"> used for the audio player's seek
+     bar (see components/GlobalAudioPlayer.jsx SeekBar). A plain native range
+     input is used there instead of a UI-library slider specifically because
+     dragging it is guaranteed to work with zero surprises. */
+  .seek-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .seek-range::-webkit-slider-runnable-track {
+    height: 4px;
+    background: transparent;
+  }
+  .seek-range::-moz-range-track {
+    height: 4px;
+    background: transparent;
+  }
+  .seek-range::-moz-range-progress {
+    height: 4px;
+    background: transparent;
+  }
+  .seek-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .seek-range:hover::-webkit-slider-thumb,
+  .seek-range:focus-visible::-webkit-slider-thumb,
+  .seek-range:active::-webkit-slider-thumb {
+    opacity: 1;
+  }
+  .seek-range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .seek-range:hover::-moz-range-thumb,
+  .seek-range:focus-visible::-moz-range-thumb,
+  .seek-range:active::-moz-range-thumb {
+    opacity: 1;
+  }
+
+  .seek-range--dark::-webkit-slider-runnable-track,
+  .seek-range--dark::-moz-range-track,
+  .seek-range--dark::-moz-range-progress {
+    background: transparent;
+  }
+  .seek-range--dark::-webkit-slider-thumb,
+  .seek-range--dark::-moz-range-thumb {
+    background: #000;
+    border-color: #fff;
+  }
+
+  /* One dash (see HomePage's DPR IAN frame) travels clockwise around a rect
+     whose pathLength is normalized to 100, so -100 is exactly one full lap. */
+  @keyframes snake-crawl {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+
+  /* The little music note that bounces beside the spinning vinyl in MusicLoader. */
+  @keyframes note-bounce {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50% { transform: translateY(-6px) rotate(8deg); }
+  }
+
+  /* ---- Listening Weather (ProfilePage) ---- */
+
+  @keyframes weather-rain-fall {
+    0% { transform: translateY(-10%); opacity: 0; }
+    10% { opacity: 0.7; }
+    100% { transform: translateY(340%); opacity: 0; }
+  }
+  .weather-raindrop {
+    animation: weather-rain-fall linear infinite;
+  }
+
+  @keyframes weather-cloud-drift {
+    from { transform: translateX(-6%); }
+    to { transform: translateX(6%); }
+  }
+  .weather-cloud {
+    animation: weather-cloud-drift ease-in-out infinite alternate;
+  }
+
+  @keyframes weather-sun-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.06); opacity: 1; }
+  }
+  .weather-sun {
+    animation: weather-sun-pulse 4.5s ease-in-out infinite;
+  }
+
+  @keyframes weather-wind-streak {
+    0% { transform: translateX(-20%); opacity: 0; }
+    15% { opacity: 0.55; }
+    85% { opacity: 0.55; }
+    100% { transform: translateX(120%); opacity: 0; }
+  }
+  .weather-wind {
+    animation: weather-wind-streak linear infinite;
+  }
+
+  @keyframes weather-twinkle {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.9; }
+  }
+  .weather-twinkle {
+    animation: weather-twinkle ease-in-out infinite;
+  }
+}

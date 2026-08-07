@@ -1,0 +1,86 @@
+[
+  {
+    "old": "music/Billie Eilish - BLUE.mp3",
+    "new": "music/BillieEilish-BLUE.mp3"
+  },
+  {
+    "old": "music/Billie Eilish - CHIHIRO.mp3",
+    "new": "music/BillieEilish-CHIHIRO.mp3"
+  },
+  {
+    "old": "music/diamond eyes.mp3",
+    "new": "music/diamondeyes.mp3"
+  },
+  {
+    "old": "music/DPR IAN - Ballroom Extravaganza.mp3",
+    "new": "music/DPRIAN-BallroomExtravaganza.mp3"
+  },
+  {
+    "old": "music/DPR IAN - Dope Lovers.mp3",
+    "new": "music/DPRIAN-DopeLovers.mp3"
+  },
+  {
+    "old": "music/DPR IAN - Nerves.mp3",
+    "new": "music/DPRIAN-Nerves.mp3"
+  },
+  {
+    "old": "music/DPR IAN - So Beautiful (OFFICIAL M-V).mp3",
+    "new": "music/DPRIAN-SoBeautiful(OFFICIALM-V).mp3"
+  },
+  {
+    "old": "music/DPR IAN - Violet Crazy.mp3",
+    "new": "music/DPRIAN-VioletCrazy.mp3"
+  },
+  {
+    "old": "music/kompa (she said shes love the islands).mp3",
+    "new": "music/kompa(shesaidsheslovetheislands).mp3"
+  },
+  {
+    "old": "music/Merry Go.mp3",
+    "new": "music/MerryGo.mp3"
+  },
+  {
+    "old": "music/Metro Boomin, The Weeknd, 21 Savage - Creepin' .mp3",
+    "new": "music/MetroBoomin,TheWeeknd,21Savage-Creepin'.mp3"
+  },
+  {
+    "old": "music/Sơn Tùng M-TP, SnoopDogg - Hãy Trao Cho Anh - Audio.mp3",
+    "new": "music/SonTungM-TP,SnoopDogg-HayTraoChoAnh-Audio.mp3"
+  },
+  {
+    "old": "music/Sơn Từng M-TP - Chúng Ta Của Tương Lai - Audio.mp3",
+    "new": "music/SonTungM-TP-ChungTaCuaTuongLai-Audio.mp3"
+  },
+  {
+    "old": "music/The Weeknd  Is There Someone Else.mp3",
+    "new": "music/TheWeekndIsThereSomeoneElse.mp3"
+  },
+  {
+    "old": "music/The Weeknd - After Hours (Audio).mp3",
+    "new": "music/TheWeeknd-AfterHours(Audio).mp3"
+  },
+  {
+    "old": "music/The Weeknd - Trust Issues.mp3",
+    "new": "music/TheWeeknd-TrustIssues.mp3"
+  },
+  {
+    "old": "music/The Weeknd, JENNIE & Lily Rose Depp - One Of The Girls (Audio).mp3",
+    "new": "music/TheWeeknd,JENNIE&LilyRoseDepp-OneOfTheGirls(Audio).mp3"
+  },
+  {
+    "old": "music/The Weeknd, Playboi Carti, Madonna - Popular (Audio).mp3",
+    "new": "music/TheWeeknd,PlayboiCarti,Madonna-Popular(Audio).mp3"
+  },
+  {
+    "old": "music/Tory Lanez - The Color Violet - Audio.mp3",
+    "new": "music/ToryLanez-TheColorViolet-Audio.mp3"
+  },
+  {
+    "old": "videos/DPR IAN - Nerves - video.mp4",
+    "new": "videos/DPRIAN-Nerves-video.mp4"
+  },
+  {
+    "old": "videos/The Weeknd - After Hours (Short Film).mp4",
+    "new": "videos/TheWeeknd-AfterHours(ShortFilm).mp4"
+  }
+]

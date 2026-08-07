@@ -1,0 +1,377 @@
+{
+  "slug": "the-weeknd",
+  "name": "The Weeknd",
+  "docTitle": "Juowle | The Weeknd",
+  "coverImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-coverImg.jpg",
+  "avatarImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-avtArtist.jpg",
+  "displayName": "The Weeknd",
+  "countryFlag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/Canada.webp",
+  "countryName": "Canada",
+  "bio": [
+    {
+      "icon": "fa-solid fa-user me-1",
+      "label": "AKA",
+      "value": "Abel Makkonen Tesfaye"
+    },
+    {
+      "icon": "fa-solid fa-calendar me-1",
+      "label": "Active Years",
+      "value": "13"
+    },
+    {
+      "icon": "fa-solid fa-drum me-1",
+      "label": "Genres",
+      "value": "Pop, R&B/Soul, Electronic"
+    },
+    {
+      "icon": "fa-solid fa-location-dot me-1",
+      "label": "Birth Place",
+      "value": "Scarborough, Ontario, Canada"
+    }
+  ],
+  "links": [
+    {
+      "href": "https://open.spotify.com/artist/5dfZ5uSmzR7VQK0udbAVpf",
+      "icon": "fa-brands fa-spotify me-1",
+      "color": "rgba(30, 215, 96, 1)"
+    },
+    {
+      "href": "https://www.youtube.com/channel/UClyA28-01x4z60eWQ2kiNbA",
+      "icon": "fa-brands fa-youtube me-1",
+      "color": "rgba(255, 0, 0, 1)"
+    },
+    {
+      "href": "https://music.amazon.com/artists/B00L24NPPA",
+      "icon": "fa-brands fa-apple",
+      "color": "#000"
+    },
+    {
+      "href": "https://facebook.com/mtp.fan",
+      "icon": "fa-brands fa-facebook",
+      "color": "rgba(0, 98, 255, 1)"
+    },
+    {
+      "href": "https://instagram.com/sontungmtp",
+      "icon": "fa-brands fa-instagram",
+      "color": "rgba(193, 61, 160, 1)"
+    },
+    {
+      "href": "https://twitter.com/sontungmtp777",
+      "icon": "fa-brands fa-x-twitter",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "https://tiktok.com/@tiger050794",
+      "icon": "fa-brands fa-tiktok",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "https://music.amazon.com/artists/B00L24NPPA",
+      "icon": "fa-brands fa-amazon",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "https://soundcloud.com/theweeknd",
+      "icon": "fa-brands fa-soundcloud",
+      "color": "rgba(255, 84, 29, 1)"
+    },
+    {
+      "href": "https://www.theweeknd.com",
+      "icon": "fa-solid fa-house-chimney",
+      "color": "rgba(0, 0, 0, 1)"
+    }
+  ],
+  "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-coverImg.jpg",
+  "aboutHtml": "<p class=\"about_artistP\">\n\n                        The Weeknd took over pop music &amp; culture on his own terms filtering R&amp;B, Pop,&amp; hip-hop through\n                        an ambitious widescreen lens. The multi-platinum 3X GRAMMY Award winner has emerged as one of\n                        the most successful &amp; significant artists of the modern era. 2012's 3X platinum Trilogy collated\n                        3 breakout mixtapes—House of Balloons, Thursday &amp; Echoes of Silence—into his 1st chart-topping\n                        collection followed by his debut LP Kiss Land in 2013. <br/><br/>\n                        Two years later, “Earned It (Fifty Shades\n                        of Grey)” won “Best R&amp;B Performance” &amp; received an Academy Award nod for “Best Original Song” &amp;\n                        4X Platinum Beauty Behind The Madness won a GRAMMY for “Best Urban Contemporary Album.” In 2018,\n                        Starboy won the same award, making him the 1st artist ever to win twice. His 6-track project My\n                        Dear Melancholy marked his 3rd consecutive #1 bow on the Billboard Top 200, &amp; “Pray For Me” with\n                        Kendrick Lamar &amp; Niels was featured in the trailer for the Academy Award winning Marvel film\n                        Black Panther. <br/><br/>\n                        In 2020 the 80's-nostalgic track Blinding Lights became a worldwide sensation,\n                        igniting viral dance challenges across social media, peaking at #1 in 30+ countries &amp; headlining\n                        Mercedes Benz EQC campaign. After Hours held the #1 spot on Billboard 200 for 4 consecutive\n                        weeks, marking his 4th #1 album &amp; becoming the first to ever rank #1 on the Billboard 200, Hot\n                        100, and Artist 100 simultaneously. After Hours is the #1 R&amp;B streaming album of all time\n                        (followed by Starboy at #2).\n                    </p>",
+  "topTrack": {
+    "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/afterHours.jpg",
+    "title": "Blinding Lights",
+    "legal": "℗ 2024 The Weeknd XO, Inc.",
+    "achievements": [
+      {
+        "number": "#1",
+        "label": "Billboard Hot 100"
+      },
+      {
+        "number": "#1",
+        "label": "GLOBAL SPOTIFY STREAMS"
+      },
+      {
+        "number": "#1",
+        "label": "APPLE MUSIC GLOBAL"
+      },
+      {
+        "number": "86 Weeks",
+        "label": "TOP 10 BILLBOARD HOT 100"
+      }
+    ],
+    "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-coverImg.jpg",
+    "aboutHtml": "<p class=\"about_songP\">\n\n                        The Weeknd's hit song 'Blinding Lights' is a vibrant blend of '80s synth-pop with modern R&amp;B,\n                        encapsulating a sense of longing and desire within its pulsating beats. The lyrics convey a deep\n                        sense of yearning for connection and the intoxicating rush of rekindled love. The Weeknd, known\n                        for his emotive voice and often dark, introspective themes, explores the duality of isolation\n                        and the craving for companionship in this chart-topping track.\n                        <br/><br/>\n                        The opening lines set the stage for a narrative of personal struggle and the need for another's\n                        presence to navigate through life's challenges. The reference to 'Sin City' being 'cold and\n                        empty' suggests a feeling of loneliness and desolation, a common theme in The Weeknd's music,\n                        which often delves into the complexities of relationships and self-discovery. The chorus, with\n                        its repeated exclamations of being 'blinded by the lights,' could symbolize the overwhelming\n                        nature of love and fame, or the disorienting effect that a significant other has on the\n                        protagonist's life. The inability to 'sleep until I feel your touch' speaks to a deep dependency\n                        and the transformative power of human connection.\n                        <br/><br/>\n                        The song's bridge, where The Weeknd insists he's 'just coming back to let you know' and that he\n                        'can never say it on the phone,' emphasizes the importance of physical presence and the\n                        limitations of distant communication. It's a modern take on the age-old adage that actions speak\n                        louder than words, and in the context of the song, it underscores the urgency and sincerity\n                        behind the protagonist's feelings. 'Blinding Lights' resonates with listeners not just for its\n                        catchy melody, but for its portrayal of the universal human experience of seeking light in the\n                        darkness of our own solitude.\n                    </p>"
+  },
+  "fanbase": [
+    {
+      "icon": "fa-brands fa-spotify me-1",
+      "iconColor": "rgba(30, 215, 96, 1)",
+      "platform": "Spotify",
+      "number": "86.6M",
+      "label": "Followers",
+      "bg": "#e0ffe0"
+    },
+    {
+      "icon": "fa-brands fa-instagram",
+      "iconColor": "rgba(193, 61, 160, 1)",
+      "platform": "Instagram",
+      "number": "75.5M",
+      "label": "Followers",
+      "bg": "rgba(193, 61, 160, .19)"
+    },
+    {
+      "icon": "fa-brands fa-youtube",
+      "iconColor": "rgba(255, 0, 0, 1)",
+      "platform": "YouTube",
+      "number": "35.4M",
+      "label": "Subscribers",
+      "bg": "#ffe0e0"
+    },
+    {
+      "icon": "fa-brands fa-facebook",
+      "iconColor": "rgba(0, 98, 255, 1)",
+      "platform": "Facebook",
+      "number": "17.6M",
+      "label": "Followers",
+      "bg": "rgba(0, 98, 255, .19)"
+    },
+    {
+      "icon": "fa-brands fa-x-twitter",
+      "iconColor": "rgba(0, 0, 0, 1)",
+      "platform": "Twitter",
+      "number": "17.1M",
+      "label": "Followers",
+      "bg": "rgba(0, 0, 0, .19)"
+    },
+    {
+      "icon": "fa-brands fa-tiktok",
+      "iconColor": "rgba(0, 0, 0, 1)",
+      "platform": "TikTok",
+      "number": "9.6M",
+      "label": "Followers",
+      "bg": "#f0f0f0"
+    },
+    {
+      "icon": "fa-brands fa-soundcloud",
+      "iconColor": "rgba(255, 84, 29, 1)",
+      "platform": "SoundCloud",
+      "number": "7M",
+      "label": "Followers",
+      "bg": "rgba(255, 84, 29, .19)"
+    }
+  ],
+  "popularSongs": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/afterHours.jpg",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "date": "Release Date: Nov 29. 20219",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/theHills.jpg",
+      "title": "The Hills",
+      "artist": "The Weeknd",
+      "date": "Release Date: May 27. 2015",
+      "link": {
+        "type": "lyric",
+        "slug": "chungTaCuaTuongLai"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/starboy.jpg",
+      "title": "Starboy",
+      "artist": "The Weeknd",
+      "date": "Release Date: Sep 22. 2016",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/popular.png",
+      "title": "Popular",
+      "artist": "The Weeknd",
+      "date": "Release Date: Feb 22. 2024",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/oneOfTheGirls.jpg",
+      "title": "One Of The Girls",
+      "artist": "The Weeknd",
+      "date": "Release Date: Feb 5. 2021",
+      "link": {
+        "type": "lyric",
+        "slug": "oneOfTheGirls"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/afterHours.jpg",
+      "title": "Save Your Tears",
+      "artist": "The Weeknd",
+      "date": "Release Date: Mar 20. 2020",
+      "link": {
+        "type": "lyric",
+        "slug": "hayTraoChoAnh"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Dear-Melancholy.jpg",
+      "title": "Call Out My Name",
+      "artist": "The Weeknd",
+      "date": "Release Date: Mar 29. 2018",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Creepin.jpg",
+      "title": "Creepin' (with The Weeknd & 21 Savage)",
+      "artist": "Metro Boomin, The Weeknd, 21 Savage",
+      "date": "Release Date: Dec 2. 2022",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/afterHours.jpg",
+      "title": "After Hours",
+      "artist": "The Weeknd",
+      "date": "Release Date: Feb 19. 2020",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Dear-Melancholy.jpg",
+      "title": "Privilege",
+      "artist": "The Weeknd",
+      "date": "Release Date: Mar 29. 2018",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/starboy.jpg",
+      "title": "Die For You",
+      "artist": "The Weeknd",
+      "date": "Release Date: Nov 25. 2016",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/DrawnFM.jpg",
+      "title": "Moth To Flame",
+      "artist": "Swedish House Mafia, The Weeknd",
+      "date": "Release Date: Oct 22. 2021",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/DrawnFM.jpg",
+      "title": "Is There Someone Else?",
+      "artist": "The Weeknd",
+      "date": "Release Date: Jan 7. 2022",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Dear-Melancholy.jpg",
+      "title": "Privilege",
+      "artist": "The Weeknd",
+      "date": "Release Date: Mar 29. 2018",
+      "link": null
+    }
+  ],
+  "albums": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-starboy(deluxe).jpg",
+      "title": "Starboy(Deluxe)",
+      "meta": "Album 2023 21 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/DrawnFM.jpg",
+      "title": "Dawn FM",
+      "meta": "Album 2022 16 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-afterHour(deluxe).jpg",
+      "title": "After Hours(Deluxe)",
+      "meta": "Album 2020 18 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/afterHours.jpg",
+      "title": "After Hours",
+      "meta": "Album 2018 14 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Dear-Melancholy.jpg",
+      "title": "My Dear Melancholy",
+      "meta": "Album 2018 7 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/starboy.jpg",
+      "title": "Starboy",
+      "meta": "Album 2016 18 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/BeautyBehindTheMadness.jpg",
+      "title": "Beauty Behind The Madness",
+      "meta": "Album 2015 14 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-kissLand.jpg",
+      "title": "Kiss Land(Deluxe)",
+      "meta": "Album 2013 12 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-kissLand.jpg",
+      "title": "Kiss Land",
+      "meta": "Album 2013 10 songs"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-trilogy.jpg",
+      "title": "Trilogy",
+      "meta": "Album 2013 30 songs"
+    }
+  ],
+  "recommended": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-avtArtist.jpg",
+      "name": "Sơn Tùng M-TP",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/Canada.webp",
+      "link": {
+        "type": "artist",
+        "slug": "son-tung-mtp"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/billieEilish-avtArtist.jpg",
+      "name": "Billie Eilish",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/DPRIAN-avtartist.jpg",
+      "name": "DPR IAN",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/SouthKorea.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TaylorSwift-avtartist.jpg",
+      "name": "Taylor Swift",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/Jungkook-avtartist.jpg",
+      "name": "Jungkook",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/SouthKorea.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/CharliePuth-avtartist.jpg",
+      "name": "Charlie Puth",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/JustinBieber-avtartist.jpg",
+      "name": "Justin Bieber",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/",
+      "link": null
+    }
+  ]
+}

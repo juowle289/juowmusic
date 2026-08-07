@@ -1,0 +1,311 @@
+{
+  "slug": "son-tung-mtp",
+  "name": "Sơn Tùng M-TP",
+  "docTitle": "Juowle | Sơn Tùng M-TP",
+  "coverImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-coverimg2.jpg",
+  "avatarImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-avtArtist.jpg",
+  "displayName": "Sơn Tùng M-TP",
+  "countryFlag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/VIETNAM.webp",
+  "countryName": "Vietnam",
+  "bio": [
+    {
+      "icon": "fa-solid fa-user me-1",
+      "label": "AKA",
+      "value": "Nguyễn Thanh Tùng"
+    },
+    {
+      "icon": "fa-solid fa-calendar me-1",
+      "label": "Active Years",
+      "value": "10"
+    },
+    {
+      "icon": "fa-solid fa-drum me-1",
+      "label": "Genres",
+      "value": "Pop, Hip-Hop/Rap, Alternative"
+    },
+    {
+      "icon": "fa-solid fa-location-dot me-1",
+      "label": "Birth Place",
+      "value": "Thai Binh, Viet Nam"
+    }
+  ],
+  "links": [
+    {
+      "href": "https://open.spotify.com/artist/5dfZ5uSmzR7VQK0udbAVpf",
+      "icon": "fa-brands fa-spotify me-1",
+      "color": "rgba(30, 215, 96, 1)"
+    },
+    {
+      "href": "https://www.youtube.com/channel/UClyA28-01x4z60eWQ2kiNbA",
+      "icon": "fa-brands fa-youtube me-1",
+      "color": "rgba(255, 0, 0, 1)"
+    },
+    {
+      "href": "https://music.amazon.com/artists/B00L24NPPA",
+      "icon": "fa-brands fa-apple",
+      "color": "#000"
+    },
+    {
+      "href": "https://facebook.com/mtp.fan",
+      "icon": "fa-brands fa-facebook",
+      "color": "rgba(0, 98, 255, 1)"
+    },
+    {
+      "href": "https://instagram.com/sontungmtp",
+      "icon": "fa-brands fa-instagram",
+      "color": "rgba(193, 61, 160, 1)"
+    },
+    {
+      "href": "https://twitter.com/sontungmtp777",
+      "icon": "fa-brands fa-x-twitter",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "https://tiktok.com/@tiger050794",
+      "icon": "fa-brands fa-tiktok",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "https://music.amazon.com/artists/B00L24NPPA",
+      "icon": "fa-brands fa-amazon",
+      "color": "rgba(0, 0, 0, 1)"
+    },
+    {
+      "href": "#",
+      "icon": "fa-brands fa-soundcloud",
+      "color": "rgba(0, 0, 0, .19)"
+    },
+    {
+      "href": "#",
+      "icon": "fa-solid fa-house-chimney",
+      "color": "rgba(0, 0, 0, .19)"
+    }
+  ],
+  "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-coverImg.jpg",
+  "aboutHtml": "<p>\n\n                        Nguyễn Thanh Tùng, born in 1994, known professionally as Sơn Tùng M-TP, is a Vietnamese singer,\n                        songwriter, producer, and actor. He is not only known as one of the most successful Vietnamese\n                        artists and as the \"Prince of V-pop\", but also as the Chairman of three self-created companies:\n                        M-TP\n                        Entertainment, M-TP Talent and M-TP &amp; Friends.\n                        <br/><br/>\n                        He has received many achievements: a MTV Europe Music\n                        Award, an Mnet Asian Music Award, appeared on Forbes Vietnam's 2018 30 Under 30 list, and is\n                        also\n                        the first Vietnamese musician to enter the Billboard Social 50. Up until now, he has already\n                        released a total of 25 songs, such as \"Cơn mưa ngang qua\", \"Em của ngày hôm qua\", \" Âm thầm bên\n                        em\",\n                        and many more. His single \"Chạy ngay đi\" was released with a music video featuring Thai actress\n                        Davika Hoorne, and with a collaboration with rapper Snoop Dogg, he went on and created the big\n                        hit\n                        \"Hãy trao cho anh\". After releasing \"Có chắc yêu là đây\" in 2020, the song became the\n                        3rd-most-streamed Youtube premiere at the time with 902,000 live viewers.\n                        <br/><br/>\n                        As we all know, music is,\n                        without a doubt, the easie st way to connect people. For Sơn Tùng M-TP, music is everything he\n                        ever\n                        wanted to offer to the world around him with all his heart and soul.\n                    </p>",
+  "topTrack": {
+    "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/dungLamTraiTimAnhDau.jpg",
+    "title": "Đừng làm trái tim anh đau",
+    "legal": "℗ 2024 M-TP Entertainment Ltd.",
+    "achievements": [
+      {
+        "number": "#1",
+        "label": "vietnam top youtube overall trending"
+      },
+      {
+        "number": "pak #1",
+        "label": "vietnam"
+      },
+      {
+        "number": "30.000.000",
+        "label": "views realtime"
+      },
+      {
+        "number": "162",
+        "label": "Billboard Global Excl.US."
+      }
+    ],
+    "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-coverImg.jpg",
+    "aboutHtml": "<p class=\"about_songP\">\n\n                        Son Tung M-TP's song 'Đừng Làm Trái Tim Anh Đau' is a heartfelt expression of deep love and\n                        vulnerability. The lyrics reveal a man who is utterly devoted to the object of his affection, to\n                        the point where his thoughts are consumed by her. He lies awake at night, unable to think of\n                        anyone else, and waits outside her house from morning till night, just to catch a glimpse of\n                        her. This level of devotion is both touching and intense, highlighting the depth of his\n                        feelings.\n                        <br/><br/>\n                        Son Tung M-TP's song 'Đừng Làm Trái Tim Anh Đau' is a heartfelt expression of deep love and\n                        vulnerability. The lyrics reveal a man who is utterly devoted to the object of his affection, to\n                        the point where his thoughts are consumed by her. He lies awake at night, unable to think of\n                        anyone else, and waits outside her house from morning till night, just to catch a glimpse of\n                        her. This level of devotion is both touching and intense, highlighting the depth of his\n                        feelings.\n                        <br/><br/>\n                        Culturally, the song taps into universal themes of love and longing, but it also reflects\n                        specific aspects of Vietnamese romantic expression. The lyrics' poetic nature and the singer's\n                        earnest delivery resonate deeply with listeners, making the song a poignant anthem for anyone\n                        who has experienced the highs and lows of love. Son Tung M-TP's musical style, which blends\n                        modern pop with traditional Vietnamese elements, adds an extra layer of emotional depth to the\n                        song, making it both contemporary and timeless.\n                    </p>"
+  },
+  "fanbase": [
+    {
+      "icon": "fa-brands fa-spotify me-1",
+      "iconColor": "rgba(30, 215, 96, 1)",
+      "platform": "Spotify",
+      "number": "5.6M",
+      "label": "Followers",
+      "bg": "#e0ffe0"
+    },
+    {
+      "icon": "fa-brands fa-instagram",
+      "iconColor": "rgba(193, 61, 160, 1)",
+      "platform": "Instagram",
+      "number": "8M",
+      "label": "Followers",
+      "bg": "rgba(193, 61, 160, .19)"
+    },
+    {
+      "icon": "fa-brands fa-youtube",
+      "iconColor": "rgba(255, 0, 0, 1)",
+      "platform": "YouTube",
+      "number": "11M",
+      "label": "Subscribers",
+      "bg": "#ffe0e0"
+    },
+    {
+      "icon": "fa-brands fa-facebook",
+      "iconColor": "rgba(0, 98, 255, 1)",
+      "platform": "Facebook",
+      "number": "14.2M",
+      "label": "Followers",
+      "bg": "rgba(0, 98, 255, .19)"
+    },
+    {
+      "icon": "fa-brands fa-x-twitter",
+      "iconColor": "rgba(0, 0, 0, 1)",
+      "platform": "Twitter",
+      "number": "183K",
+      "label": "Followers",
+      "bg": "rgba(0, 0, 0, .19)"
+    },
+    {
+      "icon": "fa-brands fa-tiktok",
+      "iconColor": "rgba(0, 0, 0, 1)",
+      "platform": "TikTok",
+      "number": "6M",
+      "label": "Followers",
+      "bg": "#f0f0f0"
+    },
+    {
+      "icon": "fa-brands fa-soundcloud",
+      "iconColor": "rgba(255, 84, 29, 1)",
+      "platform": "SoundCloud",
+      "number": "Not Found",
+      "label": "Followers",
+      "bg": "rgba(255, 84, 29, .19)"
+    }
+  ],
+  "popularSongs": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/dungLamTraiTimAnhDau.jpg",
+      "title": "Đừng Làm Trái Tim Anh Đau",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Jun 8. 2024",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/Chungtacuatuonglai.jpg",
+      "title": "Chúng Ta Của Tương Lai",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Mar 8. 2024",
+      "link": {
+        "type": "lyric",
+        "slug": "chungTaCuaTuongLai"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/chungTaCuaHienTai.jpg",
+      "title": "Chúng Ta Của Hiện Tại",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Dec 20. 2020",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/makingMyWay.jpg",
+      "title": "Making My Way",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: May 5. 2023",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/TNOAO.jpg",
+      "title": "THERE'S NO ONE AT ALL",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Apr 8. 2022",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/hayTraoChoAnh.jpg",
+      "title": "Hãy Trao Cho Anh",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Jun 1. 2019",
+      "link": {
+        "type": "lyric",
+        "slug": "hayTraoChoAnh"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/muonRoiMaSaoCon.jpg",
+      "title": "Muộn Rồi Mà Sao Còn",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Apr 29. 2021",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/coChacYeuLaDay.jpg",
+      "title": "Có Chắc Yêu Là Đây",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Jul 6. 2020",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/chayNgayDi.jpg",
+      "title": "Chạy Ngay Đi",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: May 11. 2018",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/buongDoiTayNhauRa.jpg",
+      "title": "Buông Đôi Tay Nhau Ra",
+      "artist": "Sơn Tùng M-TP",
+      "date": "Release Date: Dec 2. 2015",
+      "link": null
+    }
+  ],
+  "albums": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-ChungTaEP.jpg",
+      "title": "Chúng Ta - EP",
+      "meta": "Album 2024"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-Sky-Tour.jpg",
+      "title": "Sky Tour",
+      "meta": "Album 2020"
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Collections/album-mtpMTP.jpg",
+      "title": "m-tp M-TP",
+      "meta": "Album 2017"
+    }
+  ],
+  "recommended": [
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-avtArtist.jpg",
+      "name": "The Weeknd",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/Canada.webp",
+      "link": {
+        "type": "artist",
+        "slug": "the-weeknd"
+      }
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/billieEilish-avtArtist.jpg",
+      "name": "Billie Eilish",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/DPRIAN-avtartist.jpg",
+      "name": "DPR IAN",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/SouthKorea.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TaylorSwift-avtartist.jpg",
+      "name": "Taylor Swift",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/Jungkook-avtartist.jpg",
+      "name": "Jungkook",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/SouthKorea.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/CharliePuth-avtartist.jpg",
+      "name": "Charlie Puth",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/US.webp",
+      "link": null
+    },
+    {
+      "img": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/JustinBieber-avtartist.jpg",
+      "name": "Justin Bieber",
+      "flag": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Flag/",
+      "link": null
+    }
+  ]
+}

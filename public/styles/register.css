@@ -1,0 +1,382 @@
+@media screen and (max-width: 768px) {
+  main {
+    flex-wrap: wrap-reverse;
+    
+  }
+
+  main #login-form{
+    width: 100%;
+    padding: 0 15%;
+    font-size: .9em;
+  }
+
+  main #signup-form {
+    width: 100%;
+    height: 100%;
+    font-size: 2.1em;
+    padding: 0 15%;
+  }
+
+  main #login-form input,
+  main #signup-form input {
+    height: 3em;
+    border-radius: .3em;
+  }
+
+  #login-form #submit,
+  #signup-form #submit {
+    border-radius: .3em;
+    padding: 0;
+  }
+  #signup-form #submit{
+    margin-top: 1em;
+  }
+
+  #login-form .forgotPas a
+  #signup-form .forgotPas a {
+    font-size: .8em;
+  }
+
+  #login-form .ctn
+  #signup-form .ctn{
+    text-align: center;
+  }
+
+  #login-form .ctn hr,
+  #signup-form .ctn hr {
+    width: 40%;
+  }
+
+  #login-form #other,
+  #signup-form #other {
+    width: 100%;
+    border-radius: .3em;
+    height: 3em;
+    padding: 0;
+  }
+
+  #login-form #other img,
+  #signup-form #other img {
+    font-size: .6em;
+  }
+
+  #login-form .inputBox #revealPw, 
+  #signup-form .inputBox #revealPw {
+    margin-top: 1.3em;
+  }
+
+  #signup-form :is(
+    #forgot, button, a, .inputBox, .heading, .forgotPas, .ctn) {
+    margin-bottom: .8em;
+  }
+
+  main aside {display: none;}
+}
+
+::-moz-selection {
+  background-color: var(--color-main);
+  color: #000;
+}
+
+::selection {
+  background-color: var(--color-main);
+  color: #000;
+}
+
+body {
+  background: #fff;
+  /* overflow: hidden; */
+}
+
+/*  header  */
+header {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 4.3em;
+  padding: 0em 1.8em;
+  color: var(--color-white);
+  background-color: #000;
+  border-bottom: 0.01em solid rgba(0, 0, 0, 0);
+  text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 56;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  z-index: -1;
+}
+
+.logo img {
+  width: auto;
+  height: 3em;
+}
+
+ul {
+  display: flex;
+  color: var(--color-white);
+  gap: 1.3em;
+  z-index: 55;
+}
+
+ul li {
+  cursor: pointer;
+}
+
+ul li a {
+  position: relative;
+  font-size: 1.1em;
+  color: var(--color-white);
+  z-index: 55;
+}
+
+ul label i {
+  font-size: 1.3em;
+}
+
+#header-menu a {
+  border: 0.01em solid rgba(0, 0, 0, 0);
+  padding: 0 0.15em;
+}
+
+#header-menu a::before {
+  position: absolute;
+  content: "";
+  width: 0; height: 0.1em;
+  right: 0; bottom: -0.11em;
+  background: var(--color-main);
+  transition: 350ms ease;
+  z-index: 2;
+}
+
+#header-menu a:hover::before {
+  width: 100%; height: 0.1em;
+  left: 0;
+}
+
+.clLyrics {
+  margin-left: 3em;
+}
+
+/*: BARS         */
+#hamburger,
+#hamburger-label {
+  display: none;
+}
+
+header .fa-bars {
+  display: none;
+  overflow: hidden;
+  z-index: 52;
+}
+
+.bars {
+  display: block;
+  position: absolute;
+  top: 0; right: -15em;
+  width: 40vh; height: 100vh;
+  font-size: 1.3em;
+  transition: 450ms ease;
+  background-color: #000;
+  z-index: -1;
+  opacity: 0;
+}
+
+.bars #head-bars {
+  gap: 0.6em;
+  display: flex;
+  margin: 5em 0;
+  justify-content: center;
+}
+
+.bars #foot-bars {
+  flex-wrap: wrap;
+  margin-top: 1em;
+}
+
+/* Main */
+main {
+  display: flex;
+  margin-top: 4.3em;
+}
+
+form {
+  padding: 1em 8em 0 8em;
+  margin: 2em 0em 3em 0em;
+  border-radius: 1.8em;
+  backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, .2);
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
+}
+
+form :is(
+  #forgot, button, a, .inputBox, .heading, .forgotPas, .ctn) {
+  margin-bottom: 1.3em;
+}
+
+#login-form {
+  width: 50vw;
+  height: calc(100vh - 4.3em);
+}
+
+form div a {
+  color: #000;
+}
+
+.heading {text-align: center;}
+
+.heading h1 {
+  font-size: 2.6em;
+}
+
+.heading p {
+  margin-top: .3em;
+}
+
+form .inputBox {
+  width: 100%;
+  /* margin-bottom: 1.3em; */
+}
+
+.inputBox label {
+  font-size: 1em;
+}
+
+.inputBox span {
+  color: red;
+  font-size: 1.2em;
+}
+
+.inputBox input, #submit {
+  position: relative;
+  width: 100%; height: 3.3em;
+  font-size: 1.1em;
+  border-radius: 1em;
+  padding: 0em 3em 0em 1em;
+  margin-top: .3em;
+  border: .1em solid var(--color-gray);
+  background: transparent;
+}
+
+.inputBox input:hover {
+  border: var(--border-black);
+}
+
+.inputBox input:active {
+  outline: .3em solid rgba(0, 0, 0, .3);
+}
+
+    .inputBox .fa-circle-check {
+      position: absolute;
+      margin-top: 1.3em;
+      margin-left: 1em;
+      font-size: 1.2em;
+      color: #17b000;
+        display: none;
+    }
+
+#revealPw {
+  position: absolute;
+  font-size: 1.2em;
+  margin-left: -2.3em;
+  margin-top: 1.5em;
+  color: gray;
+  cursor: pointer;
+}
+
+.forgotPas {
+  text-align: right;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.forgotPas a:hover, .register a:hover {
+  text-decoration: underline;
+}
+
+#submit {
+  background: #000;
+  border: var(--border-black);
+  box-shadow: 0px 0px 5px var(--opac-black);
+  cursor: pointer;
+}
+
+#submit a {
+  color: #f5f5fc;
+  z-index: 5;
+}
+
+#submit:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+#submit:hover a {
+  color: #000;
+}
+
+.ctn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.ctn p {
+  width: 10em;
+  color: var(--color-gray);
+  margin: 0 .5em;
+  color: gray;
+}
+.ctn hr {
+  width: 20em; height: .01em;
+  border: .1em solid var(--color-gray);
+}
+
+.other-acc {
+  column-gap: 1.3em;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#other {
+  padding: 1em;
+  border-radius: 50%;
+  border: var(--border-gray);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+#other img {
+  width: 2.6em; height: 2.6em;
+  object-fit: contain;
+}
+
+#other:hover {
+  border: var(--border-black);
+}
+
+.register {
+  width: 100%;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.register a {
+  font-weight: bold;
+}
+
+.hidden {
+  display: none;
+  transition: 555ms ease;
+}
+
+/* FOR Sign UP */
+#signup-form {
+  width: 50vw;
+  height: calc(100vh - 4.3em);
+}
