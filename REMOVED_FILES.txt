@@ -1,2 +1,0 @@
-Xoá file sau (không còn dùng, header đã bỏ khỏi trang login/signup):
-- src/components/AuthHeader.jsx
