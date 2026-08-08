@@ -353,4 +353,10 @@
   .weather-twinkle {
     animation: weather-twinkle ease-in-out infinite;
   }
+
+  /* Pulsing glow for high-tier streak flames (StreakCard, 100+ days). */
+  .streak-glow {
+    animation: weather-sun-pulse 2.2s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
 }

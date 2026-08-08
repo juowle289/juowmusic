@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ResponsiveContainer,
@@ -19,7 +19,6 @@ import {
   ArrowLeft,
   Music4,
   Clock,
-  Flame,
   Headphones,
   Eye,
   EyeOff,
@@ -36,78 +35,92 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import { playableTracks } from '@/data/playableTracks';
+import { playableTracks, tracksBySlug } from '@/data/playableTracks';
 import { SONG_COUNTRY_ID, COUNTRY_NAMES_BY_ID } from '@/data/songCountries';
+import { readHistory } from '@/utils/listeningHistory';
+import useCountUp from '@/hooks/useCountUp';
+import StreakCard from '@/components/StreakCard';
 
 const ACCENT = '#feec93';
 const TIME_SLOT_COLORS = ['#feec93', '#e0b84d', '#a0783a', '#4b3a2a'];
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** Small deterministic PRNG so the mock listening stats stay stable across
- * re-renders/reloads for a given username, instead of jumping around every
- * time React re-renders (Math.random() on every render would look broken). */
-function seededRandom(seed) {
-  let s = 0;
-  for (let i = 0; i < seed.length; i++) s = (s * 31 + seed.charCodeAt(i)) >>> 0;
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    return s / 4294967296;
-  };
+function startOfDay(timestamp) {
+  const d = new Date(timestamp);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
 
-function buildListeningStats(seed) {
-  const rand = seededRandom(seed || 'juowle');
+function timeOfDayBucket(hour) {
+  if (hour >= 5 && hour < 12) return 'Morning';
+  if (hour >= 12 && hour < 17) return 'Afternoon';
+  if (hour >= 17 && hour < 21) return 'Evening';
+  return 'Night';
+}
 
-  const topSongs = [...playableTracks]
-    .map((track) => ({ ...track, plays: Math.round(20 + rand() * 180) }))
-    .sort((a, b) => b.plays - a.plays)
-    .slice(0, 5);
+/** Turns the real listening history (see listeningHistory.js /
+ * useListeningTracker) into everything the Overview tab shows. A brand new
+ * account with no plays yet gets honest zeroes, not filler numbers. */
+function buildRealStats(uid) {
+  const history = readHistory(uid);
+  const plays = history.filter((e) => e.type === 'play');
+  const listens = history.filter((e) => e.type === 'listen');
+
+  const topSongs = (() => {
+    const countBySlug = new Map();
+    for (const p of plays) countBySlug.set(p.slug, (countBySlug.get(p.slug) ?? 0) + 1);
+    return [...countBySlug.entries()]
+      .map(([slug, count]) => {
+        const track = tracksBySlug[slug];
+        return track ? { ...track, plays: count } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.plays - a.plays)
+      .slice(0, 5);
+  })();
 
   const days = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (13 - i));
-    return {
-      label: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      minutes: Math.round(8 + rand() * 55),
-    };
+    const dayStart = startOfDay(Date.now()) - (13 - i) * DAY_MS;
+    const dayEnd = dayStart + DAY_MS;
+    const minutes = Math.round(
+      listens.filter((e) => e.timestamp >= dayStart && e.timestamp < dayEnd).reduce((sum, e) => sum + e.seconds, 0) /
+        60,
+    );
+    return { label: new Date(dayStart).toLocaleDateString('en-US', { weekday: 'short' }), minutes };
   });
 
-  const timeOfDay = [
-    { name: 'Morning', value: Math.round(10 + rand() * 20) },
-    { name: 'Afternoon', value: Math.round(20 + rand() * 30) },
-    { name: 'Evening', value: Math.round(25 + rand() * 35) },
-    { name: 'Night', value: Math.round(10 + rand() * 20) },
-  ];
+  const timeOfDayCounts = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+  for (const p of plays) timeOfDayCounts[timeOfDayBucket(new Date(p.timestamp).getHours())]++;
+  const timeOfDay = Object.entries(timeOfDayCounts).map(([name, value]) => ({ name, value }));
 
-  const totalPlays = topSongs.reduce((sum, s) => sum + s.plays, 0) + Math.round(rand() * 400);
-  const totalMinutes = days.reduce((sum, d) => sum + d.minutes, 0) * 3;
-  const streakDays = Math.round(3 + rand() * 18);
-  const favoriteArtist = topSongs[0]?.artistName ?? '—';
+  const totalPlays = plays.length;
+  const totalMinutes = Math.round(listens.reduce((sum, e) => sum + e.seconds, 0) / 60);
+
+  const artistCounts = new Map();
+  for (const p of plays) {
+    if (!p.artistName) continue;
+    artistCounts.set(p.artistName, (artistCounts.get(p.artistName) ?? 0) + 1);
+  }
+  let favoriteArtist = '—';
+  let bestCount = 0;
+  for (const [artist, count] of artistCounts) {
+    if (count > bestCount) {
+      bestCount = count;
+      favoriteArtist = artist;
+    }
+  }
+
+  // Consecutive days (including today) with at least one play, walking
+  // backward from today - a single missed day breaks the chain.
+  const activeDays = new Set(plays.map((p) => startOfDay(p.timestamp)));
+  let streakDays = 0;
+  let cursor = startOfDay(Date.now());
+  while (activeDays.has(cursor)) {
+    streakDays++;
+    cursor -= DAY_MS;
+  }
 
   return { topSongs, days, timeOfDay, totalPlays, totalMinutes, streakDays, favoriteArtist };
-}
-
-/** Animates from 0 up to `target` once on mount, easing out - like a slot
- * machine reel settling on its final number - instead of the number just
- * appearing. Purely cosmetic: `target` itself is already the real value. */
-function useCountUp(target, duration = 1100) {
-  const [value, setValue] = useState(0);
-
-  useEffect(() => {
-    let raf;
-    const start = performance.now();
-    const from = 0;
-
-    const tick = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - (1 - t) ** 3; // easeOutCubic
-      setValue(Math.round(from + (target - from) * eased));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-
-  return value;
 }
 
 function StatCard({ icon: Icon, label, countTo, formatValue, staticValue, sub, delay = 0 }) {
@@ -163,7 +176,7 @@ export default function ProfilePage() {
   const tabParam = searchParams.get('tab');
   const tab = tabParam === 'settings' ? 'settings' : tabParam === 'explore' ? 'explore' : 'overview';
   const displayName = user?.displayName || user?.email || 'juowle';
-  const stats = useMemo(() => buildListeningStats(displayName), [displayName]);
+  const stats = useMemo(() => buildRealStats(user?.uid), [user?.uid, tab]);
 
   const [selectedCountryId, setSelectedCountryId] = useState(null);
   const availableCountryIds = useMemo(() => [...new Set(Object.values(SONG_COUNTRY_ID))], []);
@@ -222,52 +235,56 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-28">
-      <header className="border-b border-white/10 px-4 pb-8 pt-24 sm:px-8 md:px-16">
-        <button
-          type="button"
-          onClick={goBack}
-          className="mb-6 flex items-center gap-1.5 text-sm text-juow-soft/60 transition-colors hover:text-juow-accent"
-        >
-          <ArrowLeft className="size-4" /> Back
-        </button>
+      <header className="border-b border-white/10 px-4 pt-24 pb-8 sm:px-8 md:px-16 lg:px-0">
+        <div className="mx-auto lg:w-4/5 lg:max-w-[1400px]">
+          <button
+            type="button"
+            onClick={goBack}
+            className="mb-6 flex items-center gap-1.5 text-sm text-juow-soft/60 transition-colors hover:text-juow-accent"
+          >
+            <ArrowLeft className="size-4" /> Back
+          </button>
 
-        <p className="text-sm uppercase tracking-widest text-juow-accent">Account</p>
-        <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-5xl">Hi, {displayName}</h1>
-        <p className="mt-2 text-juow-soft/60">Manage your account and see how you&apos;ve been listening.</p>
+          <p className="text-sm uppercase tracking-widest text-juow-accent">Account</p>
+          <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-5xl">Hi, {displayName}</h1>
+          <p className="mt-2 text-juow-soft/60">Manage your account and see how you&apos;ve been listening.</p>
 
-        <nav className="mt-8 flex gap-6 border-b border-white/10">
-          <TabButton active={tab === 'overview'} onClick={() => setSearchParams({})} icon={LayoutDashboard}>
-            Overview
-          </TabButton>
-          <TabButton active={tab === 'explore'} onClick={() => setSearchParams({ tab: 'explore' })} icon={Globe2}>
-            Explore
-          </TabButton>
-          <TabButton active={tab === 'settings'} onClick={() => setSearchParams({ tab: 'settings' })} icon={SettingsIcon}>
-            Settings
-          </TabButton>
-        </nav>
+          <nav className="mt-8 flex gap-6 border-b border-white/10">
+            <TabButton active={tab === 'overview'} onClick={() => setSearchParams({})} icon={LayoutDashboard}>
+              Overview
+            </TabButton>
+            <TabButton active={tab === 'explore'} onClick={() => setSearchParams({ tab: 'explore' })} icon={Globe2}>
+              Explore
+            </TabButton>
+            <TabButton active={tab === 'settings'} onClick={() => setSearchParams({ tab: 'settings' })} icon={SettingsIcon}>
+              Settings
+            </TabButton>
+          </nav>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-8 md:px-16">
+      <main className="mx-auto px-4 py-10 sm:px-8 md:px-16 lg:w-4/5 lg:max-w-[1400px] lg:px-0">
         {tab === 'overview' && (
           <motion.section key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <h2 className="section-heading text-left text-3xl md:text-[2.4em]">Listening Stats</h2>
 
-            <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <StatCard icon={Headphones} label="Total plays" countTo={stats.totalPlays} sub="last 30 days" />
-              <StatCard
-                icon={Clock}
-                label="Time listened"
-                countTo={Math.round(stats.totalMinutes / 60)}
-                formatValue={(v) => `${v}h`}
-                sub={`${stats.totalMinutes} min`}
-                delay={0.08}
-              />
-              <StatCard icon={Flame} label="Current streak" countTo={stats.streakDays} formatValue={(v) => `${v} days`} sub="in a row" delay={0.16} />
-              <StatCard icon={Music4} label="Favorite artist" staticValue={stats.favoriteArtist} delay={0.24} />
-            </div>
+            <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1fr] lg:items-start">
+              <div className="grid grid-cols-2 gap-4">
+                <StatCard icon={Headphones} label="Total plays" countTo={stats.totalPlays} sub="all time" />
+                <StatCard
+                  icon={Clock}
+                  label="Time listened"
+                  countTo={Math.round(stats.totalMinutes / 60)}
+                  formatValue={(v) => `${v}h`}
+                  sub={`${stats.totalMinutes} min`}
+                  delay={0.08}
+                />
+                <StreakCard streakDays={stats.streakDays} delay={0.16} />
+                <StatCard icon={Music4} label="Favorite artist" staticValue={stats.favoriteArtist} delay={0.24} />
+              </div>
 
-            <ListeningWeather topSongs={stats.topSongs} />
+              <ListeningWeather topSongs={stats.topSongs} />
+            </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               <ChartCard title="Top 5 most played songs">
@@ -393,7 +410,7 @@ export default function ProfilePage() {
                 aria-hidden
               />
 
-              <div className="relative mx-auto grid max-w-6xl gap-10 px-4 sm:px-8 md:px-16 lg:grid-cols-[minmax(0,640px)_1fr] lg:items-center">
+              <div className="relative mx-auto grid gap-10 px-4 sm:px-8 md:px-16 lg:w-4/5 lg:max-w-[1400px] lg:grid-cols-[minmax(0,640px)_1fr] lg:items-center lg:px-0">
                 <div className="mx-auto w-full max-w-[640px] lg:mx-0">
                   <CountryGlobe
                     availableIds={availableCountryIds}

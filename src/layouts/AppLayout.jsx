@@ -1,6 +1,7 @@
 import { Outlet, useMatch } from 'react-router-dom';
 import AppHeader from '@/components/AppHeader';
 import GlobalAudioPlayer from '@/components/GlobalAudioPlayer';
+import useListeningTracker from '@/hooks/useListeningTracker';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
 
 function useHeaderConfig() {
@@ -23,6 +24,7 @@ function useHeaderConfig() {
 
 export default function AppLayout() {
   const headerConfig = useHeaderConfig();
+  useListeningTracker();
 
   return (
     <>
