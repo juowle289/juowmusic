@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { getLastPlayedSlug, usePlayerStore } from '@/stores/usePlayerStore';
 import { tracksBySlug } from '@/data/playableTracks';
+import { handleImageError } from '@/lib/imageFallback';
 
 const SPOTIFY_LINKS = {
   Vietnam: 'https://open.spotify.com/playlist/4YJnIVHbU50DhkGKGWKsiv?si=e24da81abcd84fdc',
@@ -223,7 +224,7 @@ export default function HomePage() {
             className="group mt-10 flex w-full items-center gap-4 rounded-lg border border-white/10 bg-white/5 p-4 text-left transition-colors hover:border-juow-accent md:mt-14"
           >
             <div className="relative shrink-0">
-              <img src={continueTrack.coverSrc} alt="" className="size-16 rounded object-cover" />
+              <img src={continueTrack.coverSrc} alt="" className="size-16 rounded object-cover" onError={handleImageError} />
               <span className="absolute inset-0 flex items-center justify-center rounded bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                 <Play className="size-6 fill-juow-accent text-juow-accent" />
               </span>
@@ -266,7 +267,7 @@ export default function HomePage() {
                 onClick={() => window.open(item.link, '_blank')}
                 className="group/card w-48 cursor-pointer border border-transparent transition-colors hover:border-juow-accent md:w-64"
               >
-                <img src={item.img} alt={item.title} className="size-48 object-cover md:size-64" />
+                <img src={item.img} alt={item.title} className="size-48 object-cover md:size-64" onError={handleImageError} />
                 <h3 className="mt-3 text-center text-lg font-light md:text-[1.5em]">{item.title}</h3>
               </button>
             )}
@@ -327,8 +328,7 @@ export default function HomePage() {
               <img
                 src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/referenceDPRIAN.png"
                 alt="DPR IAN"
-                className="h-[25rem] w-[18rem] object-cover md:h-[40rem] md:w-[30rem]"
-              />
+                className="h-[25rem] w-[18rem] object-cover md:h-[40rem] md:w-[30rem]" onError={handleImageError} />
               {/* A single dash chases clockwise around the frame, forever - like a
                   snake crawling around the edge with a gap between its head and
                   tail, instead of a full unbroken loop. */}

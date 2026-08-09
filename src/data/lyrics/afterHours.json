@@ -1,7 +1,7 @@
 {
   "slug": "afterHours",
   "docTitle": "The Weeknd - After Hours Lyrics Lyrics",
-  "customStyle": "nav {\n            background-image: linear-gradient(#7B9179, #2A180D);\n        }\n\n        .lyric b {\n            color: #2A180D;\n        }\n\n        .lyric q {\n            color: #2A180D;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #2A180D;\n        }",
+  "customStyle": "        .lyric b {\n            color: #2A180D;\n        }\n\n        .lyric q {\n            color: #2A180D;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #2A180D;\n        }",
   "songTitle": "After Hours",
   "artistName": "The Weeknd",
   "songMetaHtml": "<a href=\"The-Weeknd.html\">The Weeknd</a>",

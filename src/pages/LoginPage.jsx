@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { handleImageError } from '@/lib/imageFallback';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ export default function LoginPage() {
         <section className="px-6 py-10 sm:px-10 sm:py-12">
           <form onSubmit={handleSendReset} noValidate className="mx-auto w-full max-w-sm space-y-5">
             <div className="text-center">
-              <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="mx-auto mb-4 size-11 rounded-xl bg-black p-2.5" />
+              <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="mx-auto mb-4 size-11 rounded-xl bg-black p-2.5" onError={handleImageError} />
               <h1 className="text-2xl font-semibold">Reset your password</h1>
               <p className="mt-1 text-sm text-black/60">We&apos;ll email you a link to reset it.</p>
             </div>
@@ -159,7 +160,7 @@ export default function LoginPage() {
       <section className="px-6 py-10 sm:px-10 sm:py-12">
         <form onSubmit={handleSubmit} noValidate className="mx-auto w-full max-w-sm space-y-5">
           <div className="text-center">
-            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="mx-auto mb-4 size-11 rounded-xl bg-black p-2.5" />
+            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="mx-auto mb-4 size-11 rounded-xl bg-black p-2.5" onError={handleImageError} />
             <h1 className="text-2xl font-semibold">Welcome back</h1>
             <p className="mt-1 text-sm text-black/60">Let&apos;s sign you in to Juowle</p>
           </div>
@@ -172,7 +173,7 @@ export default function LoginPage() {
               disabled={googleSubmitting}
               className="h-11 w-full justify-center gap-2 rounded-xl border border-black/15 bg-white text-sm font-medium text-black hover:border-black/25 hover:bg-black/5 disabled:opacity-60"
             >
-              <img src="https://companieslogo.com/img/orig/GOOG-0ed88f7c.png?t=1633218227" alt="" className="size-4" />
+              <img src="https://companieslogo.com/img/orig/GOOG-0ed88f7c.png?t=1633218227" alt="" className="size-4" onError={handleImageError} />
               {googleSubmitting ? 'Connecting…' : 'Continue with Google'}
             </Button>
             <Button
@@ -180,7 +181,7 @@ export default function LoginPage() {
               variant="outline"
               className="h-11 w-full justify-center gap-2 rounded-xl border border-black/15 bg-white text-sm font-medium text-black hover:border-black/25 hover:bg-black/5"
             >
-              <img src="https://cdn.freebiesupply.com/images/large/2x/apple-logo-transparent.png" alt="" className="size-4" />
+              <img src="https://cdn.freebiesupply.com/images/large/2x/apple-logo-transparent.png" alt="" className="size-4" onError={handleImageError} />
               Continue with Apple
             </Button>
           </div>

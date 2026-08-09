@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import SearchBox from './SearchBox';
 import useHamburger from '../hooks/useHamburger';
+import { handleImageError } from '@/lib/imageFallback';
 
 export default function SimpleHeader() {
   const { open, toggle, iconStyle, barsStyle } = useHamburger();
@@ -9,7 +10,7 @@ export default function SimpleHeader() {
     <header id="header">
       <div className="logo">
         <Link to="/">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" />
+          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" onError={handleImageError} />
         </Link>
       </div>
 
@@ -28,7 +29,7 @@ export default function SimpleHeader() {
         </ul>
 
         <footer>
-          <div className="logo"><img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" /></div>
+          <div className="logo"><img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" onError={handleImageError} /></div>
           <div id="foot-bars">
             <p>&copy;2024 Juowle. All Rights Reserved.</p>
             <p id="text-underline">Terms & conditions.</p>

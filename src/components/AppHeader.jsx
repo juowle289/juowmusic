@@ -6,6 +6,7 @@ import SearchBox from '@/components/SearchBox';
 import { cn } from '@/lib/utils';
 import { useEffHeader, useHomeNavBorder, useScrollSpy } from '@/hooks/useHeaderScroll';
 import { useAuth } from '@/context/AuthContext';
+import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * @param {'home' | 'section'} variant
@@ -21,7 +22,6 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
   const sectionActive = useScrollSpy(sectionIds);
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email;
-  console.info('[juowmusic][AppHeader] render, user =', user);
 
   useEffect(() => {
     if (!accountOpen) return undefined;
@@ -54,7 +54,7 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
     >
       <div className="flex min-w-0 items-center gap-6 lg:gap-10">
         <Link to="/" className="shrink-0">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" className="h-12 w-auto" />
+          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" className="h-12 w-auto" onError={handleImageError} />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
@@ -203,7 +203,7 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
         </div>
 
         <div className="absolute inset-x-6 bottom-8 space-y-2 text-sm text-white/70">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="mb-4 h-10 w-auto opacity-80" />
+          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="mb-4 h-10 w-auto opacity-80" onError={handleImageError} />
           <p>&copy;2024 Juowle. All Rights Reserved.</p>
           <p className="underline">Terms & conditions.</p>
           <p className="underline">Privacy Policy.</p>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * The drag-reorderable "up next" queue. Dragging a track over the list shows
@@ -55,7 +56,7 @@ export default function QueuePanel({ playlist, playlistIndex, isPlaying, playAt,
                 )}
               >
                 <GripVertical className="size-4 shrink-0 text-white/30" />
-                <img src={track.coverSrc} alt="" className="size-9 shrink-0 rounded object-cover" />
+                <img src={track.coverSrc} alt="" className="size-9 shrink-0 rounded object-cover" onError={handleImageError} />
                 <div className="min-w-0 flex-1">
                   <p className={cn('truncate text-sm', index === playlistIndex ? 'text-juow-accent' : 'text-white')}>
                     {track.songTitle}

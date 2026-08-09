@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 
 import sonTung from '@/data/artists/son-tung-mtp.json';
 import theWeeknd from '@/data/artists/the-weeknd.json';
+import { handleImageError } from '@/lib/imageFallback';
 
 const ARTISTS = {
   'son-tung-mtp': sonTung,
@@ -121,7 +122,7 @@ function SongCard({ img, title, artist, date, to }) {
       className="group relative flex h-fit w-[23.8em] max-w-full shrink-0 gap-4 rounded-md border border-[#ddd] bg-white p-2"
       style={{ boxShadow: SHADOW_S }}
     >
-      <img src={img} alt="" className="size-24 shrink-0 rounded object-cover" />
+      <img src={img} alt="" className="size-24 shrink-0 rounded object-cover" onError={handleImageError} />
       <div className="flex min-w-0 flex-col justify-between py-1">
         <div className="min-w-0 overflow-hidden border-b border-[#ddd] pb-1">
           <h5 className="truncate font-bold" style={{ color: COLOR.blue }}>
@@ -150,7 +151,7 @@ function AlbumCard({ img, title, meta }) {
       className="group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-white text-center"
       style={{ boxShadow: SHADOW_S }}
     >
-      <img src={img} alt="" className="aspect-square w-full rounded object-cover" />
+      <img src={img} alt="" className="aspect-square w-full rounded object-cover" onError={handleImageError} />
       <h5 className="mt-2 truncate px-2 font-bold" style={{ color: COLOR.blue }}>
         {title}
       </h5>
@@ -171,12 +172,12 @@ function RecommendedCard({ img, name, flag, to }) {
       className="group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-[#fdfbfb]"
       style={{ boxShadow: SHADOW_S }}
     >
-      <img src={img} alt="" className="aspect-square w-full rounded-t object-cover" />
+      <img src={img} alt="" className="aspect-square w-full rounded-t object-cover" onError={handleImageError} />
       <div className="flex items-center justify-between p-3">
         <h5 className="truncate font-bold" style={{ color: COLOR.blue }}>
           {name}
         </h5>
-        {flag && <img src={flag} alt="" className="h-4 w-auto" />}
+        {flag && <img src={flag} alt="" className="h-4 w-auto" onError={handleImageError} />}
       </div>
       {to && (
         <i
@@ -225,8 +226,7 @@ export default function ArtistPage() {
       <img
         src={artist.coverImg}
         alt=""
-        className="pointer-events-none fixed inset-x-0 top-0 z-[-1] h-[70em] w-full object-cover"
-      />
+        className="pointer-events-none fixed inset-x-0 top-0 z-[-1] h-[70em] w-full object-cover" onError={handleImageError} />
 
       {/* figure carries the same dark-to-white gradient as the original CSS so the
           fixed photo blends into the page's white body as you scroll past it. */}
@@ -241,8 +241,7 @@ export default function ArtistPage() {
             src={artist.avatarImg}
             alt={artist.displayName}
             className="pointer-events-none size-32 rounded-full object-cover sm:size-72"
-            style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }}
-          />
+            style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }} onError={handleImageError} />
         </figcaption>
       </figure>
 
@@ -256,7 +255,7 @@ export default function ArtistPage() {
                 {artist.displayName}
               </p>
               <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
-                {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" />}
+                {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" onError={handleImageError} />}
                 <span className="text-black/90">{artist.countryName}</span>
               </div>
             </div>
@@ -310,7 +309,7 @@ export default function ArtistPage() {
               }}
             >
               {artist.aboutImg && (
-                <img src={artist.aboutImg} alt="" className="mb-3 h-48 w-full rounded object-cover sm:hidden" />
+                <img src={artist.aboutImg} alt="" className="mb-3 h-48 w-full rounded object-cover sm:hidden" onError={handleImageError} />
               )}
               <div
                 className="text-[1.05em] leading-relaxed"
@@ -329,7 +328,7 @@ export default function ArtistPage() {
                 style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
               >
                 <div className="flex w-full flex-col p-1 sm:w-[45%]">
-                  <img src={artist.topTrack.img} alt="" className="w-full rounded object-cover" />
+                  <img src={artist.topTrack.img} alt="" className="w-full rounded object-cover" onError={handleImageError} />
                   <p className="relative mt-3 text-center text-xl font-bold font-[family-name:var(--font-anton)]">
                     {artist.topTrack.title}
                     <span className="absolute -left-4 top-8 text-xs opacity-50">{artist.topTrack.legal}</span>

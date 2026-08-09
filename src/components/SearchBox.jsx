@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { searchAll } from '@/data/songs';
+import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * A small, self-contained search dropdown anchored under the header search icon.
@@ -162,7 +163,7 @@ export default function SearchBox() {
                       isActive ? 'bg-juow-accent text-black' : 'hover:bg-juow-accent hover:text-black',
                     )}
                   >
-                    <img src={artist.avtArtist} alt="" className="size-12 rounded-full object-cover" />
+                    <img src={artist.avtArtist} alt="" className="size-12 rounded-full object-cover" onError={handleImageError} />
                     <div className="min-w-0">
                       <p className="truncate font-[family-name:var(--font-anton)]">{artist.nameArtist}</p>
                       <p className="text-sm opacity-80">Artist · Pop</p>
@@ -185,7 +186,7 @@ export default function SearchBox() {
                     isActive ? 'bg-juow-accent text-black' : 'hover:bg-juow-accent hover:text-black',
                   )}
                 >
-                  <img src={song.imgSrc} alt="" className="size-12 object-cover" />
+                  <img src={song.imgSrc} alt="" className="size-12 object-cover" onError={handleImageError} />
                   <div className="min-w-0">
                     <p className="truncate font-[family-name:var(--font-anton)]">{song.title}</p>
                     <p className="truncate text-sm opacity-80">{song.artist}</p>

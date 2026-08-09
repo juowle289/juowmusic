@@ -21,6 +21,7 @@ import hayTraoChoAnh from '@/data/lyrics/hayTraoChoAnh.json';
 import nerves from '@/data/lyrics/nerves.json';
 import oneOfTheGirls from '@/data/lyrics/oneOfTheGirls.json';
 import theColorViolet from '@/data/lyrics/theColorViolet.json';
+import { handleImageError } from '@/lib/imageFallback';
 
 const SONGS = {
   afterHours,
@@ -169,15 +170,13 @@ export default function LyricPage() {
             <img
               src={song.coverSrc}
               alt={song.songTitle}
-              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl"
-            />
+              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl" onError={handleImageError} />
           </div>
           {/* Mobile cover: simple, non-overflowing, sits above the text block. */}
           <img
             src={song.coverSrc}
             alt={song.songTitle}
-            className="relative z-[2] size-40 object-cover shadow-2xl sm:hidden"
-          />
+            className="relative z-[2] size-40 object-cover shadow-2xl sm:hidden" onError={handleImageError} />
 
           {/* Right: text column. flex-col + mt-auto on the meta row (instead of
               absolutely pinning it to the column's bottom) keeps title/about
@@ -260,7 +259,7 @@ export default function LyricPage() {
                 key={rec.title}
                 className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-[#feec93]"
               >
-                <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" />
+                <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" onError={handleImageError} />
                 <div className="min-w-0">
                   <h3 className="truncate text-lg font-medium text-black">{rec.title}</h3>
                   <p className="truncate text-black/50">{rec.artist}</p>

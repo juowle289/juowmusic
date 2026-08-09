@@ -1,7 +1,7 @@
 {
   "slug": "blue",
   "docTitle": "Billie Eilish - BLUE Lyrics",
-  "customStyle": "nav {\n            background-image: linear-gradient(rgb(51, 88, 112), rgb(13, 53, 82));\n        }\n\n        .lyric b {\n            color: #0d3552;\n        }\n\n        .lyric q {\n            color: #0d3552;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #0d3552;\n        }",
+  "customStyle": "        .lyric b {\n            color: #0d3552;\n        }\n\n        .lyric q {\n            color: #0d3552;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #0d3552;\n        }",
   "songTitle": "BLUE",
   "artistName": "Billie Eilish",
   "songMetaHtml": "<a href=\"#\">Billie Eilish</a> • Track 10 on <a href=\"#\">HIT ME HARD AND SOFT</a>",

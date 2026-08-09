@@ -1,7 +1,7 @@
 {
   "slug": "chungTaCuaTuongLai",
   "docTitle": "Sơn Tùng M-TP - Chúng Ta Của Tương Lai Lyrics",
-  "customStyle": "nav {\n            background-image: linear-gradient(#d9b676, #ebce90);\n        }\n\n        .lyric b {\n            color: #d9b676;\n        }\n\n        .lyric q {\n            color: #d9b676;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d9b676;\n        }",
+  "customStyle": "        .lyric b {\n            color: #d9b676;\n        }\n\n        .lyric q {\n            color: #d9b676;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d9b676;\n        }",
   "songTitle": "Chúng Ta Của Tương Lai",
   "artistName": "Sơn Tùng M-TP",
   "songMetaHtml": "<a href=\"Son-Tung-MTP.html\">Sơn Tùng M-TP</a> • Track 2 on <a href=\"#\">Chúng Ta - EP</a>",

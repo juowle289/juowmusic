@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Quote } from 'lucide-react';
+import { handleImageError } from '@/lib/imageFallback';
 
 /** Pulls the first hex colour out of a song's customStyle CSS string (its
  * `nav { background-image: linear-gradient(#a, #b) }` rule) so the share
@@ -70,7 +71,7 @@ export default function LyricShareModal({ open, onClose, quote, songTitle, artis
               </p>
 
               <div className="flex items-center gap-3">
-                <img src={coverSrc} alt="" className="size-10 rounded object-cover" />
+                <img src={coverSrc} alt="" className="size-10 rounded object-cover" onError={handleImageError} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{songTitle}</p>
                   <p className="truncate text-xs text-white/70">{artistName}</p>
