@@ -7,7 +7,6 @@ import QueuePanel from '@/components/QueuePanel';
 import useWaveform from '@/hooks/useWaveform';
 import { cn } from '@/lib/utils';
 import { formatTime, usePlayerStore } from '@/stores/usePlayerStore';
-import { handleImageError } from '@/lib/imageFallback';
 
 const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimized
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
@@ -345,7 +344,7 @@ export default function GlobalAudioPlayer() {
               className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
               aria-label="Minimize player"
             >
-              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" onError={handleImageError} />
+              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" />
               <div className="min-w-0 flex-col text-left">
                 <p className="truncate text-sm font-semibold text-black">{currentSong.songTitle}</p>
                 <p className="truncate text-xs text-black/60">{currentSong.artistName}</p>
@@ -430,7 +429,7 @@ export default function GlobalAudioPlayer() {
               <Expand className="size-4" />
             </button>
 
-            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />
+            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" />
           </motion.div>
         )}
       </AnimatePresence>

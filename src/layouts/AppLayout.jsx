@@ -1,6 +1,7 @@
 import { Outlet, useMatch } from 'react-router-dom';
 import AppHeader from '@/components/AppHeader';
 import GlobalAudioPlayer from '@/components/GlobalAudioPlayer';
+import AmbientMoodLighting from '@/components/AmbientMoodLighting';
 import useListeningTracker from '@/hooks/useListeningTracker';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
 
@@ -28,6 +29,7 @@ export default function AppLayout() {
 
   return (
     <>
+      <AmbientMoodLighting />
       {headerConfig && <AppHeader variant={headerConfig.variant} menuItems={headerConfig.menuItems} />}
       <Outlet />
       <GlobalAudioPlayer />

@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { handleImageError } from '@/lib/imageFallback';
 
 function FacebookIcon(props) {
   return (
@@ -34,7 +33,7 @@ export default function SiteFooter({ dark = false, className }) {
         className,
       )}
     >
-      <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="h-12 w-auto" onError={handleImageError} />
+      <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="h-12 w-auto" />
 
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         <p>&copy;2024 Juowle. All Rights Reserved.</p>

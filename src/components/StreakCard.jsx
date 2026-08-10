@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Info } from 'lucide-react';
 import useCountUp from '@/hooks/useCountUp';
+import { cn } from '@/lib/utils';
 
 /** Milestones the streak "levels up" at, biggest first - first one the
  * streak meets or exceeds wins. Matches Duolingo/TikTok-style flame
@@ -24,9 +25,32 @@ function getTier(streakDays) {
   return TIERS.find((t) => streakDays >= t.min) ?? TIERS[TIERS.length - 1];
 }
 
-export default function StreakCard({ streakDays, delay = 0 }) {
+/** The "no-punishment" nudge line: today's still winnable until it fully
+ * passes, and a lapsed streak gets acknowledged for what it was instead of
+ * just showing 0 with no context. Returns null when there's nothing
+ * useful to say (streak already logged today, or no history at all). */
+function getNudge(streakDays, insights) {
+  if (!insights) return null;
+  const { hasPlayedToday, yesterdayActive, bestStreak, favoriteBucketName } = insights;
+
+  if (hasPlayedToday) return { tone: 'good', text: "Kept today's streak — see you tomorrow." };
+
+  if (yesterdayActive && streakDays > 0) {
+    const when = favoriteBucketName ? ` in the ${favoriteBucketName.toLowerCase()}` : '';
+    return { tone: 'nudge', text: `You usually listen${when} — play something today to make it ${streakDays + 1}.` };
+  }
+
+  if (!yesterdayActive && bestStreak > 0) {
+    return { tone: 'reset', text: `Your longest run was ${bestStreak} day${bestStreak === 1 ? '' : 's'} — today counts as a fresh start.` };
+  }
+
+  return null;
+}
+
+export default function StreakCard({ streakDays, insights, delay = 0 }) {
   const animated = useCountUp(streakDays);
   const tier = getTier(streakDays);
+  const nudge = getNudge(streakDays, insights);
   const [infoOpen, setInfoOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -86,6 +110,19 @@ export default function StreakCard({ streakDays, delay = 0 }) {
 
       <p className="mt-2 font-[family-name:var(--font-anton)] text-3xl tabular-nums">{animated} days</p>
       <p className="mt-1 text-sm text-juow-soft/50">{tier.label}</p>
+
+      {nudge && (
+        <p
+          className={cn(
+            'mt-3 border-t border-white/10 pt-3 text-xs leading-relaxed',
+            nudge.tone === 'good' && 'text-emerald-400/80',
+            nudge.tone === 'nudge' && 'text-juow-accent/90',
+            nudge.tone === 'reset' && 'text-juow-soft/60',
+          )}
+        >
+          {nudge.text}
+        </p>
+      )}
     </motion.div>
   );
 }

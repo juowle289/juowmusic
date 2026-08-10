@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { DEFAULT_MOOD, SONG_MOOD } from '@/data/songMood';
+import { classifyMood, weightedMood } from '@/lib/mood';
 
 const SKY = {
   rain: 'linear-gradient(180deg, #2a323f 0%, #1c222b 55%, #11151b 100%)',
@@ -21,13 +22,6 @@ const COPY = {
  * one of 5 weather conditions. Deliberately just a couple of thresholds on
  * two axes rather than anything fancier - the point is that real listening
  * data drives which one shows, not the exact shape of the mapping. */
-function classify(energy, mood) {
-  if (mood < 0.42 && energy < 0.55) return 'rain';
-  if (energy >= 0.62 && mood >= 0.5) return 'sunny';
-  if (energy >= 0.62 && mood < 0.5) return 'windy';
-  if (mood >= 0.58 && energy < 0.55) return 'clear';
-  return 'cloudy';
-}
 
 /** Deterministic pseudo-random in [0,1) - drop/cloud/star positions should
  * be stable across re-renders without reaching for Math.random(). */
@@ -38,19 +32,8 @@ function pseudo(i, salt = 1) {
 
 export default function ListeningWeather({ topSongs }) {
   const { energy, mood, condition } = useMemo(() => {
-    let weightSum = 0;
-    let energySum = 0;
-    let moodSum = 0;
-    for (const song of topSongs) {
-      const m = SONG_MOOD[song.slug] ?? DEFAULT_MOOD;
-      const w = song.plays ?? 1;
-      weightSum += w;
-      energySum += m.energy * w;
-      moodSum += m.mood * w;
-    }
-    const avgEnergy = weightSum ? energySum / weightSum : 0.5;
-    const avgMood = weightSum ? moodSum / weightSum : 0.5;
-    return { energy: avgEnergy, mood: avgMood, condition: classify(avgEnergy, avgMood) };
+    const { energy: avgEnergy, mood: avgMood } = weightedMood(topSongs, SONG_MOOD, DEFAULT_MOOD);
+    return { energy: avgEnergy, mood: avgMood, condition: classifyMood(avgEnergy, avgMood) };
   }, [topSongs]);
 
   const raindrops = useMemo(

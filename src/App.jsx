@@ -15,6 +15,8 @@ import MusicLoader from '@/components/MusicLoader';
 // less JS.
 const ArtistPage = lazy(() => import('@/pages/ArtistPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const LyricSyncTool = lazy(() => import('@/pages/LyricSyncTool'));
+const PartyPage = lazy(() => import('@/pages/PartyPage'));
 
 function LazyFallback() {
   return (
@@ -40,6 +42,14 @@ export default function App() {
           />
           <Route path="/lyrics/:slug" element={<LyricPage />} />
           <Route
+            path="/party/:partyId"
+            element={
+              <Suspense fallback={<LazyFallback />}>
+                <PartyPage />
+              </Suspense>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <Suspense fallback={<LazyFallback />}>
@@ -54,6 +64,15 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>
+
+        <Route
+          path="/tools/lyric-sync/:slug"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <LyricSyncTool />
+            </Suspense>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

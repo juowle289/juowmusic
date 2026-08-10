@@ -359,4 +359,24 @@
     animation: weather-sun-pulse 2.2s ease-in-out infinite;
     filter: drop-shadow(0 0 6px currentColor);
   }
+
+  /* Slow ambient drift for AmbientMoodLighting's two background blobs -
+     deliberately different periods/paths so they never look synced. */
+  @keyframes ambient-drift-a {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(6vw, 8vh) scale(1.15); }
+    100% { transform: translate(-3vw, 2vh) scale(1); }
+  }
+  .ambient-blob-a {
+    animation: ambient-drift-a 34s ease-in-out infinite;
+  }
+
+  @keyframes ambient-drift-b {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-7vw, -6vh) scale(1.12); }
+    100% { transform: translate(3vw, -2vh) scale(1); }
+  }
+  .ambient-blob-b {
+    animation: ambient-drift-b 41s ease-in-out infinite;
+  }
 }

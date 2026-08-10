@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import SearchBox from './SearchBox';
 import useHamburger from '../hooks/useHamburger';
 import { useEffHeader, useScrollSpy } from '../hooks/useHeaderScroll';
-import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * @param {{href:string, label:string}[]} menuItems
@@ -20,7 +19,7 @@ export default function SectionHeader({ menuItems, variant = 'artist' }) {
     <header id="header" className={scrolled ? 'effHeader' : ''}>
       <div className={variant === 'artist' ? 'logo d-flex' : 'logo'}>
         <Link to="/">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" onError={handleImageError} />
+          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" />
         </Link>
         <ul className="header-menu">
           {menuItems.map((item) => (
@@ -51,7 +50,7 @@ export default function SectionHeader({ menuItems, variant = 'artist' }) {
         </div>
 
         <footer>
-          <div className="logo"><img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" onError={handleImageError} /></div>
+          <div className="logo"><img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" /></div>
           <div id="foot-bars">
             <p>&copy;2024 Juowle. All Rights Reserved.</p>
             <p id="text-underline">Terms & conditions.</p>

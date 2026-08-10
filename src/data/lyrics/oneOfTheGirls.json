@@ -1,7 +1,7 @@
 {
   "slug": "oneOfTheGirls",
   "docTitle": "The Weeknd, JENNIE & Lily-Rose Depp - One Of The Girls Lyrics",
-  "customStyle": "        .lyric b {\n            color: #e70000;\n        }\n\n        .lyric q {\n            color: #e70000;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #e70000;\n        }",
+  "customStyle": "nav {\n            background-image: linear-gradient(#e70000, #3c5953);\n        }\n\n        .lyric b {\n            color: #e70000;\n        }\n\n        .lyric q {\n            color: #e70000;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #e70000;\n        }",
   "songTitle": "One OF The Girls",
   "artistName": "The Weeknd, JENNIE & Lily-Rose Depp",
   "songMetaHtml": "<a href=\"The-Weeknd.html\">The Weeknd, JENNIE &amp; Lily-Rose Depp</a> • Track 10 on <a href=\"#\">The Idol Episode 4 (Music from the HBO Original Series) - Single (2023)</a>",

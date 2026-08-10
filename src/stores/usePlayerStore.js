@@ -39,6 +39,15 @@ export const usePlayerStore = create((set, get) => ({
   isMini: false,
   playlist: playableTracks,
   playlistIndex: -1,
+  crossfadeEnabled: true,
+  // { time, nonce } | null - a request from outside GlobalAudioPlayer (e.g.
+  // clicking a lyric line) to jump the *real* <audio> element to a
+  // timestamp. GlobalAudioPlayer owns the actual audio refs, so this is a
+  // one-shot mailbox rather than a direct call - it watches this field and
+  // clears it once applied. `nonce` makes repeated requests to the exact
+  // same timestamp still trigger the effect (identical `time` values
+  // wouldn't otherwise look like a change).
+  seekRequest: null,
 
   /** @param {Song} song @param {boolean} [autoplay] */
   playSong: (song, autoplay = true) => {
@@ -149,7 +158,23 @@ export const usePlayerStore = create((set, get) => ({
 
   seek: (currentTime) => set({ currentTime }),
 
+  /** Asks the real <audio> element (owned by GlobalAudioPlayer) to jump to
+   * a timestamp - used by things like lyric-line click-to-seek that don't
+   * hold a ref to the audio element themselves. If `song` is given and
+   * isn't already playing, switches to it first (autoplaying), so clicking
+   * a lyric line works even if a different track is currently loaded. */
+  requestSeek: (time, song) => {
+    if (song && get().currentSong?.slug !== song.slug) {
+      get().playSong(song, true);
+    }
+    set({ seekRequest: { time, nonce: Date.now() } });
+  },
+
+  consumeSeekRequest: () => set({ seekRequest: null }),
+
   setVolume: (volume) => set({ volume: Math.min(1, Math.max(0, volume)) }),
+
+  toggleCrossfade: () => set((state) => ({ crossfadeEnabled: !state.crossfadeEnabled })),
 
   toggleMini: () => set((state) => ({ isMini: !state.isMini })),
 
