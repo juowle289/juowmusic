@@ -10,7 +10,7 @@ import {
   useScrollSpy,
 } from "@/hooks/useHeaderScroll";
 import { useAuth } from "@/context/AuthContext";
-import { handleImageError } from '@/lib/imageFallback';
+import { handleImageError } from "@/lib/imageFallback";
 
 /**
  * @param {'home' | 'section'} variant
@@ -63,7 +63,9 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <img
             src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
             alt="Juowle logo"
-            className="h-12 w-auto" onError={handleImageError} />
+            className="h-12 w-auto"
+            onError={handleImageError}
+          />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
@@ -222,7 +224,9 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <img
             src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
             alt=""
-            className="mb-4 h-10 w-auto opacity-80" onError={handleImageError} />
+            className="mb-4 h-10 w-auto opacity-80"
+            onError={handleImageError}
+          />
           <p>&copy;2024 Juowle. All Rights Reserved.</p>
           <p className="underline">Terms & conditions.</p>
           <p className="underline">Privacy Policy.</p>
