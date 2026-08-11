@@ -1,7 +1,7 @@
 {
   "slug": "hayTraoChoAnh",
   "docTitle": "Sơn Tùng M-TP, SnoopDogg - Hãy Trao Cho Anh Lyrics",
-  "customStyle": "nav {\n            background-image: linear-gradient(#fcca02, #d7b681);\n            /*#818d98*/\n        }\n\n        .lyric b {\n            color: #d7b681;\n        }\n\n        .lyric q {\n            color: #d7b681;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d7b681;\n        }",
+  "customStyle": "        .lyric b {\n            color: #d7b681;\n        }\n\n        .lyric q {\n            color: #d7b681;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d7b681;\n        }",
   "songTitle": "Hãy Trao Cho Anh",
   "artistName": "Sơn Tùng M-TP, Snoop Dogg\n                        (feat)",
   "songMetaHtml": "<a href=\"Son-Tung-MTP.html\">Sơn Tùng M-TP, Snoop Dogg\n                        (feat)</a>",

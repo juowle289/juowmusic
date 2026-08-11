@@ -1,7 +1,8 @@
 {
+  "lineTimestamps": [26.71,31.63,34.66,37.01,39.50,45.23,46.88,50.18,52.64,55.10,58.40,61.67,63.32,64.97,66.62,68.27,69.92,71.54,73.19,74.84,75.65,77.30,80.36,83.03,86.31,87.96,89.61,91.25,94.53,97.41,100.08,102.75,104.40,108.53,110.99,117.56,120.86,124.97,127.43,135.65,137.30,138.95,140.57,142.22,143.87,145.52,147.17,150.44,153.74,159.89,163.19,166.07,168.53,170.18,176.75,178.40,180.05,181.70,183.32,184.97,186.62,188.36,0,0],
   "slug": "chungTaCuaTuongLai",
   "docTitle": "Sơn Tùng M-TP - Chúng Ta Của Tương Lai Lyrics",
-  "customStyle": "nav {\n            background-image: linear-gradient(#d9b676, #ebce90);\n        }\n\n        .lyric b {\n            color: #d9b676;\n        }\n\n        .lyric q {\n            color: #d9b676;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d9b676;\n        }",
+  "customStyle": "        .lyric b {\n            color: #d9b676;\n        }\n\n        .lyric q {\n            color: #d9b676;\n            quotes: '[' ']';\n        }\n\n        :is(.about, .QapsA, .comments) {\n            border-bottom: .3em solid #d9b676;\n        }",
   "songTitle": "Chúng Ta Của Tương Lai",
   "artistName": "Sơn Tùng M-TP",
   "songMetaHtml": "<a href=\"Son-Tung-MTP.html\">Sơn Tùng M-TP</a> • Track 2 on <a href=\"#\">Chúng Ta - EP</a>",

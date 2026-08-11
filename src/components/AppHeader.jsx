@@ -1,17 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Menu, Settings, User, X } from 'lucide-react';
-import SearchBox from '@/components/SearchBox';
-import { cn } from '@/lib/utils';
-import { useEffHeader, useHomeNavBorder, useScrollSpy } from '@/hooks/useHeaderScroll';
-import { useAuth } from '@/context/AuthContext';
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { LogOut, Menu, Settings, User, X } from "lucide-react";
+import SearchBox from "@/components/SearchBox";
+import { cn } from "@/lib/utils";
+import {
+  useEffHeader,
+  useHomeNavBorder,
+  useScrollSpy,
+} from "@/hooks/useHeaderScroll";
+import { useAuth } from "@/context/AuthContext";
+import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * @param {'home' | 'section'} variant
  * @param {{ href: string, label: string, id: string }[]} [menuItems]
  */
-export default function AppHeader({ variant = 'home', menuItems = [] }) {
+export default function AppHeader({ variant = "home", menuItems = [] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef(null);
@@ -21,40 +26,44 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
   const sectionActive = useScrollSpy(sectionIds);
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email;
-  console.info('[juowmusic][AppHeader] render, user =', user);
+  console.info("[juowmusic][AppHeader] render, user =", user);
 
   useEffect(() => {
     if (!accountOpen) return undefined;
     const onPointerDown = (event) => {
-      if (accountRef.current && !accountRef.current.contains(event.target)) setAccountOpen(false);
+      if (accountRef.current && !accountRef.current.contains(event.target))
+        setAccountOpen(false);
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [accountOpen]);
 
-  const isHome = variant === 'home';
+  const isHome = variant === "home";
   const activeId = isHome ? homeActive : sectionActive;
 
   const navItems = isHome
     ? [
-        { href: '#featured', label: 'Featured', id: 'featured' },
-        { href: '#news', label: 'News', id: 'news' },
-        { href: '#songs', label: 'Songs', id: 'songs' },
+        { href: "#featured", label: "Featured", id: "featured" },
+        { href: "#news", label: "News", id: "news" },
+        { href: "#songs", label: "Songs", id: "songs" },
       ]
     : menuItems;
 
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-[56] flex h-[4.3rem] items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:px-7',
+        "fixed inset-x-0 top-0 z-[56] flex h-[4.3rem] items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:px-7",
         scrolled
-          ? 'border-b border-white/10 bg-black/80 backdrop-blur-md'
-          : 'border-b border-transparent bg-transparent',
+          ? "border-b border-white/10 bg-black/80 backdrop-blur-md"
+          : "border-b border-transparent bg-transparent",
       )}
     >
       <div className="flex min-w-0 items-center gap-6 lg:gap-10">
         <Link to="/" className="shrink-0">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle logo" className="h-12 w-auto" />
+          <img
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            alt="Juowle logo"
+            className="h-12 w-auto" onError={handleImageError} />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
@@ -62,7 +71,10 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
             <a
               key={item.href}
               href={item.href}
-              className={cn('nav-link-underline text-base', activeId === item.id && 'active text-juow-accent')}
+              className={cn(
+                "nav-link-underline text-base",
+                activeId === item.id && "active text-juow-accent",
+              )}
             >
               {item.label}
             </a>
@@ -92,8 +104,8 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
                   initial={{ opacity: 0, y: -8, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  style={{ transformOrigin: 'top right' }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  style={{ transformOrigin: "top right" }}
                   className="absolute right-0 top-[calc(100%+0.6rem)] w-48 overflow-hidden rounded-lg border border-white/10 bg-black shadow-2xl"
                 >
                   <Link
@@ -145,16 +157,20 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
           type="button"
           className="inline-flex size-10 items-center justify-center rounded-lg text-juow-soft lg:hidden"
           onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
-          {mobileOpen ? <X className={cn('size-6', mobileOpen && 'text-juow-accent')} /> : <Menu className="size-6" />}
+          {mobileOpen ? (
+            <X className={cn("size-6", mobileOpen && "text-juow-accent")} />
+          ) : (
+            <Menu className="size-6" />
+          )}
         </button>
       </div>
 
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-[55] w-72 bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden',
-          mobileOpen ? 'translate-x-0' : 'translate-x-full',
+          "fixed inset-y-0 right-0 z-[55] w-72 bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
+          mobileOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         <nav className="flex flex-col gap-4">
@@ -203,7 +219,10 @@ export default function AppHeader({ variant = 'home', menuItems = [] }) {
         </div>
 
         <div className="absolute inset-x-6 bottom-8 space-y-2 text-sm text-white/70">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="mb-4 h-10 w-auto opacity-80" />
+          <img
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            alt=""
+            className="mb-4 h-10 w-auto opacity-80" onError={handleImageError} />
           <p>&copy;2024 Juowle. All Rights Reserved.</p>
           <p className="underline">Terms & conditions.</p>
           <p className="underline">Privacy Policy.</p>

@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Expand, Shrink, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Expand, Shrink, ListMusic, Blend, Users } from 'lucide-react';
 import VinylDisc from '@/components/VinylDisc';
 import Waveform from '@/components/Waveform';
 import QueuePanel from '@/components/QueuePanel';
 import useWaveform from '@/hooks/useWaveform';
+import useAudioEngine from '@/hooks/useAudioEngine';
+import useLoudnessGain from '@/hooks/useLoudness';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { formatTime, usePlayerStore } from '@/stores/usePlayerStore';
+import { handleImageError } from '@/lib/imageFallback';
 
 const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimized
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
@@ -18,8 +23,8 @@ function isTypingTarget(el) {
   return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
 }
 
-/** Live-updating equalizer bars driven by a Web Audio AnalyserNode on the <audio> element. */
-function Visualizer({ audioRef, isPlaying }) {
+/** Live-updating equalizer bars driven by the audio engine's shared AnalyserNode. */
+function Visualizer({ getAnalyser, isPlaying }) {
   const barRefs = useRef([]);
   const rafRef = useRef(null);
 
@@ -30,43 +35,14 @@ function Visualizer({ audioRef, isPlaying }) {
       return undefined;
     }
 
-    const audio = audioRef.current;
-    if (!audio) return undefined;
+    const analyser = getAnalyser();
+    if (!analyser) return undefined;
 
-    // createMediaElementSource() may only ever be called ONCE for a given
-    // <audio> element - calling it a second time throws and leaves the
-    // element's audio pipeline broken (silent / unseekable), which is exactly
-    // what happens if this ran again after a hot-reload while the same
-    // element survives. So the graph is cached directly on the DOM node
-    // itself (audio._vizGraph) rather than in a React ref, since the node
-    // persists across re-mounts even when the component instance doesn't.
-    if (audio._vizGraph === undefined) {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
-        const source = ctx.createMediaElementSource(audio);
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 64;
-        analyser.smoothingTimeConstant = 0.75;
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-        audio._vizGraph = { ctx, analyser };
-      } catch {
-        // Analysis isn't available (e.g. already attached elsewhere) - the
-        // bars just stay idle, playback itself is unaffected either way.
-        audio._vizGraph = null;
-      }
-    }
-
-    const graph = audio._vizGraph;
-    if (!graph) return undefined;
-    if (graph.ctx.state === 'suspended') graph.ctx.resume();
-
-    const data = new Uint8Array(graph.analyser.frequencyBinCount);
+    const data = new Uint8Array(analyser.frequencyBinCount);
     const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT));
 
     const loop = () => {
-      graph.analyser.getByteFrequencyData(data);
+      analyser.getByteFrequencyData(data);
       for (let i = 0; i < BAR_COUNT; i++) {
         let sum = 0;
         for (let j = 0; j < bucket; j++) sum += data[i * bucket + j];
@@ -78,7 +54,7 @@ function Visualizer({ audioRef, isPlaying }) {
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [isPlaying, audioRef]);
+  }, [isPlaying, getAnalyser]);
 
   return (
     <div className="flex h-3 shrink-0 items-end gap-[3px]" aria-hidden>
@@ -125,7 +101,10 @@ function SeekBar({ value, onChange, onCommit, dark = false, waveform }) {
 }
 
 export default function GlobalAudioPlayer() {
-  const audioRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const [starting, setStarting] = useState(false);
   const {
     currentSong,
     isPlaying,
@@ -133,12 +112,16 @@ export default function GlobalAudioPlayer() {
     duration,
     volume,
     isMini,
+    crossfadeEnabled,
+    seekRequest,
     togglePlay,
     setPlaying,
     setCurrentTime,
     setDuration,
     seek,
     toggleMini,
+    toggleCrossfade,
+    consumeSeekRequest,
     next,
     prev,
     playlist,
@@ -149,6 +132,15 @@ export default function GlobalAudioPlayer() {
 
   const [isFullscreen, setFullscreen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
+
+  // The full-screen overlay is meant to sit on top of whatever page you
+  // opened it from, not follow you to a different page - without this, it
+  // was possible to open it, then navigate elsewhere (e.g. starting a
+  // party) and have the full-screen player stuck on top, hiding the page
+  // you just navigated to until manually minimized.
+  useEffect(() => {
+    setFullscreen(false);
+  }, [location.pathname]);
   // While the user is actively dragging the seek thumb, show their drag position
   // instead of fighting it with the audio's real (laggier) currentTime updates.
   const [seekPreview, setSeekPreview] = useState(null);
@@ -157,53 +149,64 @@ export default function GlobalAudioPlayer() {
   const [pos, setPos] = useState(null); // null = default bottom-left slot
   const dragState = useRef(null);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentSong) return undefined;
+  const nextTrack = playlistIndex >= 0 && playlistIndex < playlist.length - 1 ? playlist[playlistIndex + 1] : null;
+  const activeGain = useLoudnessGain(currentSong?.audioSrc);
+  // Speculatively measured ahead of time so the crossfade ramps the
+  // incoming track to its own correct level from the first sample, instead
+  // of blending in at an arbitrary volume and correcting itself afterward.
+  const upcomingGain = useLoudnessGain(nextTrack?.audioSrc);
 
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => setDuration(audio.duration);
-    const onEnded = () => {
+  const engine = useAudioEngine({
+    crossfadeEnabled,
+    activeGain,
+    upcomingGain,
+    nextTrack,
+    onTimeUpdate: setCurrentTime,
+    onDurationChange: setDuration,
+    onEnded: () => {
       if (playlistIndex < playlist.length - 1) next();
       else setPlaying(false);
-    };
+    },
+    onAutoAdvance: next,
+    onPlaybackError: () => setPlaying(false),
+  });
 
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('loadedmetadata', onLoadedMetadata);
-    audio.addEventListener('ended', onEnded);
-    return () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('loadedmetadata', onLoadedMetadata);
-      audio.removeEventListener('ended', onEnded);
-    };
-  }, [currentSong, setCurrentTime, setDuration, setPlaying, next, playlist.length, playlistIndex]);
+  // Genuine track changes (first load, skip/prev, queue click) hard-load
+  // into the active buffer. If this change was actually the *result* of a
+  // crossfade that already finished swapping buffers in place, the engine
+  // recognizes that itself and no-ops rather than restarting playback.
+  useEffect(() => {
+    if (!currentSong) return;
+    engine.loadTrack(currentSong, { autoplay: isPlaying });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSong?.slug]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentSong) return;
-    audio.src = currentSong.audioSrc;
-    audio.load();
-    setCurrentTime(0);
-    setDuration(0);
-  }, [currentSong?.slug, currentSong, setCurrentTime, setDuration]);
+    if (!currentSong) return;
+    if (isPlaying) engine.play();
+    else engine.pause();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, currentSong?.slug]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentSong) return;
-    if (isPlaying) audio.play().catch(() => setPlaying(false));
-    else audio.pause();
-  }, [isPlaying, currentSong, setPlaying]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) audio.volume = volume;
+    engine.setVolume(volume);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volume]);
 
+  // One-shot external seek requests (e.g. clicking a lyric line on
+  // LyricPage, which has no ref to the actual <audio> elements).
+  useEffect(() => {
+    if (!seekRequest) return;
+    engine.seek(seekRequest.time);
+    seek(seekRequest.time);
+    consumeSeekRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seekRequest]);
+
   const seekBy = (deltaSeconds) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-    const nextTime = Math.min(Math.max(audio.currentTime + deltaSeconds, 0), duration);
-    audio.currentTime = nextTime;
+    if (!duration) return;
+    const nextTime = Math.min(Math.max(currentTime + deltaSeconds, 0), duration);
+    engine.seek(nextTime);
     seek(nextTime);
   };
 
@@ -267,11 +270,10 @@ export default function GlobalAudioPlayer() {
   const handleSeekChange = (value) => setSeekPreview(value);
   // Drag released (or a plain click on the track) - commit the real seek.
   const handleSeekCommit = (value) => {
-    const audio = audioRef.current;
     setSeekPreview(null);
-    if (!audio || !duration) return;
+    if (!duration) return;
     const nextTime = (value / 100) * duration;
-    audio.currentTime = nextTime;
+    engine.seek(nextTime);
     seek(nextTime);
   };
 
@@ -279,7 +281,27 @@ export default function GlobalAudioPlayer() {
   const waveformBars = useWaveform(currentSong?.audioSrc);
   const canNext = playlistIndex >= 0 && playlistIndex < playlist.length - 1;
 
-  if (!currentSong) return null;
+  const handleStartParty = async () => {
+    if (!currentSong || starting) return;
+    setStarting(true);
+    try {
+      const { createParty } = await import('@/lib/party');
+      const partyId = await createParty({
+        song: currentSong,
+        isPlaying,
+        position: currentTime,
+        hostName: user?.displayName || user?.email || 'Host',
+        hostUid: user?.uid ?? null,
+      });
+      navigate(`/party/${partyId}`);
+      setFullscreen(false);
+    } catch {
+      // Firestore not enabled/reachable - nothing to recover into, the
+      // person just stays on the regular player.
+    } finally {
+      setStarting(false);
+    }
+  };
 
   const PlayButton = ({ size = 'size-9', icon = 'size-5' }) => (
     <button
@@ -294,7 +316,19 @@ export default function GlobalAudioPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
+      {/* These two <audio> elements must always render, even before any
+          song has ever been chosen - useAudioEngine wires up its
+          timeupdate/loadedmetadata/ended listeners exactly once, on mount.
+          If this component returned null until currentSong existed, that
+          one-time setup would run while both refs were still null (nothing
+          mounted yet), and listeners would never actually attach - audio
+          would still play (loadTrack/play() act on the refs directly at
+          click-time) but currentTime/duration would never update anywhere,
+          which is exactly what a frozen progress bar looks like. */}
+      <audio ref={engine.audioARef} preload="metadata" crossOrigin="anonymous" />
+      <audio ref={engine.audioBRef} preload="metadata" crossOrigin="anonymous" />
+      {currentSong && (
+        <>
 
       <AnimatePresence mode="popLayout">
         {isMini ? (
@@ -344,7 +378,7 @@ export default function GlobalAudioPlayer() {
               className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
               aria-label="Minimize player"
             >
-              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" />
+              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" onError={handleImageError} />
               <div className="min-w-0 flex-col text-left">
                 <p className="truncate text-sm font-semibold text-black">{currentSong.songTitle}</p>
                 <p className="truncate text-xs text-black/60">{currentSong.artistName}</p>
@@ -429,7 +463,7 @@ export default function GlobalAudioPlayer() {
               <Expand className="size-4" />
             </button>
 
-            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" />
+            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -455,6 +489,31 @@ export default function GlobalAudioPlayer() {
             className="absolute right-6 top-6 text-white/80 hover:text-white"
           >
             <Shrink className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStartParty}
+            disabled={starting}
+            aria-label="Start a listening party"
+            title="Start a listening party"
+            className="absolute right-40 top-6 text-white/80 transition-colors hover:text-white disabled:opacity-50"
+          >
+            <Users className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleCrossfade}
+            aria-label={crossfadeEnabled ? 'Turn off crossfade' : 'Turn on crossfade'}
+            aria-pressed={crossfadeEnabled}
+            title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
+            className={cn(
+              'absolute right-28 top-6 transition-colors',
+              crossfadeEnabled ? 'text-juow-accent' : 'text-white/60 hover:text-white',
+            )}
+          >
+            <Blend className="size-6" />
           </button>
 
           <button
@@ -505,7 +564,7 @@ export default function GlobalAudioPlayer() {
             <SeekBar value={progress} onChange={handleSeekChange} onCommit={handleSeekCommit} dark waveform={waveformBars} />
             <span className="w-10 shrink-0 text-xs tabular-nums text-white/70">-{formatTime(remaining)}</span>
           </div>
-          <Visualizer audioRef={audioRef} isPlaying={isPlaying} />
+          <Visualizer getAnalyser={engine.getAnalyser} isPlaying={isPlaying} />
 
           <AnimatePresence>
             {queueOpen && (
@@ -528,6 +587,8 @@ export default function GlobalAudioPlayer() {
             )}
           </AnimatePresence>
         </motion.div>
+      )}
+        </>
       )}
     </>
   );

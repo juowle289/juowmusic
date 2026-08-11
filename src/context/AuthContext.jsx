@@ -3,6 +3,7 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   reauthenticateWithCredential,
   sendPasswordResetEmail,
@@ -13,8 +14,10 @@ import {
   updatePassword as firebaseUpdatePassword,
   updateProfile,
 } from 'firebase/auth';
+import emailjs from '@emailjs/browser';
 import { auth } from '@/firebase';
 import { getFriendlyAuthError } from '@/utils/authErrors';
+import { EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_WELCOME_TEMPLATE_ID } from '@/config/emailjs';
 
 const AuthContext = createContext(undefined);
 
@@ -40,7 +43,6 @@ export function AuthProvider({ children }) {
     // the session automatically on page reload (no more losing login state
     // on F5 - Firebase persists the session in IndexedDB itself).
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.info('[juowmusic][AuthContext] onAuthStateChanged ->', firebaseUser?.email ?? null);
       setUser(toUserSnapshot(firebaseUser));
       setInitializing(false);
     });
@@ -59,16 +61,34 @@ export function AuthProvider({ children }) {
       }
       refreshUser();
       setUser(toUserSnapshot(auth.currentUser));
+      sendWelcomeEmail(username || email, email);
       return credential.user;
     } catch (error) {
       throw new Error(getFriendlyAuthError(error));
     }
   }
 
+  /**
+   * Fire-and-forget welcome email via EmailJS. Deliberately not awaited by
+   * `register()` and its own failure is only logged - a flaky/misconfigured
+   * email send should never block someone from finishing sign-up.
+   */
+  function sendWelcomeEmail(toName, toEmail) {
+    emailjs
+      .send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_WELCOME_TEMPLATE_ID,
+        { to_name: toName, to_email: toEmail },
+        { publicKey: EMAILJS_PUBLIC_KEY },
+      )
+      .catch((error) => {
+        console.error('[juowmusic] Welcome email failed to send:', error);
+      });
+  }
+
   async function login(email, password) {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      console.info('[juowmusic][AuthContext] login() success ->', credential.user.email);
       setUser(toUserSnapshot(credential.user));
       return credential.user;
     } catch (error) {
@@ -81,6 +101,9 @@ export function AuthProvider({ children }) {
       const provider = new GoogleAuthProvider();
       const credential = await signInWithPopup(auth, provider);
       setUser(toUserSnapshot(credential.user));
+      if (getAdditionalUserInfo(credential)?.isNewUser) {
+        sendWelcomeEmail(credential.user.displayName || credential.user.email, credential.user.email);
+      }
       return credential.user;
     } catch (error) {
       throw new Error(getFriendlyAuthError(error));

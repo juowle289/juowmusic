@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
+import { handleImageError } from '@/lib/imageFallback';
 
 function FacebookIcon(props) {
   return (
@@ -28,12 +29,15 @@ export default function SiteFooter({ dark = false, className }) {
   return (
     <footer
       className={cn(
-        'relative z-[1] flex flex-wrap items-center justify-between gap-6 px-6 py-10 text-sm text-juow-soft sm:px-10',
-        dark && 'bg-black',
+        "relative z-[1] flex flex-wrap items-center justify-between gap-6 px-6 py-10 text-sm text-juow-soft sm:px-10",
+        dark && "bg-black",
         className,
       )}
     >
-      <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="h-12 w-auto" />
+      <img
+        src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+        alt=""
+        className="h-12 w-auto" onError={handleImageError} />
 
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         <p>&copy;2024 Juowle. All Rights Reserved.</p>
@@ -43,7 +47,12 @@ export default function SiteFooter({ dark = false, className }) {
       </div>
 
       <div className="flex items-center gap-4 text-lg">
-        <a href="https://www.facebook.com/Duocthattha" target="_blank" rel="noreferrer" aria-label="Facebook">
+        <a
+          href="https://www.facebook.com/Duocthattha"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Facebook"
+        >
           <FacebookIcon className="size-5 hover:text-juow-accent" />
         </a>
         <a
@@ -54,7 +63,12 @@ export default function SiteFooter({ dark = false, className }) {
         >
           <SpotifyIcon className="size-5 hover:text-juow-accent" />
         </a>
-        <a href="https://www.instagram.com/juowlee/" target="_blank" rel="noreferrer" aria-label="Instagram">
+        <a
+          href="https://www.instagram.com/juowlee/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Instagram"
+        >
           <InstagramIcon className="size-5 hover:text-juow-accent" />
         </a>
       </div>

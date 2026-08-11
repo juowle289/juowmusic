@@ -8,7 +8,9 @@ import QASection from '@/components/QASection';
 import VinylDisc from '@/components/VinylDisc';
 import LyricShareModal, { extractAccentColor } from '@/components/LyricShareModal';
 import useInlineStyle from '@/hooks/useInlineStyle';
+import useCoverPalette from '@/hooks/useCoverPalette';
 import useLyricPlayer from '@/hooks/useLyricPlayer';
+import { findClickedLineIndex } from '@/lib/lyricLines';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +22,7 @@ import hayTraoChoAnh from '@/data/lyrics/hayTraoChoAnh.json';
 import nerves from '@/data/lyrics/nerves.json';
 import oneOfTheGirls from '@/data/lyrics/oneOfTheGirls.json';
 import theColorViolet from '@/data/lyrics/theColorViolet.json';
+import { handleImageError } from '@/lib/imageFallback';
 
 const SONGS = {
   afterHours,
@@ -36,6 +39,7 @@ export default function LyricPage() {
   const { slug } = useParams();
   const song = SONGS[slug];
   useInlineStyle(song?.customStyle);
+  const palette = useCoverPalette(song?.coverSrc);
   useLyricPlayer(song);
   const [adsClosed, setAdsClosed] = useState(false);
 
@@ -46,7 +50,29 @@ export default function LyricPage() {
   // the cover's edges even at rest).
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const activeSlug = usePlayerStore((s) => s.currentSong?.slug);
+  const requestSeek = usePlayerStore((s) => s.requestSeek);
   const isThisSongPlaying = isPlaying && activeSlug === song?.slug;
+
+  const hasLineTimestamps = Array.isArray(song?.lineTimestamps) && song.lineTimestamps.length > 0;
+
+  /** Click-to-seek: only wired up when this song actually has tapped
+   * timestamps (see /tools/lyric-sync) - songs without them keep the lyric
+   * block as plain, non-interactive text rather than a misleading
+   * click-that-does-nothing. */
+  const handleLyricClick = (event) => {
+    if (!hasLineTimestamps || !lyricRef.current) return;
+    const lineIndex = findClickedLineIndex(lyricRef.current, event.target);
+    if (lineIndex === null) return;
+    const time = song.lineTimestamps[lineIndex];
+    if (typeof time !== 'number') return;
+    requestSeek(time, {
+      slug: song.slug,
+      songTitle: song.songTitle,
+      artistName: song.artistName,
+      coverSrc: song.coverSrc,
+      audioSrc: song.audioSrc,
+    });
+  };
 
   const lyricRef = useRef(null);
   const shareButtonRef = useRef(null);
@@ -137,47 +163,73 @@ export default function LyricPage() {
           (see useInlineStyle) so it can't bleed into the site header's own <nav> menu.
           Two real flex columns with a gap (instead of viewport-wide absolute offsets)
           so the artwork and the text block never collide, at any zoom level. */}
-      <nav className="song-hero relative min-h-[25em] overflow-visible px-[5%] pb-6 pt-20 sm:h-[25em] sm:px-[10%]">
+      <nav
+        className="song-hero relative min-h-[25em] overflow-visible px-[5%] pb-6 pt-20 sm:h-[25em] sm:px-[10%]"
+        style={{ backgroundImage: palette.gradient }}
+      >
         <div className="flex h-full flex-wrap items-start gap-8 md:flex-nowrap md:gap-12">
           {/* Left: vinyl + cover, own small relative box so their absolute
-              positioning is local to it (not calculated against the full nav width). */}
-          <div className="relative hidden h-[22em] w-[22em] shrink-0 sm:block">
+              positioning is local to it (not calculated against the full nav width).
+              This box widens while playing (22em -> 28em) so the flex layout
+              itself pushes the text column over by the same distance the vinyl
+              slides out - otherwise the vinyl's peeking edge sits on top of the
+              title/meta text instead of beside it. */}
+          <div
+            className={cn(
+              'relative hidden h-[22em] shrink-0 transition-[width] duration-500 ease-out sm:block',
+              isThisSongPlaying ? 'w-[28em]' : 'w-[22em]',
+            )}
+          >
             <VinylDisc
               labelId="hero"
               spinning={isThisSongPlaying}
               className={cn(
                 'absolute left-0 top-0 size-[22em] transition-transform duration-500 ease-out [animation-duration:3s]',
-                isThisSongPlaying ? 'translate-x-[6em] translate-y-[2em]' : 'translate-x-0 translate-y-0',
+                // Purely horizontal - it should peek out to the right from
+                // behind the cover, not drift diagonally down-right.
+                isThisSongPlaying ? 'translate-x-[6em]' : 'translate-x-0',
               )}
             />
             <img
               src={song.coverSrc}
               alt={song.songTitle}
-              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl"
-            />
+              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl" onError={handleImageError} />
           </div>
           {/* Mobile cover: simple, non-overflowing, sits above the text block. */}
           <img
             src={song.coverSrc}
             alt={song.songTitle}
-            className="relative z-[2] size-40 object-cover shadow-2xl sm:hidden"
-          />
+            className="relative z-[2] size-40 object-cover shadow-2xl sm:hidden" onError={handleImageError} />
 
           {/* Right: text column. flex-col + mt-auto on the meta row (instead of
               absolutely pinning it to the column's bottom) keeps title/about
               and meta from ever overlapping - meta simply flows after
               whatever height the about text actually ends up taking,
               however long that turns out to be, rather than both being
-              positioned independently and assumed to never collide. */}
-          <div className="relative flex min-w-0 flex-1 flex-col self-stretch pt-2 text-[#f5f5fc] sm:pt-4">
+              positioned independently and assumed to never collide.
+              Text color flips black/white based on the sampled cover
+              brightness so it stays readable against any auto-generated
+              background, light or dark. */}
+          <div
+            className={cn(
+              'relative flex min-w-0 flex-1 flex-col self-stretch pt-2 sm:pt-4',
+              palette.isLight ? 'text-black' : 'text-[#f5f5fc]',
+            )}
+          >
             <div className="min-w-0">
               <h1 className="font-[family-name:var(--font-anton)] text-4xl font-medium leading-tight md:text-5xl">{song.songTitle}</h1>
               <h2
-                className="mt-3 text-base text-white/80 [&_a:hover]:underline [&_a]:text-[#f5f5fc]"
+                className={cn(
+                  'mt-3 text-base [&_a:hover]:underline',
+                  palette.isLight ? 'text-black/70 [&_a]:text-black' : 'text-white/80 [&_a]:text-[#f5f5fc]',
+                )}
                 dangerouslySetInnerHTML={{ __html: song.songMetaHtml }}
               />
               <p
-                className="mt-1 text-sm text-white/70 [&_a]:text-[#f5f5fc]"
+                className={cn(
+                  'mt-1 text-sm',
+                  palette.isLight ? 'text-black/60 [&_a]:text-black' : 'text-white/70 [&_a]:text-[#f5f5fc]',
+                )}
                 dangerouslySetInnerHTML={{ __html: song.producerHtml }}
               />
 
@@ -187,10 +239,16 @@ export default function LyricPage() {
                     free (bounded only by the max-w-xl wrapper above), only
                     the line count is capped. */}
                 <p
-                  className="line-clamp-3 text-sm leading-relaxed text-white/80"
+                  className={cn('line-clamp-3 text-sm leading-relaxed', palette.isLight ? 'text-black/70' : 'text-white/80')}
                   dangerouslySetInnerHTML={{ __html: song.tinyAboutHtml }}
                 />
-                <a href="#about" className="mt-2 inline-flex items-center gap-2 rounded border border-white px-2 py-0.5 text-sm text-[#f5f5fc] hover:border-[#337ab7] hover:text-[#337ab7]">
+                <a
+                  href="#about"
+                  className={cn(
+                    'mt-2 inline-flex items-center gap-2 rounded border px-2 py-0.5 text-sm hover:border-[#337ab7] hover:text-[#337ab7]',
+                    palette.isLight ? 'border-black/50 text-black' : 'border-white text-[#f5f5fc]',
+                  )}
+                >
                   More <ArrowDown className="size-4" />
                 </a>
               </div>
@@ -199,7 +257,10 @@ export default function LyricPage() {
             {/* Meta (date / viewers / views) - pushed to the bottom of the
                 column by mt-auto, never overlapping the content above it. */}
             <div
-              className="mt-auto flex flex-wrap gap-4 pt-4 text-xs text-[#ddd] [&_p]:flex [&_p]:items-center [&_p]:gap-1"
+              className={cn(
+                'mt-auto flex flex-wrap gap-4 pt-4 text-xs [&_p]:flex [&_p]:items-center [&_p]:gap-1',
+                palette.isLight ? 'text-black/60' : 'text-[#ddd]',
+              )}
               dangerouslySetInnerHTML={{ __html: song.metaHtml }}
             />
           </div>
@@ -209,7 +270,14 @@ export default function LyricPage() {
       {/* Lyrics + About + Q&A + Comments: white background, black text (matches original main{background:#fff}) */}
       <main className="bg-white px-[5%] pb-32 sm:px-[10%]">
         <section id="lyrics" className="scroll-mt-24 flex flex-wrap justify-between gap-10 bg-white py-8">
-          <div ref={lyricRef} className="lyric min-w-0 flex-1 text-black">
+          <div
+            ref={lyricRef}
+            onClick={handleLyricClick}
+            className={cn(
+              'lyric min-w-0 flex-1 text-black',
+              hasLineTimestamps && '[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5',
+            )}
+          >
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 
@@ -221,7 +289,7 @@ export default function LyricPage() {
                 key={rec.title}
                 className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-[#feec93]"
               >
-                <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" />
+                <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" onError={handleImageError} />
                 <div className="min-w-0">
                   <h3 className="truncate text-lg font-medium text-black">{rec.title}</h3>
                   <p className="truncate text-black/50">{rec.artist}</p>

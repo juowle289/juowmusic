@@ -40,6 +40,7 @@ import { SONG_COUNTRY_ID, COUNTRY_NAMES_BY_ID } from '@/data/songCountries';
 import { readHistory } from '@/utils/listeningHistory';
 import useCountUp from '@/hooks/useCountUp';
 import StreakCard from '@/components/StreakCard';
+import { handleImageError } from '@/lib/imageFallback';
 
 const ACCENT = '#feec93';
 const TIME_SLOT_COLORS = ['#feec93', '#e0b84d', '#a0783a', '#4b3a2a'];
@@ -407,7 +408,7 @@ export default function ProfilePage() {
                         to={`/lyrics/${song.slug}`}
                         className="flex items-center gap-3 py-2.5 transition-colors hover:text-juow-accent"
                       >
-                        <img src={song.coverSrc} alt="" className="size-10 shrink-0 rounded object-cover" />
+                        <img src={song.coverSrc} alt="" className="size-10 shrink-0 rounded object-cover" onError={handleImageError} />
                         <div className="min-w-0">
                           <p className="truncate">{song.songTitle}</p>
                           <p className="truncate text-sm text-juow-soft/50">{song.artistName}</p>
@@ -494,7 +495,7 @@ export default function ProfilePage() {
                                 to={`/lyrics/${song.slug}`}
                                 className="flex items-center gap-3 py-3 transition-colors hover:text-juow-accent"
                               >
-                                <img src={song.coverSrc} alt="" className="size-12 shrink-0 rounded object-cover" />
+                                <img src={song.coverSrc} alt="" className="size-12 shrink-0 rounded object-cover" onError={handleImageError} />
                                 <div className="min-w-0">
                                   <p className="truncate">{song.songTitle}</p>
                                   <p className="truncate text-sm text-juow-soft/50">{song.artistName}</p>

@@ -1,4 +1,13 @@
-import { Disc3, Headphones, ListMusic, Mic2, Music2, Radio, Sparkles, Volume2 } from 'lucide-react';
+import {
+  Disc3,
+  Headphones,
+  ListMusic,
+  Mic2,
+  Music2,
+  Radio,
+  Sparkles,
+  Volume2,
+} from "lucide-react";
 
 // Satellite icon positions as percentages of the square panel, radiating
 // out from the centered brand badge - mirrors the "hub and spoke" diagram
@@ -23,8 +32,9 @@ export default function AuthShowcase({ title, subtitle }) {
       <div
         className="absolute inset-0 opacity-[0.15]"
         style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
         }}
         aria-hidden
       />
@@ -35,7 +45,11 @@ export default function AuthShowcase({ title, subtitle }) {
       </div>
 
       <div className="relative aspect-square w-full max-w-md">
-        <svg viewBox="0 0 100 100" className="absolute inset-0 size-full" aria-hidden>
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0 size-full"
+          aria-hidden
+        >
           {NODES.map(({ top, left }, i) => (
             <line
               key={i}
@@ -61,7 +75,11 @@ export default function AuthShowcase({ title, subtitle }) {
         ))}
 
         <div className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl bg-black shadow-xl ring-4 ring-juow-accent/20">
-          <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="" className="size-8" />
+          <img
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            alt=""
+            className="size-8"
+          />
         </div>
       </div>
     </aside>

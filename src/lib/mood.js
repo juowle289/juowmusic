@@ -1,9 +1,7 @@
 /**
  * Weighted-average energy/mood (0..1 each, see data/songMood.js) -> one of
- * 5 "conditions". Shared by ListeningWeather (a snapshot of top songs) and
- * AmbientMoodLighting (whatever's playing right now), so the same
- * energy/mood numbers always mean the same condition everywhere on the
- * site, instead of two components quietly drifting out of sync.
+ * 5 "conditions", used by ListeningWeather to turn a set of songs into a
+ * weather condition.
  */
 export function classifyMood(energy, mood) {
   if (mood < 0.42 && energy < 0.55) return 'rain';
