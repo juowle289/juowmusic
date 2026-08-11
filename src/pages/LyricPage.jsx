@@ -6,6 +6,7 @@ import Loader from '@/components/Loader';
 import Comments from '@/components/Comments';
 import QASection from '@/components/QASection';
 import VinylDisc from '@/components/VinylDisc';
+import PartyBubbles from '@/components/PartyBubbles';
 import LyricShareModal, { extractAccentColor } from '@/components/LyricShareModal';
 import useInlineStyle from '@/hooks/useInlineStyle';
 import useCoverPalette from '@/hooks/useCoverPalette';
@@ -296,6 +297,8 @@ export default function LyricPage() {
                 </div>
               </Link>
             ))}
+
+            <PartyBubbles />
           </aside>
         </section>
 

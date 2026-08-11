@@ -61,6 +61,16 @@ export default function PartyPage() {
     setMessageText('');
   };
 
+  // "Leave" used to hard-navigate to the homepage. A party someone joined
+  // from a lyrics page's invite should just close back to wherever they
+  // came from - same pattern ProfilePage's back button uses - falling back
+  // to home only when there's genuinely no previous page in this tab's
+  // history (e.g. the invite link was opened directly).
+  const leaveParty = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/');
+  };
+
   const copyLink = async () => {
     const url = `${window.location.origin}/party/${partyId}`;
     try {
@@ -92,7 +102,7 @@ export default function PartyPage() {
             <Button type="button" onClick={copyLink} variant="outline" className="h-9 gap-1.5 border-white/20 bg-transparent text-xs text-white hover:bg-white/10">
               <Copy className="size-3.5" /> {copied ? 'Copied!' : 'Copy invite link'}
             </Button>
-            <Button type="button" onClick={() => navigate('/')} variant="outline" className="h-9 gap-1.5 border-white/20 bg-transparent text-xs text-white hover:bg-white/10">
+            <Button type="button" onClick={leaveParty} variant="outline" className="h-9 gap-1.5 border-white/20 bg-transparent text-xs text-white hover:bg-white/10">
               <LogOut className="size-3.5" /> Leave
             </Button>
           </div>

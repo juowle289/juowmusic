@@ -1,40 +1,38 @@
-const KEY_PREFIX = 'juowmusic-history';
-const MAX_ENTRIES = 4000; // keeps localStorage bounded for long-lived accounts
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/firebaseFirestore';
 
-function storageKey(uid) {
-  return `${KEY_PREFIX}:${uid}`;
-}
+// How many events buildRealStats (ProfilePage) ever needs to look at - caps
+// the read/subscription instead of pulling someone's entire multi-year
+// history on every load. Matches the old localStorage MAX_ENTRIES ceiling.
+export const HISTORY_LIMIT = 4000;
 
-function load(uid) {
-  try {
-    const raw = localStorage.getItem(storageKey(uid));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function save(uid, entries) {
-  try {
-    const trimmed = entries.length > MAX_ENTRIES ? entries.slice(entries.length - MAX_ENTRIES) : entries;
-    localStorage.setItem(storageKey(uid), JSON.stringify(trimmed));
-  } catch {
-    // localStorage can be unavailable (private mode, quota full, etc.) -
-    // losing history isn't worth crashing the app over.
-  }
+function eventsCollection(uid) {
+  return collection(db, 'users', uid, 'listeningEvents');
 }
 
 /**
- * One entry per song actually started - logged once real playback of that
+ * One doc per song actually started - logged once real playback of that
  * song has run a few seconds (see useListeningTracker's PLAY_THRESHOLD),
  * not on every press of the play button. This is what "total plays",
  * "top songs", the listening streak, and "time of day" are all built from.
+ *
+ * Lives in Firestore under `users/{uid}/listeningEvents`, not
+ * localStorage - so history is tied to the account, not the browser: it
+ * survives a new device or a cleared cache instead of quietly evaporating.
+ * Firestore's own offline cache (see firebaseFirestore.js) means this still
+ * works instantly while offline and syncs once back online.
  */
 export function recordPlayStart(uid, { slug, artistName }) {
   if (!uid || !slug) return;
-  const entries = load(uid);
-  entries.push({ type: 'play', slug, artistName: artistName ?? null, timestamp: Date.now() });
-  save(uid, entries);
+  addDoc(eventsCollection(uid), {
+    type: 'play',
+    slug,
+    artistName: artistName ?? null,
+    timestamp: Date.now(),
+    createdAt: serverTimestamp(),
+  }).catch((error) => {
+    console.error('[juowmusic] Failed to record play start:', error);
+  });
 }
 
 /**
@@ -45,13 +43,13 @@ export function recordPlayStart(uid, { slug, artistName }) {
  */
 export function recordListenChunk(uid, { slug, seconds }) {
   if (!uid || !slug || !(seconds > 0)) return;
-  const entries = load(uid);
-  entries.push({ type: 'listen', slug, seconds, timestamp: Date.now() });
-  save(uid, entries);
-}
-
-/** Full raw history for a user - callers filter by `type` as needed. */
-export function readHistory(uid) {
-  if (!uid) return [];
-  return load(uid);
+  addDoc(eventsCollection(uid), {
+    type: 'listen',
+    slug,
+    seconds,
+    timestamp: Date.now(),
+    createdAt: serverTimestamp(),
+  }).catch((error) => {
+    console.error('[juowmusic] Failed to record listen chunk:', error);
+  });
 }

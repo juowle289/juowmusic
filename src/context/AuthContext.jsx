@@ -121,6 +121,12 @@ export function AuthProvider({ children }) {
 
   async function resetPassword(email) {
     try {
+      // Plain call, no actionCodeSettings: the emailed link uses
+      // Firebase's own default hosted "reset your password" page
+      // (`<project>.firebaseapp.com/__/auth/action`). Good enough for now
+      // - a matching-branded in-app page can be built later without
+      // touching this call again (it's just an actionCodeSettings.url
+      // away).
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       throw new Error(getFriendlyAuthError(error));

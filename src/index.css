@@ -359,4 +359,22 @@
     animation: weather-sun-pulse 2.2s ease-in-out infinite;
     filter: drop-shadow(0 0 6px currentColor);
   }
+
+  /* ---- Party bubbles (LyricPage "join a listening party" rail) ----
+     Each bubble drifts gently up/down on its own cycle - the per-item
+     duration/delay come from inline custom properties (--bob-duration,
+     --bob-delay) set in PartyBubbles.jsx so the whole cluster doesn't
+     bob in unison like one rigid grid. */
+  @keyframes party-bubble-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .party-bubble {
+    animation: party-bubble-bob var(--bob-duration, 4s) ease-in-out infinite;
+    animation-delay: var(--bob-delay, 0s);
+  }
+  .party-bubble:hover,
+  .party-bubble:focus-visible {
+    animation-play-state: paused;
+  }
 }

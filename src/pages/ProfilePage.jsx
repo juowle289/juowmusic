@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { playableTracks, tracksBySlug } from '@/data/playableTracks';
 import { SONG_COUNTRY_ID, COUNTRY_NAMES_BY_ID } from '@/data/songCountries';
-import { readHistory } from '@/utils/listeningHistory';
+import useListeningHistory from '@/hooks/useListeningHistory';
 import useCountUp from '@/hooks/useCountUp';
 import StreakCard from '@/components/StreakCard';
 import { handleImageError } from '@/lib/imageFallback';
@@ -60,10 +60,10 @@ function timeOfDayBucket(hour) {
 }
 
 /** Turns the real listening history (see listeningHistory.js /
- * useListeningTracker) into everything the Overview tab shows. A brand new
- * account with no plays yet gets honest zeroes, not filler numbers. */
-function buildRealStats(uid) {
-  const history = readHistory(uid);
+ * useListeningTracker, synced from Firestore by useListeningHistory) into
+ * everything the Overview tab shows. A brand new account with no plays yet
+ * gets honest zeroes, not filler numbers. */
+function buildRealStats(history) {
   const plays = history.filter((e) => e.type === 'play');
   const listens = history.filter((e) => e.type === 'listen');
 
@@ -211,7 +211,8 @@ export default function ProfilePage() {
   const tabParam = searchParams.get('tab');
   const tab = tabParam === 'settings' ? 'settings' : tabParam === 'explore' ? 'explore' : 'overview';
   const displayName = user?.displayName || user?.email || 'juowle';
-  const stats = useMemo(() => buildRealStats(user?.uid), [user?.uid, tab]);
+  const { history, loading: historyLoading } = useListeningHistory(user?.uid);
+  const stats = useMemo(() => buildRealStats(history), [history]);
 
   const [selectedCountryId, setSelectedCountryId] = useState(null);
   const availableCountryIds = useMemo(() => [...new Set(Object.values(SONG_COUNTRY_ID))], []);
@@ -303,6 +304,12 @@ export default function ProfilePage() {
           <motion.section key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <h2 className="section-heading text-left text-3xl md:text-[2.4em]">Listening Stats</h2>
 
+            {historyLoading ? (
+              <div className="mt-10 flex justify-center">
+                <MusicLoader />
+              </div>
+            ) : (
+              <>
             <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1fr] lg:items-start">
               <div className="grid grid-cols-2 gap-4">
                 <StatCard icon={Headphones} label="Total plays" countTo={stats.totalPlays} sub="all time" />
@@ -420,6 +427,8 @@ export default function ProfilePage() {
                 </ul>
               </ChartCard>
             </div>
+              </>
+            )}
           </motion.section>
         )}
 
