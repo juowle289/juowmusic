@@ -87,25 +87,61 @@ export default function LoginPage() {
     setView("forgot");
   };
 
+  const getResetPasswordErrorMessage = (error) => {
+    const code = error?.code || "";
+    const message = error?.message || "";
+
+    if (code === "auth/user-not-found") {
+      return "No account was found for this email. Please check the address or sign up first.";
+    }
+
+    if (code === "auth/invalid-email") {
+      return "This email address is invalid. Please enter a valid email format.";
+    }
+
+    if (code === "auth/too-many-requests") {
+      return "Too many reset attempts. Please wait a moment and try again later.";
+    }
+
+    if (code === "auth/network-request-failed") {
+      return "Network error. Please check your connection and try again.";
+    }
+
+    if (message) {
+      return message
+        .replace(/^Firebase:\s*/i, "")
+        .replace(/\s*\(auth\/[^)]+\)\.?$/i, "");
+    }
+
+    return "Unable to send the reset link right now. Please try again.";
+  };
+
   const handleSendReset = async (e) => {
     e.preventDefault();
-    if (!resetEmail) {
+    const normalizedEmail = resetEmail.trim();
+
+    if (!normalizedEmail) {
       setResetStatus({
         type: "error",
         message: "Please enter your email address.",
       });
       return;
     }
+
     setResetSubmitting(true);
     setResetStatus(null);
+
     try {
-      await resetPassword(resetEmail);
+      await resetPassword(normalizedEmail);
       setResetStatus({
         type: "success",
-        message: `Reset link sent to ${resetEmail}. Check your inbox.`,
+        message: `Password reset link sent to ${normalizedEmail}. Please check your inbox.`,
       });
     } catch (err) {
-      setResetStatus({ type: "error", message: err.message });
+      setResetStatus({
+        type: "error",
+        message: getResetPasswordErrorMessage(err),
+      });
     } finally {
       setResetSubmitting(false);
     }

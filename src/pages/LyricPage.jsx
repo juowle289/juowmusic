@@ -282,7 +282,7 @@ export default function LyricPage() {
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 
-          <aside className="sticky top-0 h-fit w-full shrink-0 pt-[10%] md:w-80">
+          <aside className="sticky top-0 h-fit w-full shrink-0 pt-[4%] md:w-80">
             <div className="mb-0 rounded-t bg-black py-2 text-center text-lg text-[#f5f5fc]">You may also like</div>
             {song.recommended.map((rec) => (
               <Link
