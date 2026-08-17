@@ -1,27 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Expand,
-  Shrink,
-  ListMusic,
-  Blend,
-  Users,
-} from "lucide-react";
-import VinylDisc from "@/components/VinylDisc";
-import Waveform from "@/components/Waveform";
-import QueuePanel from "@/components/QueuePanel";
-import useWaveform from "@/hooks/useWaveform";
-import useAudioEngine from "@/hooks/useAudioEngine";
-import useLoudnessGain from "@/hooks/useLoudness";
-import { useAuth } from "@/context/AuthContext";
-import { cn } from "@/lib/utils";
-import { formatTime, usePlayerStore } from "@/stores/usePlayerStore";
-import { handleImageError } from "@/lib/imageFallback";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Play, Pause, SkipBack, SkipForward, Expand, Shrink, ListMusic, Blend, Users } from 'lucide-react';
+import VinylDisc from '@/components/VinylDisc';
+import Waveform from '@/components/Waveform';
+import QueuePanel from '@/components/QueuePanel';
+import useWaveform from '@/hooks/useWaveform';
+import useAudioEngine from '@/hooks/useAudioEngine';
+import useLoudnessGain from '@/hooks/useLoudness';
+import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
+import { formatTime, usePlayerStore } from '@/stores/usePlayerStore';
+import { handleImageError } from '@/lib/imageFallback';
 
 const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimized
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
@@ -30,7 +20,7 @@ const BAR_COUNT = 5;
 function isTypingTarget(el) {
   if (!el) return false;
   const tag = el.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
 }
 
 /** Live-updating equalizer bars driven by the audio engine's shared AnalyserNode. */
@@ -41,9 +31,7 @@ function Visualizer({ getAnalyser, isPlaying }) {
   useEffect(() => {
     if (!isPlaying) {
       cancelAnimationFrame(rafRef.current);
-      barRefs.current.forEach(
-        (el) => el && (el.style.transform = "scaleY(0.18)"),
-      );
+      barRefs.current.forEach((el) => el && (el.style.transform = 'scaleY(0.18)'));
       return undefined;
     }
 
@@ -75,7 +63,7 @@ function Visualizer({ getAnalyser, isPlaying }) {
           key={i}
           ref={(el) => (barRefs.current[i] = el)}
           className="h-full w-[3px] origin-bottom rounded-full bg-black/70 transition-transform duration-75"
-          style={{ transform: "scaleY(0.18)" }}
+          style={{ transform: 'scaleY(0.18)' }}
         />
       ))}
     </div>
@@ -92,8 +80,8 @@ function SeekBar({ value, onChange, onCommit, dark = false, waveform }) {
       <Waveform
         bars={waveform}
         progress={value}
-        mutedColor={dark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)"}
-        playedColor={dark ? "#feec93" : "#000"}
+        mutedColor={dark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'}
+        playedColor={dark ? '#feec93' : '#000'}
       />
       <input
         type="range"
@@ -104,11 +92,8 @@ function SeekBar({ value, onChange, onCommit, dark = false, waveform }) {
         onChange={(e) => onChange(parseFloat(e.target.value))}
         onPointerUp={(e) => onCommit(parseFloat(e.target.value))}
         onKeyUp={(e) => onCommit(parseFloat(e.target.value))}
-        style={{ "--seek-progress": value }}
-        className={cn(
-          "seek-range absolute inset-0 w-full",
-          dark && "seek-range--dark",
-        )}
+        style={{ '--seek-progress': value }}
+        className={cn('seek-range absolute inset-0 w-full', dark && 'seek-range--dark')}
         aria-label="Seek"
       />
     </div>
@@ -164,10 +149,7 @@ export default function GlobalAudioPlayer() {
   const [pos, setPos] = useState(null); // null = default bottom-left slot
   const dragState = useRef(null);
 
-  const nextTrack =
-    playlistIndex >= 0 && playlistIndex < playlist.length - 1
-      ? playlist[playlistIndex + 1]
-      : null;
+  const nextTrack = playlistIndex >= 0 && playlistIndex < playlist.length - 1 ? playlist[playlistIndex + 1] : null;
   const activeGain = useLoudnessGain(currentSong?.audioSrc);
   // Speculatively measured ahead of time so the crossfade ramps the
   // incoming track to its own correct level from the first sample, instead
@@ -222,11 +204,18 @@ export default function GlobalAudioPlayer() {
   }, [seekRequest]);
 
   const seekBy = (deltaSeconds) => {
-    if (!duration) return;
-    const nextTime = Math.min(
-      Math.max(currentTime + deltaSeconds, 0),
-      duration,
-    );
+    // Reads live state straight from the Zustand store instead of the
+    // `currentTime` captured by this render's closure - the keydown
+    // effect below intentionally does NOT list currentTime as a
+    // dependency (re-adding a document listener on every timeupdate tick
+    // would be wasteful), so that captured value goes stale the moment
+    // playback moves on. Clicking a lyric line jumps currentTime forward
+    // via a one-shot seek, but without this the very next arrow-key press
+    // still saw the pre-click time and "seeked" 5s from THAT - which,
+    // near the start of a song, clamps right back to 0.
+    const { currentTime: liveTime, duration: liveDuration } = usePlayerStore.getState();
+    if (!liveDuration) return;
+    const nextTime = Math.min(Math.max(liveTime + deltaSeconds, 0), liveDuration);
     engine.seek(nextTime);
     seek(nextTime);
   };
@@ -236,19 +225,19 @@ export default function GlobalAudioPlayer() {
     if (!currentSong) return undefined;
     const onKeyDown = (event) => {
       if (isTypingTarget(document.activeElement)) return;
-      if (event.code === "Space") {
+      if (event.code === 'Space') {
         event.preventDefault();
         togglePlay();
-      } else if (event.code === "ArrowLeft") {
+      } else if (event.code === 'ArrowLeft') {
         event.preventDefault();
         seekBy(-SEEK_STEP);
-      } else if (event.code === "ArrowRight") {
+      } else if (event.code === 'ArrowRight') {
         event.preventDefault();
         seekBy(SEEK_STEP);
       }
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSong, togglePlay, duration]);
 
@@ -271,10 +260,7 @@ export default function GlobalAudioPlayer() {
     const y = event.clientY - dragState.current.offsetY;
     const maxX = window.innerWidth - MINI_SIZE;
     const maxY = window.innerHeight - MINI_SIZE;
-    setPos({
-      x: Math.min(Math.max(x, 0), maxX),
-      y: Math.min(Math.max(y, 0), maxY),
-    });
+    setPos({ x: Math.min(Math.max(x, 0), maxX), y: Math.min(Math.max(y, 0), maxY) });
   };
 
   const handlePointerUp = () => {
@@ -288,10 +274,7 @@ export default function GlobalAudioPlayer() {
     if (seekPreview !== null) return seekPreview;
     return duration ? (currentTime / duration) * 100 : 0;
   }, [seekPreview, currentTime, duration]);
-  const remaining = duration
-    ? duration -
-      (seekPreview !== null ? (seekPreview / 100) * duration : currentTime)
-    : 0;
+  const remaining = duration ? duration - (seekPreview !== null ? (seekPreview / 100) * duration : currentTime) : 0;
 
   // Continuous drag preview - just update the visual position, don't touch the audio yet.
   const handleSeekChange = (value) => setSeekPreview(value);
@@ -312,12 +295,12 @@ export default function GlobalAudioPlayer() {
     if (!currentSong || starting) return;
     setStarting(true);
     try {
-      const { createParty } = await import("@/lib/party");
+      const { createParty } = await import('@/lib/party');
       const partyId = await createParty({
         song: currentSong,
         isPlaying,
         position: currentTime,
-        hostName: user?.displayName || user?.email || "Host",
+        hostName: user?.displayName || user?.email || 'Host',
         hostUid: user?.uid ?? null,
       });
       navigate(`/party/${partyId}`);
@@ -330,18 +313,14 @@ export default function GlobalAudioPlayer() {
     }
   };
 
-  const PlayButton = ({ size = "size-9", icon = "size-5" }) => (
+  const PlayButton = ({ size = 'size-9', icon = 'size-5' }) => (
     <button
       type="button"
       onClick={togglePlay}
-      aria-label={isPlaying ? "Pause" : "Play"}
-      className={cn("grid place-items-center text-black", size)}
+      aria-label={isPlaying ? 'Pause' : 'Play'}
+      className={cn('grid place-items-center text-black', size)}
     >
-      {isPlaying ? (
-        <Pause className={cn(icon, "fill-current")} />
-      ) : (
-        <Play className={cn(icon, "fill-current")} />
-      )}
+      {isPlaying ? <Pause className={cn(icon, 'fill-current')} /> : <Play className={cn(icon, 'fill-current')} />}
     </button>
   );
 
@@ -356,316 +335,121 @@ export default function GlobalAudioPlayer() {
           would still play (loadTrack/play() act on the refs directly at
           click-time) but currentTime/duration would never update anywhere,
           which is exactly what a frozen progress bar looks like. */}
-      <audio
-        ref={engine.audioARef}
-        preload="metadata"
-        crossOrigin="anonymous"
-      />
-      <audio
-        ref={engine.audioBRef}
-        preload="metadata"
-        crossOrigin="anonymous"
-      />
+      <audio ref={engine.audioARef} preload="metadata" crossOrigin="anonymous" />
+      <audio ref={engine.audioBRef} preload="metadata" crossOrigin="anonymous" />
       {currentSong && (
         <>
-          <AnimatePresence mode="popLayout">
-            {isMini ? (
-              <motion.div
-                key="mini"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                initial={{ scale: 0.6, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.6, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 32 }}
-                style={
-                  pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: "6%" }
+
+      <AnimatePresence mode="popLayout">
+        {isMini ? (
+          <motion.div
+            key="mini"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.6, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+            style={pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: '6%' }}
+            className="fixed z-50 cursor-grab touch-none select-none active:cursor-grabbing"
+          >
+            <div
+              className="relative rounded-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]"
+              style={{ width: MINI_SIZE, height: MINI_SIZE }}
+            >
+              <VinylDisc labelId="mini" className="size-full" />
+              <motion.img
+                src={currentSong.coverSrc}
+                alt=""
+                draggable={false}
+                className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-white/70"
+                animate={{ rotate: isPlaying ? 360 : 0 }}
+                transition={
+                  isPlaying
+                    ? { repeat: Infinity, duration: 3, ease: 'linear' }
+                    : { duration: 0.3 }
                 }
-                className="fixed z-50 cursor-grab touch-none select-none active:cursor-grabbing"
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="full"
+            initial={{ scale: 0.94, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.94, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
+          >
+            <button
+              type="button"
+              onClick={toggleMini}
+              className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
+              aria-label="Minimize player"
+            >
+              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" onError={handleImageError} />
+              <div className="min-w-0 flex-col text-left">
+                <p className="truncate text-sm font-semibold text-black">{currentSong.songTitle}</p>
+                <p className="truncate text-xs text-black/60">{currentSong.artistName}</p>
+              </div>
+            </button>
+
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={prev}
+                disabled={!canPrev}
+                aria-label="Previous track"
+                className="grid size-8 place-items-center text-black disabled:opacity-30"
               >
-                <div
-                  className="relative rounded-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]"
-                  style={{ width: MINI_SIZE, height: MINI_SIZE }}
-                >
-                  <VinylDisc labelId="mini" className="size-full" />
-                  <motion.img
-                    src={currentSong.coverSrc}
-                    alt=""
-                    draggable={false}
-                    className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-white/70"
-                    animate={{ rotate: isPlaying ? 360 : 0 }}
-                    transition={
-                      isPlaying
-                        ? { repeat: Infinity, duration: 3, ease: "linear" }
-                        : { duration: 0.3 }
-                    }
-                  />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="full"
-                initial={{ scale: 0.94, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.94, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
+                <SkipBack className="size-4 fill-current" />
+              </button>
+              <PlayButton />
+              <button
+                type="button"
+                onClick={next}
+                disabled={!canNext}
+                aria-label="Next track"
+                className="grid size-8 place-items-center text-black disabled:opacity-30"
               >
-                <button
-                  type="button"
-                  onClick={toggleMini}
-                  className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
-                  aria-label="Minimize player"
-                >
-                  <img
-                    src={currentSong.coverSrc}
-                    alt=""
-                    className="size-11 shrink-0 rounded-sm object-cover"
-                    onError={handleImageError}
-                  />
-                  <div className="min-w-0 flex-col text-left">
-                    <p className="truncate text-sm font-semibold text-black">
-                      {currentSong.songTitle}
-                    </p>
-                    <p className="truncate text-xs text-black/60">
-                      {currentSong.artistName}
-                    </p>
-                  </div>
-                </button>
+                <SkipForward className="size-4 fill-current" />
+              </button>
+            </div>
 
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={prev}
-                    disabled={!canPrev}
-                    aria-label="Previous track"
-                    className="grid size-8 place-items-center text-black disabled:opacity-30"
-                  >
-                    <SkipBack className="size-4 fill-current" />
-                  </button>
-                  <PlayButton />
-                  <button
-                    type="button"
-                    onClick={next}
-                    disabled={!canNext}
-                    aria-label="Next track"
-                    className="grid size-8 place-items-center text-black disabled:opacity-30"
-                  >
-                    <SkipForward className="size-4 fill-current" />
-                  </button>
-                </div>
+            {/* Shared width for time/SeekBar/time - a single row now, no bars underneath. */}
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <span className="hidden w-10 shrink-0 text-xs tabular-nums text-black/70 sm:inline">
+                {formatTime(currentTime)}
+              </span>
+              <SeekBar value={progress} onChange={handleSeekChange} onCommit={handleSeekCommit} waveform={waveformBars} />
+              <span className="hidden w-10 shrink-0 text-right text-xs tabular-nums text-black/70 sm:inline">
+                -{formatTime(remaining)}
+              </span>
+            </div>
 
-                {/* Shared width for time/SeekBar/time - a single row now, no bars underneath. */}
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <span className="hidden w-10 shrink-0 text-xs tabular-nums text-black/70 sm:inline">
-                    {formatTime(currentTime)}
-                  </span>
-                  <SeekBar
-                    value={progress}
-                    onChange={handleSeekChange}
-                    onCommit={handleSeekCommit}
-                    waveform={waveformBars}
-                  />
-                  <span className="hidden w-10 shrink-0 text-right text-xs tabular-nums text-black/70 sm:inline">
-                    -{formatTime(remaining)}
-                  </span>
-                </div>
-
-                {/* Queue toggle - opens the same drag-reorderable "up next" panel
+            {/* Queue toggle - opens the same drag-reorderable "up next" panel
                 as full-screen mode, right where the bass-reactive bars used
                 to sit. */}
-                <div className="relative hidden shrink-0 sm:block">
-                  <button
-                    type="button"
-                    onClick={() => setQueueOpen((v) => !v)}
-                    aria-label="Toggle queue"
-                    className={cn(
-                      "transition-colors",
-                      queueOpen
-                        ? "text-black"
-                        : "text-black/50 hover:text-black",
-                    )}
-                  >
-                    <ListMusic className="size-4" />
-                  </button>
-
-                  <AnimatePresence>
-                    {queueOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                        transition={{ duration: 0.18, ease: "easeOut" }}
-                        style={{ transformOrigin: "bottom right" }}
-                        className="absolute bottom-[calc(100%+0.75rem)] right-0 w-80"
-                      >
-                        <QueuePanel
-                          playlist={playlist}
-                          playlistIndex={playlistIndex}
-                          isPlaying={isPlaying}
-                          playAt={playAt}
-                          reorderQueue={reorderQueue}
-                          className="max-h-[50vh] shadow-2xl"
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setFullscreen(true)}
-                  aria-label="Full screen"
-                  className="hidden shrink-0 text-black/60 transition-colors hover:text-black sm:block"
-                >
-                  <Expand className="size-4" />
-                </button>
-
-                <img
-                  src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
-                  alt="Juowle"
-                  className="hidden h-8 w-auto shrink-0 opacity-80 lg:block"
-                  onError={handleImageError}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Full-screen focus mode: reimplements the original (disabled/commented)
-          full-screen player — big backdrop from the song cover, large controls. */}
-          {isFullscreen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-6 pb-16 pt-24 text-white"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,255,255,0), rgba(0,0,0,0.85) 80%), url(${currentSong.coverSrc})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setFullscreen(false)}
-                aria-label="Exit full screen"
-                className="absolute right-6 top-6 text-white/80 hover:text-white"
-              >
-                <Shrink className="size-6" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleStartParty}
-                disabled={starting}
-                aria-label="Start a listening party"
-                title="Start a listening party"
-                className="absolute right-40 top-6 text-white/80 transition-colors hover:text-white disabled:opacity-50"
-              >
-                <Users className="size-6" />
-              </button>
-
-              <button
-                type="button"
-                onClick={toggleCrossfade}
-                aria-label={
-                  crossfadeEnabled ? "Turn off crossfade" : "Turn on crossfade"
-                }
-                aria-pressed={crossfadeEnabled}
-                title={crossfadeEnabled ? "Crossfade: on" : "Crossfade: off"}
-                className={cn(
-                  "absolute right-28 top-6 transition-colors",
-                  crossfadeEnabled
-                    ? "text-juow-accent"
-                    : "text-white/60 hover:text-white",
-                )}
-              >
-                <Blend className="size-6" />
-              </button>
-
+            <div className="relative hidden shrink-0 sm:block">
               <button
                 type="button"
                 onClick={() => setQueueOpen((v) => !v)}
                 aria-label="Toggle queue"
-                className={cn(
-                  "absolute right-16 top-6 transition-colors",
-                  queueOpen
-                    ? "text-juow-accent"
-                    : "text-white/80 hover:text-white",
-                )}
+                className={cn('transition-colors', queueOpen ? 'text-black' : 'text-black/50 hover:text-black')}
               >
-                <ListMusic className="size-6" />
+                <ListMusic className="size-4" />
               </button>
-
-              <div className="text-center">
-                <p className="font-[family-name:var(--font-anton)] text-3xl">
-                  {currentSong.songTitle}
-                </p>
-                <p className="mt-1 text-white/70">{currentSong.artistName}</p>
-              </div>
-
-              <div className="flex w-full max-w-md items-center justify-center gap-6">
-                <button
-                  type="button"
-                  onClick={prev}
-                  disabled={!canPrev}
-                  aria-label="Previous track"
-                  className="grid size-10 place-items-center text-white disabled:opacity-30"
-                >
-                  <SkipBack className="size-6 fill-current" />
-                </button>
-                <button
-                  type="button"
-                  onClick={togglePlay}
-                  aria-label={isPlaying ? "Pause" : "Play"}
-                  className="grid size-16 place-items-center rounded-full bg-white text-black"
-                >
-                  {isPlaying ? (
-                    <Pause className="size-7 fill-current" />
-                  ) : (
-                    <Play className="size-7 fill-current" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={next}
-                  disabled={!canNext}
-                  aria-label="Next track"
-                  className="grid size-10 place-items-center text-white disabled:opacity-30"
-                >
-                  <SkipForward className="size-6 fill-current" />
-                </button>
-              </div>
-
-              <div className="flex w-full max-w-md items-center gap-3">
-                <span className="w-10 shrink-0 text-right text-xs tabular-nums text-white/70">
-                  {formatTime(currentTime)}
-                </span>
-                <SeekBar
-                  value={progress}
-                  onChange={handleSeekChange}
-                  onCommit={handleSeekCommit}
-                  dark
-                  waveform={waveformBars}
-                />
-                <span className="w-10 shrink-0 text-xs tabular-nums text-white/70">
-                  -{formatTime(remaining)}
-                </span>
-              </div>
-              <Visualizer
-                getAnalyser={engine.getAnalyser}
-                isPlaying={isPlaying}
-              />
 
               <AnimatePresence>
                 {queueOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 24 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="w-full max-w-md"
+                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    style={{ transformOrigin: 'bottom right' }}
+                    className="absolute bottom-[calc(100%+0.75rem)] right-0 w-80"
                   >
                     <QueuePanel
                       playlist={playlist}
@@ -673,13 +457,147 @@ export default function GlobalAudioPlayer() {
                       isPlaying={isPlaying}
                       playAt={playAt}
                       reorderQueue={reorderQueue}
-                      className="max-h-[40vh]"
+                      className="max-h-[50vh] shadow-2xl"
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
-          )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setFullscreen(true)}
+              aria-label="Full screen"
+              className="hidden shrink-0 text-black/60 transition-colors hover:text-black sm:block"
+            >
+              <Expand className="size-4" />
+            </button>
+
+            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Full-screen focus mode: reimplements the original (disabled/commented)
+          full-screen player — big backdrop from the song cover, large controls. */}
+      {isFullscreen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-6 pb-16 pt-24 text-white"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0), rgba(0,0,0,0.85) 80%), url(${currentSong.coverSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setFullscreen(false)}
+            aria-label="Exit full screen"
+            className="absolute right-6 top-6 text-white/80 hover:text-white"
+          >
+            <Shrink className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStartParty}
+            disabled={starting}
+            aria-label="Start a listening party"
+            title="Start a listening party"
+            className="absolute right-40 top-6 text-white/80 transition-colors hover:text-white disabled:opacity-50"
+          >
+            <Users className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleCrossfade}
+            aria-label={crossfadeEnabled ? 'Turn off crossfade' : 'Turn on crossfade'}
+            aria-pressed={crossfadeEnabled}
+            title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
+            className={cn(
+              'absolute right-28 top-6 transition-colors',
+              crossfadeEnabled ? 'text-juow-accent' : 'text-white/60 hover:text-white',
+            )}
+          >
+            <Blend className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setQueueOpen((v) => !v)}
+            aria-label="Toggle queue"
+            className={cn('absolute right-16 top-6 transition-colors', queueOpen ? 'text-juow-accent' : 'text-white/80 hover:text-white')}
+          >
+            <ListMusic className="size-6" />
+          </button>
+
+          <div className="text-center">
+            <p className="font-[family-name:var(--font-anton)] text-3xl">{currentSong.songTitle}</p>
+            <p className="mt-1 text-white/70">{currentSong.artistName}</p>
+          </div>
+
+          <div className="flex w-full max-w-md items-center justify-center gap-6">
+            <button
+              type="button"
+              onClick={prev}
+              disabled={!canPrev}
+              aria-label="Previous track"
+              className="grid size-10 place-items-center text-white disabled:opacity-30"
+            >
+              <SkipBack className="size-6 fill-current" />
+            </button>
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              className="grid size-16 place-items-center rounded-full bg-white text-black"
+            >
+              {isPlaying ? <Pause className="size-7 fill-current" /> : <Play className="size-7 fill-current" />}
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              disabled={!canNext}
+              aria-label="Next track"
+              className="grid size-10 place-items-center text-white disabled:opacity-30"
+            >
+              <SkipForward className="size-6 fill-current" />
+            </button>
+          </div>
+
+          <div className="flex w-full max-w-md items-center gap-3">
+            <span className="w-10 shrink-0 text-right text-xs tabular-nums text-white/70">{formatTime(currentTime)}</span>
+            <SeekBar value={progress} onChange={handleSeekChange} onCommit={handleSeekCommit} dark waveform={waveformBars} />
+            <span className="w-10 shrink-0 text-xs tabular-nums text-white/70">-{formatTime(remaining)}</span>
+          </div>
+          <Visualizer getAnalyser={engine.getAnalyser} isPlaying={isPlaying} />
+
+          <AnimatePresence>
+            {queueOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="w-full max-w-md"
+              >
+                <QueuePanel
+                  playlist={playlist}
+                  playlistIndex={playlistIndex}
+                  isPlaying={isPlaying}
+                  playAt={playAt}
+                  reorderQueue={reorderQueue}
+                  className="max-h-[40vh]"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
         </>
       )}
     </>

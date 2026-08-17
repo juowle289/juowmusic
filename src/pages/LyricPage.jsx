@@ -313,7 +313,7 @@ export default function LyricPage() {
         </section>
 
         <QASection items={song.qa} />
-        <Comments />
+        <Comments slug={song.slug} />
       </main>
 
       {!adsClosed && song.spotifyLink && (
