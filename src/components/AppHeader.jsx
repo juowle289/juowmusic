@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useMatch } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, Menu, Settings, User, X } from "lucide-react";
 import SearchBox from "@/components/SearchBox";
@@ -10,7 +10,7 @@ import {
   useScrollSpy,
 } from "@/hooks/useHeaderScroll";
 import { useAuth } from "@/context/AuthContext";
-import { handleImageError } from "@/lib/imageFallback";
+import { handleImageError } from '@/lib/imageFallback';
 
 /**
  * @param {'home' | 'section'} variant
@@ -26,7 +26,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   const sectionActive = useScrollSpy(sectionIds);
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email;
-  console.info("[juowmusic][AppHeader] render, user =", user);
+  const exploreActive = useMatch('/explore');
 
   useEffect(() => {
     if (!accountOpen) return undefined;
@@ -63,12 +63,16 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <img
             src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
             alt="Juowle logo"
-            className="h-12 w-auto"
-            onError={handleImageError}
-          />
+            className="h-12 w-auto" onError={handleImageError} />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
+          <Link
+            to="/explore"
+            className={cn("nav-link-underline text-base", exploreActive && "active text-juow-accent")}
+          >
+            Explore
+          </Link>
           {navItems.map((item) => (
             <a
               key={item.href}
@@ -224,9 +228,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <img
             src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
             alt=""
-            className="mb-4 h-10 w-auto opacity-80"
-            onError={handleImageError}
-          />
+            className="mb-4 h-10 w-auto opacity-80" onError={handleImageError} />
           <p>&copy;2024 Juowle. All Rights Reserved.</p>
           <p className="underline">Terms & conditions.</p>
           <p className="underline">Privacy Policy.</p>

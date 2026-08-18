@@ -15,6 +15,7 @@ import MusicLoader from '@/components/MusicLoader';
 // less JS.
 const ArtistPage = lazy(() => import('@/pages/ArtistPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const ExplorePage = lazy(() => import('@/pages/ExplorePage'));
 const LyricSyncTool = lazy(() => import('@/pages/LyricSyncTool'));
 const PartyPage = lazy(() => import('@/pages/PartyPage'));
 
@@ -41,6 +42,14 @@ export default function App() {
             }
           />
           <Route path="/lyrics/:slug" element={<LyricPage />} />
+          <Route
+            path="/explore"
+            element={
+              <Suspense fallback={<LazyFallback />}>
+                <ExplorePage />
+              </Suspense>
+            }
+          />
           <Route
             path="/party/:partyId"
             element={

@@ -8,6 +8,7 @@ function useHeaderConfig() {
   const homeMatch = useMatch('/');
   const lyricMatch = useMatch('/lyrics/:slug');
   const artistMatch = useMatch('/artist/:slug');
+  const exploreMatch = useMatch('/explore');
 
   if (homeMatch) {
     return { variant: 'home', menuItems: HOME_NAV };
@@ -17,6 +18,9 @@ function useHeaderConfig() {
   }
   if (artistMatch) {
     return { variant: 'section', menuItems: ARTIST_NAV };
+  }
+  if (exploreMatch) {
+    return { variant: 'section', menuItems: [] };
   }
 
   return null;
