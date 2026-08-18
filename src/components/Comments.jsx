@@ -124,10 +124,10 @@ function CommentRow({ comment, isOwn, onRequestReport, onRequestDelete, t }) {
               <MoreVertical className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={onRequestReport}>
+              <DropdownMenuItem onClick={onRequestReport}>
                 <Flag className="size-4" /> {t('comments.menu.report')}
               </DropdownMenuItem>
-              <DropdownMenuItem variant="destructive" onSelect={onRequestDelete}>
+              <DropdownMenuItem variant="destructive" onClick={onRequestDelete}>
                 <Trash2 className="size-4" /> {t('comments.menu.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
