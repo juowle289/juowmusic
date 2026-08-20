@@ -6,7 +6,6 @@ import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import SweepButton from '@/components/SweepButton';
 import PlaylistCarousel from '@/components/PlaylistCarousel';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -363,10 +362,7 @@ export default function HomePage() {
           {FAV_SONGS.map((song) => (
             <article
               key={song.title}
-              className={cn(
-                'flex flex-wrap items-start gap-6 border-b-[0.3em] border-juow-accent pb-10',
-                song.reverse ? 'md:flex-row-reverse' : 'md:flex-row',
-              )}
+              className={cn('flex flex-wrap items-start gap-6 pb-10', song.reverse ? 'md:flex-row-reverse' : 'md:flex-row')}
             >
               <Reveal variant={song.reverse ? 'slideRight' : 'slideLeft'} className="min-w-0 flex-1">
                 <h3 className="font-[family-name:var(--font-anton)] text-3xl underline decoration-juow-accent md:text-[2em]">
@@ -396,14 +392,14 @@ export default function HomePage() {
               name="name"
               placeholder="Full name"
               required
-              className="h-12 border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
+              className="h-12 rounded-none border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
             />
             <Input
               type="email"
               name="email"
               placeholder="Email"
               required
-              className="h-12 border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
+              className="h-12 rounded-none border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
             />
           </div>
           <Textarea
@@ -411,12 +407,16 @@ export default function HomePage() {
             placeholder="Custom field"
             required
             rows={8}
-            className="border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
+            className="rounded-none border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
           />
           {!submitted ? (
-            <Button type="submit" className="bg-juow-accent text-black hover:bg-juow-accent/90">
+            <SweepButton
+              as="button"
+              type="submit"
+              className="border-2 border-juow-accent bg-black/60 px-6 py-3 text-xs uppercase tracking-widest text-white"
+            >
               Submit
-            </Button>
+            </SweepButton>
           ) : (
             <p className="text-juow-accent">Submitted!</p>
           )}

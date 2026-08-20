@@ -214,8 +214,8 @@ export default function ProfilePage() {
   const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const tab = tabParam === 'settings' ? 'settings' : 'overview';
-  const [settingsTab, setSettingsTab] = useState('account'); // 'account' | 'appearance' | 'activity'
+  const tab = tabParam === 'settings' ? 'settings' : tabParam === 'activity' ? 'activity' : 'overview';
+  const [settingsTab, setSettingsTab] = useState('account'); // 'account' | 'appearance'
   const displayName = user?.displayName || user?.email || 'juowle';
   const { history, loading: historyLoading } = useListeningHistory(user?.uid);
   const stats = useMemo(() => buildRealStats(history), [history]);
@@ -271,19 +271,19 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-28">
-      <header className="border-b border-white/10 px-4 pt-24 pb-8 sm:px-8 md:px-16 lg:px-0">
+      <header className="border-b border-white/10 px-4 pt-24 pb-5 sm:px-8 md:px-16 lg:px-0">
         <div className="mx-auto lg:w-4/5 lg:max-w-[1400px]">
           <button
             type="button"
             onClick={goBack}
-            className="mb-6 flex items-center gap-1.5 text-sm text-juow-soft/60 transition-colors hover:text-juow-accent"
+            className="mb-3 flex items-center gap-1.5 text-sm text-juow-soft/60 transition-colors hover:text-juow-accent"
           >
             <ArrowLeft className="size-4" /> {t('profile.back')}
           </button>
 
-          <p className="text-sm uppercase tracking-widest text-juow-accent">Account</p>
-          <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-5xl">Hi, {displayName}</h1>
-          <p className="mt-2 text-juow-soft/60">Manage your account and see how you&apos;ve been listening.</p>
+          <p className="text-xs uppercase tracking-widest text-juow-accent">Account</p>
+          <h1 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl">Hi, {displayName}</h1>
+          <p className="mt-1 text-sm text-juow-soft/60">Manage your account and see how you&apos;ve been listening.</p>
         </div>
       </header>
 
@@ -296,6 +296,9 @@ export default function ProfilePage() {
             <SidebarTabButton active={tab === 'settings'} onClick={() => setSearchParams({ tab: 'settings' }, { replace: true })} icon={SettingsIcon}>
               {t('profile.tab.settings')}
             </SidebarTabButton>
+            <SidebarTabButton active={tab === 'activity'} onClick={() => setSearchParams({ tab: 'activity' }, { replace: true })} icon={ScrollText}>
+              {t('settings.tab.activity')}
+            </SidebarTabButton>
           </nav>
 
           {tab === 'settings' && (
@@ -305,9 +308,6 @@ export default function ProfilePage() {
               </SidebarTabButton>
               <SidebarTabButton active={settingsTab === 'appearance'} onClick={() => setSettingsTab('appearance')} icon={Palette}>
                 {t('settings.tab.appearance')}
-              </SidebarTabButton>
-              <SidebarTabButton active={settingsTab === 'activity'} onClick={() => setSettingsTab('activity')} icon={ScrollText}>
-                {t('settings.tab.activity')}
               </SidebarTabButton>
             </nav>
           )}
@@ -580,8 +580,12 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+          </motion.section>
+        )}
 
-            {settingsTab === 'activity' && <ActivityLogPanel user={user} reauthenticate={reauthenticate} />}
+        {tab === 'activity' && (
+          <motion.section key="activity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <ActivityLogPanel user={user} reauthenticate={reauthenticate} />
           </motion.section>
         )}
           </div>

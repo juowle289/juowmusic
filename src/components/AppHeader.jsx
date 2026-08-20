@@ -27,6 +27,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email;
   const exploreActive = useMatch('/explore');
+  const homeRouteActive = useMatch('/');
 
   useEffect(() => {
     if (!accountOpen) return undefined;
@@ -67,6 +68,12 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
+          <Link
+            to="/"
+            className={cn("nav-link-underline text-base", homeRouteActive && "active text-juow-accent")}
+          >
+            Home
+          </Link>
           <Link
             to="/explore"
             className={cn("nav-link-underline text-base", exploreActive && "active text-juow-accent")}

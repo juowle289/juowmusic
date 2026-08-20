@@ -34,6 +34,40 @@ const VARIANTS = {
 // catalog ever grows to cover a few hundred countries.
 const LOG_PAGE_SIZE = 6;
 
+/** Same deterministic-scatter approach as CountryGlobe's own starfield
+ * (seeded LCG, varied radius/opacity) instead of a tiled CSS
+ * background-image - a repeating grid of dots reads as a hard pattern,
+ * not open space. Percent-based coordinates on an SVG with
+ * preserveAspectRatio="none" so it fills whatever width/height this
+ * section ends up being, at any viewport. */
+function useScatteredStars(count, seed = 7) {
+  return useMemo(() => {
+    let s = seed;
+    const rand = () => {
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      return s / 0x7fffffff;
+    };
+    return Array.from({ length: count }, () => ({
+      x: rand() * 100,
+      y: rand() * 100,
+      r: rand() * 1.3 + 0.25,
+      o: rand() * 0.55 + 0.15,
+    }));
+  }, [count, seed]);
+}
+
+function Starfield() {
+  const stars = useScatteredStars(220);
+  return (
+    <svg className="pointer-events-none absolute inset-0 size-full" preserveAspectRatio="none" aria-hidden>
+      {stars.map((star, i) => (
+        <circle key={i} cx={`${star.x}%`} cy={`${star.y}%`} r={star.r} fill="#fff" opacity={star.o} />
+      ))}
+    </svg>
+  );
+}
+
+
 function Reveal({ className, delay = 0, as: Component = motion.div, ...props }) {
   return (
     <Component
@@ -149,30 +183,11 @@ export default function ExplorePage() {
              height math needed) - On Air scrolls internally to match
              rather than pushing the row taller. ---- */}
         <div className="relative left-1/2 mt-10 w-screen -translate-x-1/2 overflow-hidden bg-black py-16">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: 'radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)',
-              backgroundSize: '28px 28px',
-            }}
-            aria-hidden
-          />
-          {/* A second, sparser/larger layer so the field reads as depth
-              (near stars vs. far stars) rather than one flat repeating
-              dot pattern. */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: 'radial-gradient(rgba(255,255,255,0.8) 1.5px, transparent 1.5px)',
-              backgroundSize: '72px 72px',
-              backgroundPosition: '20px 35px',
-            }}
-            aria-hidden
-          />
+          <Starfield />
 
-          <div className="relative mx-auto grid gap-10 px-4 sm:px-8 md:px-16 lg:w-4/5 lg:max-w-[1400px] lg:grid-cols-[1.2fr_1fr] lg:px-0">
+          <div className="relative mx-auto grid gap-10 px-4 sm:px-8 md:px-16 md:grid-cols-[1.2fr_1fr] lg:w-4/5 lg:max-w-[1400px] lg:px-0">
             {/* LEFT: Explore by Country - heading, globe, search, presets */}
-            <Reveal className="mx-auto w-full max-w-xl text-center lg:mx-0">
+            <Reveal className="mx-auto w-full max-w-xl text-center md:mx-0">
               <p className="flex items-center justify-center gap-2 text-sm tracking-widest text-juow-accent uppercase">
                 <Radio className="size-4" /> Worldwide Frequency
               </p>
@@ -255,7 +270,7 @@ export default function ExplorePage() {
 
             {/* RIGHT: On Air - wraps freely, height-matched to the left
                 column, scrolls internally past that. */}
-            <Reveal delay={0.05} className="flex min-h-0 flex-col lg:h-full">
+            <Reveal delay={0.05} className="flex min-h-0 flex-col md:h-full">
               <div className="flex items-baseline justify-between">
                 <h2 className="font-[family-name:var(--font-anton)] text-2xl tracking-wide text-juow-soft md:text-3xl">On Air</h2>
                 <span className="font-mono text-xs text-juow-soft/40 uppercase">{stationName}</span>

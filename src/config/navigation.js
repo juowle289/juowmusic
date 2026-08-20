@@ -2,6 +2,7 @@ export const HOME_NAV = [
   { href: '#featured', label: 'Featured', id: 'featured' },
   { href: '#news', label: 'News', id: 'news' },
   { href: '#songs', label: 'Songs', id: 'songs' },
+  { href: '#contact', label: 'Contact', id: 'contact' },
 ];
 
 export const LYRIC_NAV = [
