@@ -8,6 +8,8 @@ import SweepButton from '@/components/SweepButton';
 import PlaylistCarousel from '@/components/PlaylistCarousel';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONTACT_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID } from '@/config/emailjs';
 import { cn } from '@/lib/utils';
 import { getLastPlayedSlug, usePlayerStore } from '@/stores/usePlayerStore';
 import { tracksBySlug } from '@/data/playableTracks';
@@ -134,6 +136,8 @@ function Reveal({ variant = 'scale', className, delay = 0, as: Component = motio
 export default function HomePage() {
   const videoRef = useRef(null);
   const [submitted, setSubmitted] = useState(false);
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactError, setContactError] = useState('');
   const [continueTrack, setContinueTrack] = useState(null);
   const playSong = usePlayerStore((s) => s.playSong);
   const activeSlug = usePlayerStore((s) => s.currentSong?.slug);
@@ -155,9 +159,35 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setContactError('');
+
+    const form = e.target;
+    const payload = {
+      user_name: form.name.value.trim(),
+      user_email: form.email.value.trim(),
+      subject: form.subject.value,
+      message: form.message.value.trim(),
+    };
+
+    setContactSubmitting(true);
+    try {
+      // Goes to EMAILJS_CONTACT_TEMPLATE_ID, a separate template from the
+      // welcome email (see config/emailjs.js) - that template's own "To
+      // Email" setting (configured in the EmailJS dashboard, not here)
+      // decides who actually receives this, not anything sent from the
+      // client. `subject`/`message`/`user_name`/`user_email` need to
+      // match the variable names used inside that template's content.
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CONTACT_TEMPLATE_ID, payload, { publicKey: EMAILJS_PUBLIC_KEY });
+      setSubmitted(true);
+      form.reset();
+    } catch (error) {
+      console.error('[juowmusic] Contact form failed to send:', error);
+      setContactError('Something went wrong sending this - please try again in a moment.');
+    } finally {
+      setContactSubmitting(false);
+    }
   };
 
   return (
@@ -183,7 +213,7 @@ export default function HomePage() {
           {/* figcaption font-size cascades in the original (4em container, h1 at
               2.2em of that = ~8.8em/141px on desktop) - reproduced directly with
               explicit sizes here since Tailwind classes don't cascade em-on-em. */}
-          <figcaption className="absolute left-[10%] top-[20%] max-w-2xl text-left text-white">
+          <figcaption className="absolute left-[10%] top-[30%] max-w-2xl text-left text-white">
             <h1 className="font-[family-name:var(--font-display)] text-6xl font-bold leading-none sm:text-8xl md:text-[8.8em]">
               Nerves
             </h1>
@@ -240,7 +270,7 @@ export default function HomePage() {
           as={motion.h2}
           variant="textAppear"
           id="featured"
-          className="section-heading mt-16 scroll-mt-24 text-4xl md:mt-20 md:text-[3.6em]"
+          className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]"
         >
           MY PLAYLIST
         </Reveal>
@@ -354,7 +384,7 @@ export default function HomePage() {
           </div>
         </Reveal>
 
-        <Reveal as={motion.h2} variant="textAppear" id="songs" className="section-heading scroll-mt-24 text-4xl md:text-[3.6em]">
+        <Reveal as={motion.h2} variant="textAppear" id="songs" className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]">
           FAV SONGS
         </Reveal>
 
@@ -382,7 +412,7 @@ export default function HomePage() {
           ))}
         </section>
 
-        <Reveal as={motion.h2} variant="textAppear" id="contact" className="section-heading mt-16 scroll-mt-24 text-4xl md:text-[3.6em]">
+        <Reveal as={motion.h2} variant="textAppear" id="contact" className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]">
           CONTACT
         </Reveal>
 
@@ -402,24 +432,44 @@ export default function HomePage() {
               className="h-12 rounded-none border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
             />
           </div>
+
+          <select
+            name="subject"
+            required
+            defaultValue=""
+            className="h-12 w-full rounded-none border border-white/20 bg-white/5 px-3 text-sm text-juow-soft focus:border-juow-accent focus:outline-none"
+          >
+            <option value="" disabled className="bg-black text-white/40">
+              What&apos;s this about?
+            </option>
+            <option value="Feedback" className="bg-black text-white">Feedback on the site</option>
+            <option value="Bug report" className="bg-black text-white">Something&apos;s broken</option>
+            <option value="Feature request" className="bg-black text-white">Feature request</option>
+            <option value="Business inquiry" className="bg-black text-white">Business / collab inquiry</option>
+            <option value="Other" className="bg-black text-white">Other</option>
+          </select>
+
           <Textarea
             name="message"
-            placeholder="Custom field"
+            placeholder="Tell us more..."
             required
             rows={8}
             className="rounded-none border-white/20 bg-white/5 text-juow-soft placeholder:text-white/40"
           />
+
           {!submitted ? (
             <SweepButton
               as="button"
               type="submit"
-              className="border-2 border-juow-accent bg-black/60 px-6 py-3 text-xs uppercase tracking-widest text-white"
+              disabled={contactSubmitting}
+              className="border-2 border-juow-accent bg-black/60 px-6 py-3 text-xs uppercase tracking-widest text-white disabled:opacity-50"
             >
-              Submit
+              {contactSubmitting ? 'Sending…' : 'Submit'}
             </SweepButton>
           ) : (
-            <p className="text-juow-accent">Submitted!</p>
+            <p className="text-juow-accent">Thanks — I got it!</p>
           )}
+          {contactError && <p className="text-sm text-red-400">{contactError}</p>}
         </form>
       </main>
 

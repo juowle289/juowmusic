@@ -8,6 +8,7 @@ import QASection from '@/components/QASection';
 import VinylDisc from '@/components/VinylDisc';
 import PartyBubbles from '@/components/PartyBubbles';
 import LyricShareModal, { extractAccentColor } from '@/components/LyricShareModal';
+import Hint from '@/components/Hint';
 import useInlineStyle from '@/hooks/useInlineStyle';
 import useCoverPalette from '@/hooks/useCoverPalette';
 import useLyricPlayer from '@/hooks/useLyricPlayer';
@@ -279,6 +280,7 @@ export default function LyricPage() {
               hasLineTimestamps && '[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5',
             )}
           >
+            <Hint className="mb-3">Select any lyrics to share them as an image</Hint>
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 

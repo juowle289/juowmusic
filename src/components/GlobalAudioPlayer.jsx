@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, Expand, Shrink, ListMusic, Blend, Users } from 'lucide-react';
 import VinylDisc from '@/components/VinylDisc';
+import Hint from '@/components/Hint';
 import Waveform from '@/components/Waveform';
 import QueuePanel from '@/components/QueuePanel';
 import useWaveform from '@/hooks/useWaveform';
@@ -340,26 +341,35 @@ export default function GlobalAudioPlayer() {
       {currentSong && (
         <>
 
+      {!isMini && (
+        // Sibling to the bar itself (not a child of it) - the bar has
+        // overflow-hidden now (needed for the shrink-into-record
+        // animation to clip cleanly), which would've clipped this hint
+        // since it sits just above the bar's own box.
+        <Hint dark className="fixed inset-x-[3%] bottom-[calc(3%+4.75rem)] z-[60] sm:inset-x-[10%] sm:bottom-[calc(6%+4.75rem)]">
+          Click the song to shrink it into a record you can drag anywhere
+        </Hint>
+      )}
+
       <AnimatePresence mode="popLayout">
         {isMini ? (
           <motion.div
             key="mini"
+            layoutId="player-shell"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.6, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-            style={pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: '6%' }}
-            className="fixed z-50 cursor-grab touch-none select-none active:cursor-grabbing"
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+            style={pos ? { left: pos.x, top: pos.y, width: MINI_SIZE, height: MINI_SIZE } : { left: 12, bottom: '6%', width: MINI_SIZE, height: MINI_SIZE }}
+            className="fixed z-50 cursor-grab touch-none select-none overflow-hidden rounded-full active:cursor-grabbing"
           >
-            <div
-              className="relative rounded-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]"
-              style={{ width: MINI_SIZE, height: MINI_SIZE }}
-            >
+            <div className="relative size-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]">
               <VinylDisc labelId="mini" className="size-full" />
               <motion.img
+                layoutId="player-cover-art"
                 src={currentSong.coverSrc}
                 alt=""
                 draggable={false}
@@ -376,11 +386,12 @@ export default function GlobalAudioPlayer() {
         ) : (
           <motion.div
             key="full"
-            initial={{ scale: 0.94, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.94, opacity: 0 }}
+            layoutId="player-shell"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
+            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 overflow-hidden rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
           >
             <button
               type="button"
@@ -388,7 +399,18 @@ export default function GlobalAudioPlayer() {
               className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
               aria-label="Minimize player"
             >
-              <img src={currentSong.coverSrc} alt="" className="size-11 shrink-0 rounded-sm object-cover" onError={handleImageError} />
+              {/* layoutId shared with the mini widget's cover art below -
+                  Framer Motion FLIP-animates this square thumbnail
+                  morphing into the mini vinyl's circular center label
+                  (position, size, and border-radius all interpolate)
+                  instead of the two states just cross-fading in place. */}
+              <motion.img
+                layoutId="player-cover-art"
+                src={currentSong.coverSrc}
+                alt=""
+                className="size-11 shrink-0 rounded-sm object-cover"
+                onError={handleImageError}
+              />
               <div className="min-w-0 flex-col text-left">
                 <p className="truncate text-sm font-semibold text-black">{currentSong.songTitle}</p>
                 <p className="truncate text-xs text-black/60">{currentSong.artistName}</p>
@@ -427,6 +449,23 @@ export default function GlobalAudioPlayer() {
                 -{formatTime(remaining)}
               </span>
             </div>
+
+            {/* Crossfade toggle - same control as the full-screen view's
+                Blend icon (see below), just also reachable without going
+                full-screen. Amber when on (the default), plain when off. */}
+            <button
+              type="button"
+              onClick={toggleCrossfade}
+              aria-label={crossfadeEnabled ? 'Turn off crossfade' : 'Turn on crossfade'}
+              aria-pressed={crossfadeEnabled}
+              title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
+              className={cn(
+                'hidden shrink-0 transition-colors sm:block',
+                crossfadeEnabled ? 'text-juow-accent' : 'text-black/40 hover:text-black',
+              )}
+            >
+              <Blend className="size-4" />
+            </button>
 
             {/* Queue toggle - opens the same drag-reorderable "up next" panel
                 as full-screen mode, right where the bass-reactive bars used
@@ -482,15 +521,17 @@ export default function GlobalAudioPlayer() {
           full-screen player — big backdrop from the song cover, large controls. */}
       {isFullscreen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-6 pb-16 pt-24 text-white"
+          initial={{ opacity: 0, scale: 0.4, y: 80 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.4, y: 80 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           style={{
+            transformOrigin: 'bottom center',
             backgroundImage: `linear-gradient(rgba(255,255,255,0), rgba(0,0,0,0.85) 80%), url(${currentSong.coverSrc})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-6 pb-16 pt-24 text-white"
         >
           <button
             type="button"

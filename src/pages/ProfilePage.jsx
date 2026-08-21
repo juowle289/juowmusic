@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/components/ThemeProvider';
+import { useUiHints } from '@/context/UiHintsContext';
 import { logActivity } from '@/utils/activityLog';
 import ActivityLogPanel from '@/components/ActivityLogPanel';
 import { tracksBySlug } from '@/data/playableTracks';
@@ -212,6 +213,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { t, lang, setLang } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { hintsEnabled, setHintsEnabled } = useUiHints();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const tab = tabParam === 'settings' ? 'settings' : tabParam === 'activity' ? 'activity' : 'overview';
@@ -574,6 +576,31 @@ export default function ProfilePage() {
                         {t('settings.appearance.theme.dark')}
                       </button>
                     </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-juow-soft/80">Tips &amp; hints</p>
+                    <p className="mt-1 text-xs text-juow-soft/40">
+                      Faint on-screen labels pointing out things like selecting lyrics to share, or shrinking the
+                      player into a draggable record.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setHintsEnabled(!hintsEnabled)}
+                      role="switch"
+                      aria-checked={hintsEnabled}
+                      className={cn(
+                        'relative mt-2 h-6 w-11 shrink-0 rounded-full transition-colors',
+                        hintsEnabled ? 'bg-juow-accent' : 'bg-white/15',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'absolute top-0.5 size-5 rounded-full bg-black transition-transform',
+                          hintsEnabled ? 'translate-x-[1.375rem]' : 'translate-x-0.5',
+                        )}
+                      />
+                    </button>
                   </div>
 
                   <p className="text-xs text-juow-soft/40">{t('settings.appearance.scopeNote')}</p>
