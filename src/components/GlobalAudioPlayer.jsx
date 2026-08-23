@@ -461,8 +461,8 @@ export default function GlobalAudioPlayer() {
               aria-pressed={crossfadeEnabled}
               title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
               className={cn(
-                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5]',
-                crossfadeEnabled ? 'text-juow-accent' : 'text-black/40',
+                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
+                crossfadeEnabled ? 'bg-black font-bold text-juow-accent [&>svg]:stroke-[2.5]' : 'text-black/40',
               )}
             >
               <Blend className="size-5" />
@@ -477,8 +477,8 @@ export default function GlobalAudioPlayer() {
                 onClick={() => setQueueOpen((v) => !v)}
                 aria-label="Toggle queue"
                 className={cn(
-                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5]',
-                  queueOpen ? 'text-black' : 'text-black/50',
+                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
+                  queueOpen ? 'bg-black font-bold text-juow-accent [&>svg]:stroke-[2.5]' : 'text-black/50',
                 )}
               >
                 <ListMusic className="size-5" />
