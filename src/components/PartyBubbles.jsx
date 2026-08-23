@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Radio } from 'lucide-react';
+import { Users } from 'lucide-react';
 import useActiveParties from '@/hooks/useActiveParties';
 import { handleImageError } from '@/lib/imageFallback';
 import { cn } from '@/lib/utils';
@@ -110,7 +110,7 @@ export default function PartyBubbles() {
   return (
     <div className="mt-6">
       <div className="flex items-center gap-2 text-black">
-        <Radio className="size-4" />
+        <Users className="size-4" />
         <h3 className="font-[family-name:var(--font-anton)] text-lg tracking-wide">Listening Party</h3>
       </div>
       <p className="mt-1.5 text-sm text-black/50">

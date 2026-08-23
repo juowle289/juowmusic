@@ -461,11 +461,11 @@ export default function GlobalAudioPlayer() {
               aria-pressed={crossfadeEnabled}
               title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
               className={cn(
-                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:font-bold hover:text-juow-accent',
+                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
                 crossfadeEnabled ? 'text-juow-accent' : 'text-black/40',
               )}
             >
-              <Blend className="size-4" />
+              <Blend className="size-5" />
             </button>
 
             {/* Queue toggle - opens the same drag-reorderable "up next" panel
@@ -477,11 +477,11 @@ export default function GlobalAudioPlayer() {
                 onClick={() => setQueueOpen((v) => !v)}
                 aria-label="Toggle queue"
                 className={cn(
-                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:font-bold hover:text-juow-accent',
+                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
                   queueOpen ? 'text-black' : 'text-black/50',
                 )}
               >
-                <ListMusic className="size-4" />
+                <ListMusic className="size-5" />
               </button>
 
               <AnimatePresence>
@@ -511,9 +511,9 @@ export default function GlobalAudioPlayer() {
               type="button"
               onClick={() => setFullscreen(true)}
               aria-label="Full screen"
-              className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:font-bold hover:text-juow-accent sm:block"
+              className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] sm:block"
             >
-              <Expand className="size-4" />
+              <Expand className="size-5" />
             </button>
 
             <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />

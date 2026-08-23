@@ -58,15 +58,23 @@ export default function Hint({ targetRef, children, className, offsetY = 34, off
       <span
         className={cn(
           'block w-max max-w-[16rem] text-[11px] leading-tight font-semibold',
-          // Optional dark, blurred backdrop for spots where the hint can
-          // land over busy/light content behind it (see GlobalAudioPlayer)
-          // - plain text-shadow alone isn't always enough to stay legible.
-          // White text (not the usual gold) reads best against that dark
-          // backdrop; the gold accent is reserved for the plain-background case.
-          dark ? 'rounded-md bg-black/70 px-2 py-1 text-white backdrop-blur-sm' : 'text-juow-accent',
+          // Optional soft dark patch for spots where the hint can land
+          // over busy/light content behind it (see GlobalAudioPlayer) -
+          // plain text-shadow alone isn't always enough to stay legible.
+          // White text (not the usual gold) reads best here; the gold
+          // accent is reserved for the plain-background case.
+          dark ? 'text-white' : 'text-juow-accent',
           className,
         )}
         style={{
+          // Dark variant: a radial gradient rather than a flat fill +
+          // border-radius, so the dark patch behind the text fades out
+          // gradually at its edges instead of showing a visible box
+          // outline against whatever it's sitting on top of.
+          background: dark
+            ? 'radial-gradient(ellipse 100% 140% at center, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0) 100%)'
+            : undefined,
+          padding: dark ? '0.5rem 1.1rem' : undefined,
           textShadow: dark ? undefined : '0 1px 3px rgba(0,0,0,0.85), 0 0 10px rgba(0,0,0,0.6)',
           // Nudges just the label sideways, independent of the leader
           // line below (which stays anchored to the real target) - lets a
