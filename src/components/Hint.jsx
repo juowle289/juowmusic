@@ -63,7 +63,7 @@ export default function Hint({ targetRef, children, className, offsetY = 34, off
           // plain text-shadow alone isn't always enough to stay legible.
           // White text (not the usual gold) reads best here; the gold
           // accent is reserved for the plain-background case.
-          dark ? 'text-white' : 'text-juow-accent',
+          dark ? 'rounded-lg text-white' : 'text-juow-accent',
           className,
         )}
         style={{

@@ -396,7 +396,7 @@ export default function GlobalAudioPlayer() {
               type="button"
               onClick={toggleMini}
               ref={minimizeBtnRef}
-              className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
+              className="-mx-1.5 -my-1 flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100"
               aria-label="Minimize player"
             >
               {/* layoutId shared with the mini widget's cover art below -
@@ -412,8 +412,8 @@ export default function GlobalAudioPlayer() {
                 onError={handleImageError}
               />
               <div className="min-w-0 flex-col text-left">
-                <p className="truncate text-sm font-semibold text-black">{currentSong.songTitle}</p>
-                <p className="truncate text-xs text-black/60">{currentSong.artistName}</p>
+                <p className="truncate text-base font-semibold text-black">{currentSong.songTitle}</p>
+                <p className="truncate text-sm text-black/60">{currentSong.artistName}</p>
               </div>
             </button>
 
@@ -461,7 +461,7 @@ export default function GlobalAudioPlayer() {
               aria-pressed={crossfadeEnabled}
               title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
               className={cn(
-                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
+                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5]',
                 crossfadeEnabled ? 'text-juow-accent' : 'text-black/40',
               )}
             >
@@ -477,7 +477,7 @@ export default function GlobalAudioPlayer() {
                 onClick={() => setQueueOpen((v) => !v)}
                 aria-label="Toggle queue"
                 className={cn(
-                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5]',
+                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5]',
                   queueOpen ? 'text-black' : 'text-black/50',
                 )}
               >
@@ -511,7 +511,7 @@ export default function GlobalAudioPlayer() {
               type="button"
               onClick={() => setFullscreen(true)}
               aria-label="Full screen"
-              className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] sm:block"
+              className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5] sm:block"
             >
               <Expand className="size-5" />
             </button>
