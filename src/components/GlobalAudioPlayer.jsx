@@ -390,13 +390,13 @@ export default function GlobalAudioPlayer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
+            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-2 rounded-md border border-black/80 bg-white/40 px-2 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%] sm:gap-3 sm:px-3"
           >
             <button
               type="button"
               onClick={toggleMini}
               ref={minimizeBtnRef}
-              className="-mx-1.5 -my-1 flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100"
+              className="-mx-1.5 -my-1 flex w-full max-w-[7rem] shrink-0 items-center gap-2 overflow-hidden rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100 sm:max-w-[22em] sm:gap-2.5"
               aria-label="Minimize player"
             >
               {/* layoutId shared with the mini widget's cover art below -
@@ -423,7 +423,7 @@ export default function GlobalAudioPlayer() {
                 onClick={prev}
                 disabled={!canPrev}
                 aria-label="Previous track"
-                className="grid size-8 place-items-center text-black disabled:opacity-30"
+                className="hidden size-8 place-items-center text-black disabled:opacity-30 sm:grid"
               >
                 <SkipBack className="size-4 fill-current" />
               </button>
@@ -433,7 +433,7 @@ export default function GlobalAudioPlayer() {
                 onClick={next}
                 disabled={!canNext}
                 aria-label="Next track"
-                className="grid size-8 place-items-center text-black disabled:opacity-30"
+                className="hidden size-8 place-items-center text-black disabled:opacity-30 sm:grid"
               >
                 <SkipForward className="size-4 fill-current" />
               </button>
@@ -535,15 +535,15 @@ export default function GlobalAudioPlayer() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-6 pb-16 pt-24 text-white"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-4 pb-16 pt-24 text-white sm:px-6"
         >
           <button
             type="button"
             onClick={() => setFullscreen(false)}
             aria-label="Exit full screen"
-            className="absolute right-6 top-6 text-white/80 hover:text-white"
+            className="absolute right-4 top-4 text-white/80 hover:text-white sm:right-6 sm:top-6"
           >
-            <Shrink className="size-6" />
+            <Shrink className="size-5 sm:size-6" />
           </button>
 
           <button
@@ -552,9 +552,9 @@ export default function GlobalAudioPlayer() {
             disabled={starting}
             aria-label="Start a listening party"
             title="Start a listening party"
-            className="absolute right-40 top-6 text-white/80 transition-colors hover:text-white disabled:opacity-50"
+            className="absolute right-28 top-4 text-white/80 transition-colors hover:text-white disabled:opacity-50 sm:right-40 sm:top-6"
           >
-            <Users className="size-6" />
+            <Users className="size-5 sm:size-6" />
           </button>
 
           <button
@@ -564,24 +564,24 @@ export default function GlobalAudioPlayer() {
             aria-pressed={crossfadeEnabled}
             title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
             className={cn(
-              'absolute right-28 top-6 transition-colors',
+              'absolute right-20 top-4 transition-colors sm:right-28 sm:top-6',
               crossfadeEnabled ? 'text-juow-accent' : 'text-white/60 hover:text-white',
             )}
           >
-            <Blend className="size-6" />
+            <Blend className="size-5 sm:size-6" />
           </button>
 
           <button
             type="button"
             onClick={() => setQueueOpen((v) => !v)}
             aria-label="Toggle queue"
-            className={cn('absolute right-16 top-6 transition-colors', queueOpen ? 'text-juow-accent' : 'text-white/80 hover:text-white')}
+            className={cn('absolute right-12 top-4 transition-colors sm:right-16 sm:top-6', queueOpen ? 'text-juow-accent' : 'text-white/80 hover:text-white')}
           >
-            <ListMusic className="size-6" />
+            <ListMusic className="size-5 sm:size-6" />
           </button>
 
           <div className="text-center">
-            <p className="font-[family-name:var(--font-anton)] text-3xl">{currentSong.songTitle}</p>
+            <p className="font-[family-name:var(--font-anton)] text-2xl sm:text-3xl">{currentSong.songTitle}</p>
             <p className="mt-1 text-white/70">{currentSong.artistName}</p>
           </div>
 

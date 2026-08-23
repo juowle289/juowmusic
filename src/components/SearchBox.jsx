@@ -117,7 +117,7 @@ export default function SearchBox() {
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 top-[calc(100%+0.75rem)] w-80 overflow-hidden rounded-lg border border-white/10 bg-black text-juow-soft shadow-2xl"
+            className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-white/10 bg-black text-juow-soft shadow-2xl"
           >
           <div className="flex items-center gap-2 border-b border-white/10 p-3">
             <input
