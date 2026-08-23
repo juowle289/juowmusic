@@ -5,7 +5,7 @@ import useActiveParties from '@/hooks/useActiveParties';
 import { handleImageError } from '@/lib/imageFallback';
 import { cn } from '@/lib/utils';
 
-const LOGO_SRC = 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png';
+const LOGO_SRC = 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png';
 
 // Hand-placed cluster positions (percent of container width/height + px
 // diameter) instead of a grid - loosely overlapping, uneven sizes, the way

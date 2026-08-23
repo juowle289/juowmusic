@@ -103,7 +103,7 @@ function CommentRow({
                 className="min-h-16 border-black/15 bg-white text-black"
               />
               <div className="flex gap-2">
-                <Button type="button" size="sm" onClick={() => onSaveEdit(draft)} disabled={!draft.trim()} className="gap-1 bg-black text-white hover:bg-black/80">
+                <Button type="button" size="sm" onClick={() => onSaveEdit(draft)} disabled={!draft.trim()} className="gap-1 bg-black text-white hover:bg-juow-accent hover:text-black">
                   <Check className="size-3.5" /> {t('comments.menu.save')}
                 </Button>
                 <Button type="button" size="sm" variant="outline" onClick={onCancelEdit} className="gap-1 border-black/15">

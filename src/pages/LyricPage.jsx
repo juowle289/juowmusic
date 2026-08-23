@@ -271,6 +271,11 @@ export default function LyricPage() {
 
       {/* Lyrics + About + Q&A + Comments: white background, black text (matches original main{background:#fff}) */}
       <main className="bg-white px-[5%] pb-32 sm:px-[10%]">
+        {/* offsetX pulls the label left, clear of the cover art sitting just
+            above/left of the lyric block in the hero - the leader line still
+            points straight back down at the lyric block itself. */}
+        <Hint targetRef={lyricRef} offsetY={30} offsetX={-190}>Select any lyrics to share them as an image</Hint>
+
         <section id="lyrics" className="scroll-mt-24 flex flex-wrap justify-between gap-10 bg-white py-8">
           <div
             ref={lyricRef}
@@ -280,7 +285,6 @@ export default function LyricPage() {
               hasLineTimestamps && '[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5',
             )}
           >
-            <Hint className="mb-3">Select any lyrics to share them as an image</Hint>
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 

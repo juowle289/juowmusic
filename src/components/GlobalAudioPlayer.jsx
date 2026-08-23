@@ -106,6 +106,8 @@ export default function GlobalAudioPlayer() {
   const location = useLocation();
   const { user } = useAuth();
   const [starting, setStarting] = useState(false);
+  const minimizeBtnRef = useRef(null);
+  const crossfadeBtnRef = useRef(null);
   const {
     currentSong,
     isPlaying,
@@ -342,13 +344,10 @@ export default function GlobalAudioPlayer() {
         <>
 
       {!isMini && (
-        // Sibling to the bar itself (not a child of it) - the bar has
-        // overflow-hidden now (needed for the shrink-into-record
-        // animation to clip cleanly), which would've clipped this hint
-        // since it sits just above the bar's own box.
-        <Hint dark className="fixed inset-x-[3%] bottom-[calc(3%+4.75rem)] z-[60] sm:inset-x-[10%] sm:bottom-[calc(6%+4.75rem)]">
-          Click the song to shrink it into a record you can drag anywhere
-        </Hint>
+        <>
+          <Hint targetRef={minimizeBtnRef} offsetY={58} dark>Click the song to shrink it into a record you can drag anywhere</Hint>
+          <Hint targetRef={crossfadeBtnRef} offsetY={58} dark>Toggle crossfade</Hint>
+        </>
       )}
 
       <AnimatePresence mode="popLayout">
@@ -391,11 +390,12 @@ export default function GlobalAudioPlayer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 overflow-hidden rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
+            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-3 rounded-md border border-black/80 bg-white/40 px-3 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%]"
           >
             <button
               type="button"
               onClick={toggleMini}
+              ref={minimizeBtnRef}
               className="flex w-full max-w-[22em] shrink-0 items-center gap-2.5 overflow-hidden rounded-sm"
               aria-label="Minimize player"
             >
@@ -456,12 +456,13 @@ export default function GlobalAudioPlayer() {
             <button
               type="button"
               onClick={toggleCrossfade}
+              ref={crossfadeBtnRef}
               aria-label={crossfadeEnabled ? 'Turn off crossfade' : 'Turn on crossfade'}
               aria-pressed={crossfadeEnabled}
               title={crossfadeEnabled ? 'Crossfade: on' : 'Crossfade: off'}
               className={cn(
-                'hidden shrink-0 transition-colors sm:block',
-                crossfadeEnabled ? 'text-juow-accent' : 'text-black/40 hover:text-black',
+                'hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:font-bold hover:text-juow-accent',
+                crossfadeEnabled ? 'text-juow-accent' : 'text-black/40',
               )}
             >
               <Blend className="size-4" />
@@ -475,7 +476,10 @@ export default function GlobalAudioPlayer() {
                 type="button"
                 onClick={() => setQueueOpen((v) => !v)}
                 aria-label="Toggle queue"
-                className={cn('transition-colors', queueOpen ? 'text-black' : 'text-black/50 hover:text-black')}
+                className={cn(
+                  'rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:font-bold hover:text-juow-accent',
+                  queueOpen ? 'text-black' : 'text-black/50',
+                )}
               >
                 <ListMusic className="size-4" />
               </button>
@@ -488,7 +492,7 @@ export default function GlobalAudioPlayer() {
                     exit={{ opacity: 0, y: -8, scale: 0.97 }}
                     transition={{ duration: 0.18, ease: 'easeOut' }}
                     style={{ transformOrigin: 'bottom right' }}
-                    className="absolute bottom-[calc(100%+0.75rem)] right-0 w-80"
+                    className="absolute bottom-[calc(100%+0.75rem)] right-0 z-10 w-80"
                   >
                     <QueuePanel
                       playlist={playlist}
@@ -507,12 +511,12 @@ export default function GlobalAudioPlayer() {
               type="button"
               onClick={() => setFullscreen(true)}
               aria-label="Full screen"
-              className="hidden shrink-0 text-black/60 transition-colors hover:text-black sm:block"
+              className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:font-bold hover:text-juow-accent sm:block"
             >
               <Expand className="size-4" />
             </button>
 
-            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-J.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />
+            <img src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" alt="Juowle" className="hidden h-8 w-auto shrink-0 opacity-80 lg:block" onError={handleImageError} />
           </motion.div>
         )}
       </AnimatePresence>

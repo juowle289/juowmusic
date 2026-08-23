@@ -116,15 +116,19 @@ function LogRow({ index, song, countryName }) {
   return (
     <Link
       to={`/lyrics/${song.slug}`}
-      className="group flex items-center gap-4 border-b border-white/8 px-2 py-3 transition-colors hover:bg-white/[0.04] sm:px-4"
+      className="group flex items-center gap-4 border-b border-white/8 px-2 py-3 transition-colors hover:bg-juow-accent sm:px-4"
     >
-      <span className="w-10 shrink-0 font-mono text-xs text-juow-soft/30 tabular-nums">{String(index).padStart(2, '0')}</span>
+      <span className="w-10 shrink-0 font-mono text-xs text-juow-soft/30 tabular-nums group-hover:text-black/50">
+        {String(index).padStart(2, '0')}
+      </span>
       <img src={song.coverSrc} alt="" className="size-11 shrink-0 rounded object-cover" onError={handleImageError} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-juow-soft group-hover:text-juow-accent">{song.songTitle}</p>
-        <p className="truncate text-xs text-juow-soft/40">{song.artistName}</p>
+        <p className="truncate text-sm text-juow-soft group-hover:text-black">{song.songTitle}</p>
+        <p className="truncate text-xs text-juow-soft/40 group-hover:text-black/60">{song.artistName}</p>
       </div>
-      <span className="hidden shrink-0 font-mono text-[11px] text-juow-soft/30 uppercase sm:block">{countryName}</span>
+      <span className="hidden shrink-0 font-mono text-[11px] text-juow-soft/30 uppercase group-hover:text-black/50 sm:block">
+        {countryName}
+      </span>
     </Link>
   );
 }

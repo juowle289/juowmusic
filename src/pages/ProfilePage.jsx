@@ -39,6 +39,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { useUiHints } from '@/context/UiHintsContext';
 import { logActivity } from '@/utils/activityLog';
+import { syncCommentAuthorName } from '@/utils/syncCommentAuthorName';
 import ActivityLogPanel from '@/components/ActivityLogPanel';
 import { tracksBySlug } from '@/data/playableTracks';
 import useListeningHistory from '@/hooks/useListeningHistory';
@@ -259,7 +260,16 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await reauthenticate(currentPassword);
+      const usernameChanged = username.trim() && username.trim() !== (user.displayName ?? '');
       await updateUserProfile({ username, email, newPassword: newPassword || undefined });
+      if (usernameChanged) {
+        // Fire-and-forget: don't block the "saved" confirmation on this -
+        // worst case it finishes a beat later and old comments catch up
+        // to the new name shortly after the success message shows.
+        syncCommentAuthorName(user.uid, username.trim()).catch((error) => {
+          console.error('[juowmusic] Failed to sync new display name onto past comments:', error);
+        });
+      }
       logActivity(user.uid, { type: 'profile_update', detail: { username, email, passwordChanged: !!newPassword } });
       setCurrentPassword('');
       setNewPassword('');
@@ -463,7 +473,7 @@ export default function ProfilePage() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
-                      className="h-11 border-white/20 bg-white/5 text-juow-soft"
+                      className="h-11 rounded-none border-white/20 bg-white/5 text-juow-soft"
                     />
                   </div>
 
@@ -476,7 +486,7 @@ export default function ProfilePage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-11 border-white/20 bg-white/5 text-juow-soft"
+                      className="h-11 rounded-none border-white/20 bg-white/5 text-juow-soft"
                     />
                   </div>
 
@@ -492,7 +502,7 @@ export default function ProfilePage() {
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         required
                         placeholder="Needed to confirm any change"
-                        className="h-11 border-white/20 bg-white/5 pr-10 text-juow-soft"
+                        className="h-11 rounded-none border-white/20 bg-white/5 pr-10 text-juow-soft"
                       />
                       <button
                         type="button"
@@ -515,7 +525,7 @@ export default function ProfilePage() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Leave blank to keep your current password"
-                      className="h-11 border-white/20 bg-white/5 text-juow-soft"
+                      className="h-11 rounded-none border-white/20 bg-white/5 text-juow-soft"
                     />
                   </div>
 
@@ -526,7 +536,7 @@ export default function ProfilePage() {
                     </p>
                   )}
 
-                  <Button type="submit" disabled={saving} className="h-11 bg-juow-accent text-black hover:bg-juow-accent/90 disabled:opacity-60">
+                  <Button type="submit" disabled={saving} className="h-11 rounded-none bg-juow-accent text-black hover:bg-juow-accent/90 disabled:opacity-60">
                     {saving ? 'Saving…' : 'Save changes'}
                   </Button>
                 </form>

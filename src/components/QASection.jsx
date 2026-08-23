@@ -19,7 +19,7 @@ export default function QASection({ items }) {
                 onClick={() => setOpenIndex(isOpen ? null : index)}
                 className={cn(
                   'flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors',
-                  isOpen ? 'bg-black text-juow-soft' : 'bg-white text-black hover:bg-black/5',
+                  isOpen ? 'bg-black text-juow-soft hover:bg-juow-accent hover:text-black' : 'bg-white text-black hover:bg-black/5',
                 )}
               >
                 <span className="font-medium">{item.question}</span>

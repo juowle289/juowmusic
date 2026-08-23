@@ -9,6 +9,7 @@ const CY = VIEW / 2;
 const RADIUS = 220;
 
 const AUTO_SPEED = 4; // degrees/second
+const AXIS_TILT_DEG = -18; // visual-only roll so the pole reads as a "/" diagonal, like real Earth globes, instead of dead vertical
 const DRAG_SENSITIVITY = 0.3; // degrees per px
 const DRAG_THRESHOLD = 4; // px of movement before a press counts as a drag (not a click)
 const MOMENTUM_DECAY = 0.92; // per-frame (60fps-normalized) velocity retention
@@ -234,35 +235,44 @@ export default function CountryGlobe({ availableIds, selectedId, onSelectCountry
           <circle key={i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity={s.o} />
         ))}
 
-        {/* Ocean / sphere base */}
-        <circle cx={CX} cy={CY} r={RADIUS} fill="url(#globe-ocean)" />
+        {/* Everything below is the sphere itself, rotated as a static
+            visual roll (see AXIS_TILT_DEG) - this is separate from the
+            lambda/phi drag rotation (which stays purely vertical/
+            horizontal in its own math); this just tilts the finished
+            render so the pole reads as a "/" diagonal like real globe
+            imagery, rather than dead upright. Stars stay outside this
+            group so they don't tilt along with it. */}
+        <g transform={`rotate(${AXIS_TILT_DEG} ${CX} ${CY})`}>
+          {/* Ocean / sphere base */}
+          <circle cx={CX} cy={CY} r={RADIUS} fill="url(#globe-ocean)" />
 
-        {/* Graticule */}
-        <path ref={graticuleRef} d="" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
+          {/* Graticule */}
+          <path ref={graticuleRef} d="" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
 
-        {/* Every country without song data - one shared path, inert */}
-        <path ref={bgPathRef} d="" fill={LAND_FILL} stroke={LAND_STROKE} strokeWidth="0.5" />
+          {/* Every country without song data - one shared path, inert */}
+          <path ref={bgPathRef} d="" fill={LAND_FILL} stroke={LAND_STROKE} strokeWidth="0.5" />
 
-        {/* Countries with song data - individually interactive */}
-        {availableCountries.map((c) => (
-          <path
-            key={c.id}
-            ref={(el) => {
-              availablePathRefs.current[c.id] = el;
-            }}
-            d=""
-            fill={selectedId === c.id ? AVAILABLE_SELECTED_FILL : hoveredId === c.id ? AVAILABLE_HOVER_FILL : AVAILABLE_FILL}
-            stroke={AVAILABLE_STROKE}
-            strokeWidth={selectedId === c.id ? 1.4 : 0.8}
-            className="cursor-pointer transition-colors duration-150"
-            onPointerEnter={() => setHoveredId(c.id)}
-            onPointerLeave={() => setHoveredId((h) => (h === c.id ? null : h))}
-            onClick={() => onSelectCountry(c)}
-          />
-        ))}
+          {/* Countries with song data - individually interactive */}
+          {availableCountries.map((c) => (
+            <path
+              key={c.id}
+              ref={(el) => {
+                availablePathRefs.current[c.id] = el;
+              }}
+              d=""
+              fill={selectedId === c.id ? AVAILABLE_SELECTED_FILL : hoveredId === c.id ? AVAILABLE_HOVER_FILL : AVAILABLE_FILL}
+              stroke={AVAILABLE_STROKE}
+              strokeWidth={selectedId === c.id ? 1.4 : 0.8}
+              className="cursor-pointer transition-colors duration-150"
+              onPointerEnter={() => setHoveredId(c.id)}
+              onPointerLeave={() => setHoveredId((h) => (h === c.id ? null : h))}
+              onClick={() => onSelectCountry(c)}
+            />
+          ))}
 
-        {/* Rim shading for a touch of sphere depth on top of everything */}
-        <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="2" />
+          {/* Rim shading for a touch of sphere depth on top of everything */}
+          <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="2" />
+        </g>
       </svg>
 
       {hoveredCountry && (
