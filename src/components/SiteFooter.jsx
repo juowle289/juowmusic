@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { handleImageError } from "@/lib/imageFallback";
 
@@ -25,55 +26,99 @@ function SpotifyIcon(props) {
   );
 }
 
+// Not the literal trademarked wordmark-cloud - a plain cloud silhouette with
+// a couple of short waveform ticks, enough to read as "SoundCloud" at 20px
+// next to the other three brand glyphs without redrawing their exact path data.
+function SoundCloudIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
+      <path d="M12 4c-2.2 0-4.1 1.4-4.8 3.4C4.9 7.7 3 9.7 3 12.1 3 14.8 5.2 17 7.9 17h9.6A4.5 4.5 0 0 0 22 12.5c0-2.3-1.7-4.2-3.9-4.5C17.4 5.4 14.9 4 12 4z" />
+      <rect x="1.3" y="13.3" width="1.1" height="3.7" rx="0.55" />
+      <rect x="3.2" y="11.4" width="1.1" height="5.6" rx="0.55" />
+    </svg>
+  );
+}
+
+const FOOTER_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Songs", href: "/#songs" },
+  { label: "News", href: "/#news" },
+  { label: "Explore", href: "/explore" },
+  { label: "Contact", href: "/#contact" },
+];
+
+const SOCIALS = [
+  { label: "Facebook", href: "https://www.facebook.com/Duocthattha", Icon: FacebookIcon },
+  { label: "Spotify", href: "https://open.spotify.com/user/31pm2sncp7nyw7o7i4ncnep25k3i?si=4a087f6556c94839", Icon: SpotifyIcon },
+  { label: "Instagram", href: "https://www.instagram.com/juowlee/", Icon: InstagramIcon },
+  { label: "SoundCloud", href: "https://on.soundcloud.com/pCRdP4WEYNZZuDqQd9", Icon: SoundCloudIcon },
+];
+
 export default function SiteFooter({ dark = false, className }) {
   return (
     <footer
       className={cn(
-        "relative z-[1] flex flex-wrap items-center justify-between gap-6 px-6 py-10 text-sm text-juow-soft sm:px-10",
+        "relative z-[1] border-t border-white/10 px-6 py-12 text-sm text-juow-soft sm:px-10",
         dark && "bg-black",
         className,
       )}
     >
-      <img
-        src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
-        alt=""
-        className="h-12 w-auto"
-        onError={handleImageError}
-      />
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-x-12 gap-y-10">
+        <div className="max-w-xs">
+          <img
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            alt=""
+            className="h-12 w-auto"
+            onError={handleImageError}
+          />
+          <p className="mt-4 text-white/50">A solo-built home for the songs I keep coming back to.</p>
+        </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1">
-        <p>&copy;2024 Juowle. All Rights Reserved.</p>
-        <p className="cursor-pointer underline">Terms & conditions.</p>
-        <p className="cursor-pointer underline">Privacy Policy.</p>
-        <p className="cursor-pointer underline">Cookie Policy.</p>
+        <nav aria-label="Footer">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Explore</p>
+          <ul className="flex flex-col gap-2">
+            {FOOTER_LINKS.map((link) =>
+              link.href.startsWith("/#") ? (
+                <li key={link.label}>
+                  <a href={link.href} className="transition-colors hover:text-juow-accent">
+                    {link.label}
+                  </a>
+                </li>
+              ) : (
+                <li key={link.label}>
+                  <Link to={link.href} className="transition-colors hover:text-juow-accent">
+                    {link.label}
+                  </Link>
+                </li>
+              ),
+            )}
+          </ul>
+        </nav>
+
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Legal</p>
+          <ul className="flex flex-col gap-2">
+            <li className="cursor-pointer transition-colors hover:text-juow-accent">Terms & conditions.</li>
+            <li className="cursor-pointer transition-colors hover:text-juow-accent">Privacy Policy.</li>
+            <li className="cursor-pointer transition-colors hover:text-juow-accent">Cookie Policy.</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Follow</p>
+          <div className="flex items-center gap-4 text-lg">
+            {SOCIALS.map(({ label, href, Icon }) => (
+              <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}>
+                <Icon className="size-5 transition-colors hover:text-juow-accent" />
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 text-lg">
-        <a
-          href="https://www.facebook.com/Duocthattha"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Facebook"
-        >
-          <FacebookIcon className="size-5 hover:text-juow-accent" />
-        </a>
-        <a
-          href="https://open.spotify.com/user/31pm2sncp7nyw7o7i4ncnep25k3i?si=4a087f6556c94839"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Spotify"
-        >
-          <SpotifyIcon className="size-5 hover:text-juow-accent" />
-        </a>
-        <a
-          href="https://www.instagram.com/juowlee/"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Instagram"
-        >
-          <InstagramIcon className="size-5 hover:text-juow-accent" />
-        </a>
-      </div>
+      <p className="mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-xs text-white/40">
+        &copy;2024 Juowle. All Rights Reserved.
+      </p>
     </footer>
   );
 }

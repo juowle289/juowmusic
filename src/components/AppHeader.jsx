@@ -53,7 +53,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-[56] flex h-[4.3rem] items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:px-7",
+        "fixed inset-x-0 top-0 z-[102] flex h-[4.3rem] items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:px-7",
         scrolled
           ? "border-b border-white/10 bg-black/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent",
@@ -182,7 +182,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
       <div
         className={cn(
-          "fixed inset-y-0 right-0 z-[55] w-72 bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed inset-y-0 right-0 z-[101] w-[80%] max-w-xs bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
           mobileOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -246,7 +246,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
       {mobileOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-[54] bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[100] bg-black/60 lg:hidden"
           aria-label="Close menu overlay"
           onClick={() => setMobileOpen(false)}
         />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Play } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
@@ -39,6 +39,12 @@ const PLAYLISTS = Array.from({ length: 10 }, (_, i) => {
   if (i < BASE_PLAYLISTS.length) return base;
   return { ...base, id: `${base.id}-dup${Math.floor(i / BASE_PLAYLISTS.length)}` };
 });
+
+const FAVORITE_SINGERS = [
+  { name: 'DPR IAN', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/referenceDPRIAN.png' },
+  { name: 'Sơn Tùng M-TP', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/SonTungMTP.jpg' },
+  { name: 'Justin Bieber', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/JustinBieber.jpg' },
+];
 
 const FAV_SONGS = [
   {
@@ -139,11 +145,21 @@ export default function HomePage() {
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactError, setContactError] = useState('');
   const [continueTrack, setContinueTrack] = useState(null);
+  const [singerIndex, setSingerIndex] = useState(0);
   const playSong = usePlayerStore((s) => s.playSong);
   const activeSlug = usePlayerStore((s) => s.currentSong?.slug);
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.currentTime = 10;
+  }, []);
+
+  // "MY FAVORITE SINGER" slideshow - cycles the portrait + gold name
+  // together on a timer rather than staying pinned to one artist.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSingerIndex((i) => (i + 1) % FAVORITE_SINGERS.length);
+    }, 5000);
+    return () => clearInterval(id);
   }, []);
 
   // "Continue Listening": pick up whatever was last played (persisted in
@@ -330,7 +346,18 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-32">
             <div className="max-w-md text-center md:text-left">
               <Reveal as={motion.h2} variant="textY" className="section-heading text-left text-3xl md:text-[3.6em]">
-                &apos; <span className="text-juow-accent">DPR IAN</span> &apos;
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={FAVORITE_SINGERS[singerIndex].name}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.45, ease: 'easeOut' }}
+                    className="inline-block"
+                  >
+                    &apos; <span className="text-juow-accent">{FAVORITE_SINGERS[singerIndex].name}</span> &apos;
+                  </motion.span>
+                </AnimatePresence>
               </Reveal>
               <Reveal
                 as={motion.h5}
@@ -353,33 +380,44 @@ export default function HomePage() {
               </Reveal>
             </div>
 
-            <div className="relative">
-              <img
-                src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/referenceDPRIAN.png"
-                alt="DPR IAN"
-                className="h-[25rem] w-[18rem] object-cover md:h-[40rem] md:w-[30rem]" onError={handleImageError} />
-              {/* A single dash chases clockwise around the frame, forever - like a
-                  snake crawling around the edge with a gap between its head and
-                  tail, instead of a full unbroken loop. */}
-              <svg
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                className="pointer-events-none absolute inset-0 size-full overflow-visible"
-              >
-                <rect
-                  x="0.5"
-                  y="0.5"
-                  width="99"
-                  height="99"
-                  fill="none"
-                  stroke="var(--color-juow-accent)"
-                  strokeWidth="2"
-                  vectorEffect="non-scaling-stroke"
-                  pathLength="100"
-                  strokeDasharray="22 78"
-                  className="animate-[snake-crawl_4s_linear_infinite]"
+            <div className="relative h-[25rem] w-[18rem] md:h-[40rem] md:w-[30rem]">
+              <AnimatePresence>
+                <motion.img
+                  key={FAVORITE_SINGERS[singerIndex].img}
+                  src={FAVORITE_SINGERS[singerIndex].img}
+                  alt={FAVORITE_SINGERS[singerIndex].name}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7, ease: 'easeInOut' }}
+                  className="absolute inset-0 size-full object-cover"
+                  onError={handleImageError}
                 />
-              </svg>
+              </AnimatePresence>
+              {/* A single gap chases clockwise around the frame, forever - like a
+                  snake crawling around the edge, head and tail never touching.
+                  Built as a conic-gradient ring (masked down to just its outer
+                  2px, via mask-composite "punching out" the inner content-box)
+                  rather than a dashed SVG path: the frame isn't square, and an
+                  SVG path's dash lengths are computed in the pre-stretch
+                  coordinate space, so a non-square box distorted how long each
+                  side's visible segment/gap looked and could fracture the line
+                  in ways that didn't match this rectangle's real proportions.
+                  This is plain CSS on the actual rendered box, so it always
+                  traces the real edges exactly regardless of aspect ratio. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 animate-[snake-spin_6s_linear_infinite]"
+                style={{
+                  padding: '2px',
+                  background:
+                    'conic-gradient(from var(--snake-angle, 0deg), var(--color-juow-accent) 0 92%, transparent 92% 100%)',
+                  WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  mask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+                  maskComposite: 'exclude',
+                }}
+              />
             </div>
           </div>
         </Reveal>

@@ -168,7 +168,7 @@ export default function LyricPage() {
         className="song-hero relative min-h-[25em] overflow-visible px-[5%] pb-6 pt-20 sm:h-[25em] sm:px-[10%]"
         style={{ backgroundImage: palette.gradient }}
       >
-        <div className="flex h-full flex-wrap items-start gap-8 md:flex-nowrap md:gap-12">
+        <div className="flex h-full flex-col gap-6 pb-2 sm:flex-row sm:flex-wrap sm:items-start sm:gap-8 sm:pb-0 md:flex-nowrap md:gap-12">
           {/* Left: vinyl + cover, own small relative box so their absolute
               positioning is local to it (not calculated against the full nav width).
               This box widens while playing (22em -> 28em) so the flex layout
@@ -200,7 +200,7 @@ export default function LyricPage() {
           <img
             src={song.coverSrc}
             alt={song.songTitle}
-            className="relative z-[2] size-40 object-cover shadow-2xl sm:hidden" onError={handleImageError} />
+            className="relative z-[2] mx-auto size-40 object-cover shadow-2xl sm:mx-0 sm:hidden" onError={handleImageError} />
 
           {/* Right: text column. flex-col + mt-auto on the meta row (instead of
               absolutely pinning it to the column's bottom) keeps title/about

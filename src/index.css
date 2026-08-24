@@ -3,6 +3,16 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/* Lets the conic-gradient "snake border" on HomePage's singer frame animate
+   smoothly - custom properties are just inert strings to the CSS engine by
+   default (an animation between two of them would jump instantly instead of
+   interpolating) unless registered with a typed syntax like this. */
+@property --snake-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -295,11 +305,13 @@
     border-color: #fff;
   }
 
-  /* One dash (see HomePage's DPR IAN frame) travels clockwise around a rect
-     whose pathLength is normalized to 100, so -100 is exactly one full lap. */
-  @keyframes snake-crawl {
+  /* Rotates the conic-gradient "gap" around HomePage's singer frame (see
+     the frame's own comment for why this replaced an SVG dash-offset
+     approach - a plain rectangle's 4 sides don't share one length unit,
+     which was distorting the dash/gap proportions per side). */
+  @keyframes snake-spin {
     to {
-      stroke-dashoffset: -100;
+      --snake-angle: 360deg;
     }
   }
 
