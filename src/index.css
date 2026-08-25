@@ -315,10 +315,12 @@
     }
   }
 
-  /* The little music note that bounces beside the spinning vinyl in MusicLoader. */
-  @keyframes note-bounce {
-    0%, 100% { transform: translateY(0) rotate(-8deg); }
-    50% { transform: translateY(-6px) rotate(8deg); }
+  /* The 3 soundwave bars in MusicLoader (site loading screen). Bar height
+     is fixed via inline style; this just scales it down and back up from
+     the bottom edge, staggered per bar via animation-delay. */
+  @keyframes soundbar-bounce {
+    0%, 100% { transform: scaleY(0.25); }
+    50% { transform: scaleY(1); }
   }
 
   /* ---- Listening Weather (ProfilePage) ---- */

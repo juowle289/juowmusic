@@ -288,7 +288,7 @@ export default function LyricPage() {
               <Link
                 to={rec.link}
                 key={rec.title}
-                className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-[#feec93]"
+                className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-gray-100"
               >
                 <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" onError={handleImageError} />
                 <div className="min-w-0">

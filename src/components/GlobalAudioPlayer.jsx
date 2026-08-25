@@ -136,6 +136,51 @@ export default function GlobalAudioPlayer() {
   const [isFullscreen, setFullscreen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
 
+  // Long-press (750ms) anywhere on the docked bar's own background opens
+  // fullscreen on touch devices - the explicit fullscreen button is hidden
+  // below `sm` since there's no room for it there, so this is how mobile
+  // gets to the same view. Deliberately scoped to *touch* events only (not
+  // mouse), and skipped entirely if the press started on an actual control
+  // (button/input/link), so it never fights normal taps, the seek bar drag,
+  // or desktop click-and-hold.
+  const longPressTimerRef = useRef(null);
+  const longPressStartRef = useRef(null);
+  const longPressFiredRef = useRef(false);
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    longPressStartRef.current = null;
+  };
+
+  const handleBarTouchStart = (event) => {
+    if (event.touches.length !== 1 || event.target.closest('button, input, a')) return;
+    const { clientX, clientY } = event.touches[0];
+    longPressStartRef.current = { x: clientX, y: clientY };
+    longPressFiredRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressFiredRef.current = true;
+      setFullscreen(true);
+    }, 750);
+  };
+
+  const handleBarTouchMove = (event) => {
+    if (!longPressStartRef.current || !event.touches[0]) return;
+    const { clientX, clientY } = event.touches[0];
+    const dx = clientX - longPressStartRef.current.x;
+    const dy = clientY - longPressStartRef.current.y;
+    if (Math.hypot(dx, dy) > 10) clearLongPress();
+  };
+
+  const handleBarTouchEnd = (event) => {
+    clearLongPress();
+    // The long-press already opened fullscreen - swallow the tap that would
+    // otherwise fire right after release (e.g. toggling the mini widget).
+    if (longPressFiredRef.current) event.preventDefault();
+  };
+
   // The full-screen overlay is meant to sit on top of whatever page you
   // opened it from, not follow you to a different page - without this, it
   // was possible to open it, then navigate elsewhere (e.g. starting a
@@ -391,6 +436,10 @@ export default function GlobalAudioPlayer() {
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-2 rounded-md border border-black/80 bg-white/40 px-2 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%] sm:gap-3 sm:px-3"
+            onTouchStart={handleBarTouchStart}
+            onTouchMove={handleBarTouchMove}
+            onTouchEnd={handleBarTouchEnd}
+            onTouchCancel={clearLongPress}
           >
             <button
               type="button"
@@ -523,8 +572,9 @@ export default function GlobalAudioPlayer() {
 
       {/* Full-screen focus mode: reimplements the original (disabled/commented)
           full-screen player — big backdrop from the song cover, large controls. */}
-      {isFullscreen && (
-        <motion.div
+      <AnimatePresence>
+        {isFullscreen && (
+          <motion.div
           initial={{ opacity: 0, scale: 0.4, y: 80 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.4, y: 80 }}
@@ -642,7 +692,8 @@ export default function GlobalAudioPlayer() {
             )}
           </AnimatePresence>
         </motion.div>
-      )}
+        )}
+      </AnimatePresence>
         </>
       )}
     </>

@@ -229,20 +229,20 @@ export default function HomePage() {
           {/* figcaption font-size cascades in the original (4em container, h1 at
               2.2em of that = ~8.8em/141px on desktop) - reproduced directly with
               explicit sizes here since Tailwind classes don't cascade em-on-em. */}
-          <figcaption className="absolute left-[10%] top-[30%] max-w-2xl text-left text-white">
+          <figcaption className="absolute inset-x-0 top-[30%] px-6 text-center text-white sm:inset-x-auto sm:left-[10%] sm:max-w-2xl sm:px-0 sm:text-left">
             <h1 className="font-[family-name:var(--font-display)] text-6xl font-bold leading-none sm:text-8xl md:text-[8.8em]">
               Nerves
             </h1>
             <h6 className="mt-2 text-xl font-thin sm:text-2xl md:text-[2.8em]">
               <span className="text-juow-accent">|</span>{' '}
-              <a href="#" className="hover:text-juow-accent hover:underline">
+              <a href="#" className="font-bold hover:text-juow-accent hover:underline">
                 DPR IAN
               </a>
             </h6>
             <SweepButton
               as={Link}
               to="/lyrics/nerves"
-              className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 text-xs uppercase tracking-widest text-white md:mt-8"
+              className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:mt-8"
             >
               Listen Now
             </SweepButton>
@@ -500,7 +500,7 @@ export default function HomePage() {
               as="button"
               type="submit"
               disabled={contactSubmitting}
-              className="border-2 border-juow-accent bg-black/60 px-6 py-3 text-xs uppercase tracking-widest text-white disabled:opacity-50"
+              className="border-2 border-juow-accent bg-black/60 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] disabled:opacity-50"
             >
               {contactSubmitting ? 'Sending…' : 'Submit'}
             </SweepButton>

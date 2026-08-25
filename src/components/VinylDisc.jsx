@@ -38,7 +38,7 @@ export default function VinylDisc({ labelSrc, spinning = false, className, label
       {labelSrc ? (
         <image href={labelSrc} x="33" y="33" width="34" height="34" clipPath={`url(#${labelId}-clip)`} preserveAspectRatio="xMidYMid slice" />
       ) : (
-        <circle cx="50" cy="50" r="17" fill="#7a1f1f" />
+        <circle cx="50" cy="50" r="17" fill="#000" />
       )}
       <circle cx="50" cy="50" r="17" fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
 

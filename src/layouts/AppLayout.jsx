@@ -1,6 +1,7 @@
 import { Outlet, useMatch } from 'react-router-dom';
 import AppHeader from '@/components/AppHeader';
 import GlobalAudioPlayer from '@/components/GlobalAudioPlayer';
+import ScrollToTop from '@/components/ScrollToTop';
 import useListeningTracker from '@/hooks/useListeningTracker';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
 
@@ -34,6 +35,7 @@ export default function AppLayout() {
     <>
       {headerConfig && <AppHeader variant={headerConfig.variant} menuItems={headerConfig.menuItems} />}
       <Outlet />
+      <ScrollToTop />
       <GlobalAudioPlayer />
     </>
   );
