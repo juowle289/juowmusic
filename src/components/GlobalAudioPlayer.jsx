@@ -585,7 +585,7 @@ export default function GlobalAudioPlayer() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-end gap-6 bg-black px-4 pb-16 pt-24 text-white sm:px-6"
+          className="fixed inset-0 z-[110] flex flex-col items-center justify-end gap-6 bg-black px-4 pb-16 pt-24 text-white sm:px-6"
         >
           <button
             type="button"
