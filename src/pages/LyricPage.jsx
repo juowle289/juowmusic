@@ -199,7 +199,7 @@ export default function LyricPage() {
           <img
             src={song.coverSrc}
             alt={song.songTitle}
-            className="relative z-[2] mx-auto size-40 object-cover shadow-2xl sm:mx-0 sm:hidden" onError={handleImageError} />
+            className="relative z-[2] mx-auto size-40 object-cover shadow-[0_18px_35px_-8px_rgba(0,0,0,0.75)] sm:mx-0 sm:hidden" onError={handleImageError} />
 
           {/* Right: text column. flex-col + mt-auto on the meta row (instead of
               absolutely pinning it to the column's bottom) keeps title/about

@@ -182,7 +182,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
       <div
         className={cn(
-          "fixed inset-y-0 right-0 z-[101] w-[80%] max-w-xs bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed right-0 top-0 z-[101] h-dvh w-[80%] max-w-xs overflow-y-auto bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
           mobileOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -246,7 +246,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
       {mobileOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-[100] bg-black/60 lg:hidden"
+          className="fixed inset-x-0 top-0 z-[100] h-dvh bg-black/60 lg:hidden"
           aria-label="Close menu overlay"
           onClick={() => setMobileOpen(false)}
         />

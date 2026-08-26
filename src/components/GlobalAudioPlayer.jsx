@@ -18,6 +18,16 @@ const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimize
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 5;
 
+// A short, sharp buzz - similar weight to the iPhone 8's Home button click.
+// Only actually does anything on browsers that support the Vibration API
+// (Android Chrome/Firefox etc.) - iOS Safari has never implemented it, in
+// the browser or as an installed PWA, so this is a silent no-op there.
+function vibrateTick() {
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    navigator.vibrate(15);
+  }
+}
+
 function isTypingTarget(el) {
   if (!el) return false;
   const tag = el.tagName;
@@ -163,6 +173,7 @@ export default function GlobalAudioPlayer() {
     longPressFiredRef.current = false;
     longPressTimerRef.current = setTimeout(() => {
       longPressFiredRef.current = true;
+      vibrateTick();
       setFullscreen(true);
     }, 750);
   };
@@ -393,7 +404,7 @@ export default function GlobalAudioPlayer() {
         <>
           <Hint targetRef={minimizeBtnRef} offsetY={58} dark>Click the song to shrink it into a record you can drag anywhere</Hint>
           <Hint targetRef={crossfadeBtnRef} offsetY={58} dark>Toggle crossfade</Hint>
-          <Hint targetRef={barRef} offsetY={58} dark mobileOnly>Press and hold to view fullscreen</Hint>
+          <Hint targetRef={barRef} offsetY={150} dark mobileOnly>Press and hold to view fullscreen</Hint>
         </>
       )}
 
@@ -592,7 +603,10 @@ export default function GlobalAudioPlayer() {
         >
           <button
             type="button"
-            onClick={() => setFullscreen(false)}
+            onClick={() => {
+              vibrateTick();
+              setFullscreen(false);
+            }}
             aria-label="Exit full screen"
             className="absolute right-4 top-4 text-white/80 hover:text-white sm:right-6 sm:top-6"
           >
