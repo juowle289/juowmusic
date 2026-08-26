@@ -236,7 +236,7 @@ export default function ArtistPage() {
       >
         {/* Avatar sits in the left ~35% column, not centered across the page
             (matches figcaption{width:35%;margin-left:2.3%;padding-top:40vh}). */}
-        <figcaption className="flex w-full items-start justify-center pt-[12em] sm:w-[35%] sm:pt-[21em] sm:pl-[2.3%]">
+        <figcaption className="flex w-full items-start justify-center pt-[12em] sm:w-[35%] sm:pt-[21em] sm:pl-[15%]">
           <img
             src={artist.avatarImg}
             alt={artist.displayName}

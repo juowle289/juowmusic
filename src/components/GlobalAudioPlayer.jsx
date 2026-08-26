@@ -107,6 +107,7 @@ export default function GlobalAudioPlayer() {
   const { user } = useAuth();
   const [starting, setStarting] = useState(false);
   const minimizeBtnRef = useRef(null);
+  const barRef = useRef(null);
   const crossfadeBtnRef = useRef(null);
   const {
     currentSong,
@@ -392,6 +393,7 @@ export default function GlobalAudioPlayer() {
         <>
           <Hint targetRef={minimizeBtnRef} offsetY={58} dark>Click the song to shrink it into a record you can drag anywhere</Hint>
           <Hint targetRef={crossfadeBtnRef} offsetY={58} dark>Toggle crossfade</Hint>
+          <Hint targetRef={barRef} offsetY={58} dark mobileOnly>Press and hold to view fullscreen</Hint>
         </>
       )}
 
@@ -436,6 +438,7 @@ export default function GlobalAudioPlayer() {
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-2 rounded-md border border-black/80 bg-white/40 px-2 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%] sm:gap-3 sm:px-3"
+            ref={barRef}
             onTouchStart={handleBarTouchStart}
             onTouchMove={handleBarTouchMove}
             onTouchEnd={handleBarTouchEnd}
@@ -445,7 +448,7 @@ export default function GlobalAudioPlayer() {
               type="button"
               onClick={toggleMini}
               ref={minimizeBtnRef}
-              className="-mx-1.5 -my-1 flex w-full max-w-[7rem] shrink-0 items-center gap-2 overflow-hidden rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100 sm:max-w-[22em] sm:gap-2.5"
+              className="-mx-1.5 -my-1 flex w-full max-w-[10rem] shrink-0 items-center gap-2 overflow-hidden rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100 sm:max-w-[22em] sm:gap-2.5"
               aria-label="Minimize player"
             >
               {/* layoutId shared with the mini widget's cover art below -

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowDown, Share2, X } from 'lucide-react';
+import { ArrowDown, Share2 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import Comments from '@/components/Comments';
@@ -42,7 +42,6 @@ export default function LyricPage() {
   useInlineStyle(song?.customStyle);
   const palette = useCoverPalette(song?.coverSrc);
   useLyricPlayer(song);
-  const [adsClosed, setAdsClosed] = useState(false);
 
   // The vinyl behind the cover art should stay fully tucked out of sight
   // until this exact song is actually playing - only then does it slide
@@ -304,7 +303,7 @@ export default function LyricPage() {
 
         {/* Full width of main's content box (up to where the aside above ends),
             not the narrower 60% column the original design used. */}
-        <section id="about" className="about scroll-mt-24 mb-12 w-full border-b-[0.3em] border-[#a00000] py-12">
+        <section id="about" className="about scroll-mt-24 mb-12 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0">
           <h1 className="section-heading mb-8 text-black">About</h1>
           <div
             className="mx-auto max-w-3xl text-[1.2em] text-black [&_p]:mb-2 [&_p]:indent-4 [&_p]:leading-relaxed"
@@ -315,28 +314,6 @@ export default function LyricPage() {
         <QASection items={song.qa} />
         <Comments slug={song.slug} />
       </main>
-
-      {!adsClosed && song.spotifyLink && (
-        <div className="fixed bottom-28 right-4 z-40 md:bottom-32">
-          <button
-            type="button"
-            onClick={() => setAdsClosed(true)}
-            className="absolute -right-2 -top-2 rounded-full bg-black/80 p-1 text-white"
-            aria-label="Close Spotify link"
-          >
-            <X className="size-4" />
-          </button>
-          <a
-            href={song.spotifyLink}
-            target="_blank"
-            rel="noreferrer"
-            className="flex size-14 items-center justify-center rounded-full bg-[#1ed760] text-black shadow-lg"
-            aria-label="Open on Spotify"
-          >
-            <i className="bi bi-spotify text-2xl" aria-hidden />
-          </a>
-        </div>
-      )}
 
       <SiteFooter dark />
 

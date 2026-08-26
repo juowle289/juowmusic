@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
  * Renders nothing (not just hidden) when hints are turned off (Settings >
  * Appearance) or before the target has been measured.
  */
-export default function Hint({ targetRef, children, className, offsetY = 34, offsetX = 0, dark = false }) {
+export default function Hint({ targetRef, children, className, offsetY = 34, offsetX = 0, dark = false, mobileOnly = false }) {
   const { hintsEnabled } = useUiHints();
   const [rect, setRect] = useState(null);
   const labelRef = useRef(null);
@@ -92,7 +92,7 @@ export default function Hint({ targetRef, children, className, offsetY = 34, off
     const y1 = labelRect.top + labelRect.height / 2;
     const length = Math.hypot(targetX - x1, targetY - y1);
     diagonalLine = (
-      <svg className="pointer-events-none fixed inset-0 z-[70] overflow-visible" width="100%" height="100%" aria-hidden>
+      <svg className={cn('pointer-events-none fixed inset-0 z-[70] overflow-visible', mobileOnly && 'sm:hidden')} width="100%" height="100%" aria-hidden>
         <line
           x1={x1}
           y1={y1}
@@ -110,7 +110,7 @@ export default function Hint({ targetRef, children, className, offsetY = 34, off
 
   return (
     <>
-      <div className="pointer-events-none fixed z-[70]" style={{ left: labelX, top: labelY }} aria-hidden>
+      <div className={cn('pointer-events-none fixed z-[70]', mobileOnly && 'sm:hidden')} style={{ left: labelX, top: labelY }} aria-hidden>
         <span
           ref={labelRef}
           className={cn(

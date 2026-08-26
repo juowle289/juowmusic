@@ -235,14 +235,14 @@ export default function HomePage() {
             </h1>
             <h6 className="mt-2 text-xl font-thin sm:text-2xl md:text-[2.8em]">
               <span className="text-juow-accent">|</span>{' '}
-              <a href="#" className="font-bold hover:text-juow-accent hover:underline">
+              <a href="#" className="font-[family-name:var(--font-anton)] font-bold hover:text-juow-accent hover:underline">
                 DPR IAN
               </a>
             </h6>
             <SweepButton
               as={Link}
               to="/lyrics/nerves"
-              className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:mt-8"
+              className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 font-[family-name:var(--font-anton)] text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:mt-8"
             >
               Listen Now
             </SweepButton>
@@ -373,7 +373,7 @@ export default function HomePage() {
                   href="#"
                   target="_blank"
                   rel="noreferrer"
-                  className="h-auto w-full max-w-md border-2 border-juow-accent px-6 py-3 text-2xl text-juow-soft md:text-[2.5em]"
+                  className="h-auto w-full max-w-md border-2 border-juow-accent px-6 py-3 text-2xl font-bold text-juow-soft transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:text-[2.5em]"
                 >
                   WHO IS HE?
                 </SweepButton>
