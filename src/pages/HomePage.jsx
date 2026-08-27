@@ -12,6 +12,7 @@ import emailjs from '@emailjs/browser';
 import { EMAILJS_CONTACT_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID } from '@/config/emailjs';
 import { cn } from '@/lib/utils';
 import { getLastPlayedSlug, usePlayerStore } from '@/stores/usePlayerStore';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { tracksBySlug } from '@/data/playableTracks';
 import { handleImageError } from '@/lib/imageFallback';
 
@@ -140,6 +141,7 @@ function Reveal({ variant = 'scale', className, delay = 0, as: Component = motio
 }
 
 export default function HomePage() {
+  useDocumentTitle();
   const videoRef = useRef(null);
   const [submitted, setSubmitted] = useState(false);
   const [contactSubmitting, setContactSubmitting] = useState(false);

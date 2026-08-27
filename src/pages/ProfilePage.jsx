@@ -46,6 +46,7 @@ import useListeningHistory from '@/hooks/useListeningHistory';
 import useCountUp from '@/hooks/useCountUp';
 import StreakCard from '@/components/StreakCard';
 import { handleImageError } from '@/lib/imageFallback';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 
 const ACCENT = '#feec93';
 const TIME_SLOT_COLORS = ['#feec93', '#e0b84d', '#a0783a', '#4b3a2a'];
@@ -210,6 +211,7 @@ function SidebarTabButton({ active, onClick, icon: Icon, children }) {
 }
 
 export default function ProfilePage() {
+  useDocumentTitle('Juowle | Profile');
   const { user, initializing, updateUserProfile, reauthenticate } = useAuth();
   const navigate = useNavigate();
   const { t, lang, setLang } = useLanguage();

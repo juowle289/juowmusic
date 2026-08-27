@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { handleImageError } from "@/lib/imageFallback";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 const USERNAME_MIN_LENGTH = 6;
 
 export default function SignupPage() {
+  useDocumentTitle("Juowle | Sign Up");
   const navigate = useNavigate();
   const { user, initializing, register, loginWithGoogle } = useAuth();
   const [username, setUsername] = useState("");

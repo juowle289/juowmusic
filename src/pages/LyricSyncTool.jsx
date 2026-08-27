@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Copy, Pause, Play, RotateCcw, Undo2 } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { extractLyricLines } from '@/lib/lyricLines';
 import { formatTime } from '@/stores/usePlayerStore';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
 
 import afterHours from '@/data/lyrics/afterHours.json';
@@ -37,6 +38,7 @@ const SONGS = {
 export default function LyricSyncTool() {
   const { slug } = useParams();
   const song = SONGS[slug];
+  useDocumentTitle(song ? `Juowle | Lyric Sync - ${song.songTitle}` : 'Juowle | Lyric Sync Tool');
   const lines = useMemo(() => extractLyricLines(song?.lyricHtml), [song]);
 
   const audioRef = useRef(null);

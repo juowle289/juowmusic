@@ -8,6 +8,7 @@ import { playableTracks } from '@/data/playableTracks';
 import { SONG_COUNTRY_ID, COUNTRY_NAMES_BY_ID } from '@/data/songCountries';
 import { handleImageError } from '@/lib/imageFallback';
 import { cn } from '@/lib/utils';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 
 /**
  * THE METAPHOR: a shortwave radio, dialed around the planet.
@@ -134,6 +135,7 @@ function LogRow({ index, song, countryName }) {
 }
 
 export default function ExplorePage() {
+  useDocumentTitle('Juowle | Explore');
   const [selectedCountryId, setSelectedCountryId] = useState(null);
   const [hoveredSlug, setHoveredSlug] = useState(null);
   const [query, setQuery] = useState('');

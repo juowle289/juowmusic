@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { handleImageError } from "@/lib/imageFallback";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 export default function LoginPage() {
+  useDocumentTitle("Juowle | Login");
   const navigate = useNavigate();
   const { user, initializing, login, loginWithGoogle, resetPassword } =
     useAuth();

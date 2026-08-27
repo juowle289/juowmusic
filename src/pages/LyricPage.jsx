@@ -10,6 +10,7 @@ import PartyBubbles from '@/components/PartyBubbles';
 import LyricShareModal, { extractAccentColor } from '@/components/LyricShareModal';
 import useInlineStyle from '@/hooks/useInlineStyle';
 import useCoverPalette from '@/hooks/useCoverPalette';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 import useLyricPlayer from '@/hooks/useLyricPlayer';
 import { findClickedLineIndex } from '@/lib/lyricLines';
 import { usePlayerStore } from '@/stores/usePlayerStore';
@@ -39,6 +40,7 @@ const SONGS = {
 export default function LyricPage() {
   const { slug } = useParams();
   const song = SONGS[slug];
+  useDocumentTitle(song?.docTitle);
   useInlineStyle(song?.customStyle);
   const palette = useCoverPalette(song?.coverSrc);
   useLyricPlayer(song);

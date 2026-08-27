@@ -9,10 +9,12 @@ import { isHostOfParty } from '@/lib/party';
 import { usePlayerStore } from '@/stores/usePlayerStore';
 import { handleImageError } from '@/lib/imageFallback';
 import { cn } from '@/lib/utils';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 
 const NICKNAME_KEY = 'juowmusic-party-nickname';
 
 export default function PartyPage() {
+  useDocumentTitle('Juowle | Listening Party');
   const { partyId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

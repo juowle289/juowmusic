@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import useCoverPalette from '@/hooks/useCoverPalette';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
 
 import sonTung from '@/data/artists/son-tung-mtp.json';
@@ -208,6 +209,7 @@ function RecommendedCard({ img, name, flag, to }) {
 export default function ArtistPage() {
   const { slug } = useParams();
   const artist = ARTISTS[slug];
+  useDocumentTitle(artist?.docTitle);
   const [songExpanded, setSongExpanded] = useState(false);
 
   const popularScroll = useRef(null);
