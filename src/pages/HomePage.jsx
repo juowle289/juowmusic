@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import SweepButton from '@/components/SweepButton';
@@ -173,9 +173,15 @@ function withParams(embedUrl, params) {
  * player controls during actual playback can't be removed (their embed
  * terms require it) - modestbranding/rel/iv_load_policy just keep what's
  * left as minimal as YouTube allows.
+ *
+ * `isActive`/`onPlay`/`onStop` are lifted up to the parent list rather than
+ * kept as local state, so only one of these can be "activated" (i.e. have
+ * a live iframe) at a time across the whole FAV SONGS section - starting
+ * another one flips this one back to the poster, which fully unmounts its
+ * iframe and actually stops the audio instead of leaving it playing
+ * unheard in the background.
  */
-function YouTubeFacade({ embed, title }) {
-  const [activated, setActivated] = useState(false);
+function YouTubeFacade({ embed, title, isActive, onPlay, onStop }) {
   const videoId = useMemo(() => getYouTubeId(embed), [embed]);
   const [posterSrc, setPosterSrc] = useState(() => `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
 
@@ -184,22 +190,36 @@ function YouTubeFacade({ embed, title }) {
     [embed],
   );
 
-  if (activated) {
+  if (isActive) {
     return (
-      <iframe
-        title={title}
-        src={playSrc}
-        className="aspect-video w-full max-w-full border border-juow-accent md:w-[640px]"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowFullScreen
-      />
+      <div className="group relative aspect-video w-full max-w-full md:w-[640px]">
+        <iframe
+          title={title}
+          src={playSrc}
+          className="size-full border border-juow-accent"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+        />
+        {/* YouTube's own pause control is buried in its small control bar -
+            this floating button gives an obvious, always-visible way to
+            stop this video (fully unmounting the iframe, not just pausing
+            visually) without hunting for it. */}
+        <button
+          type="button"
+          onClick={onStop}
+          aria-label={`Stop ${title}`}
+          className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-black/70 text-white/90 opacity-0 transition-opacity duration-200 hover:bg-black/90 group-hover:opacity-100 focus-visible:opacity-100"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
     );
   }
 
   return (
     <button
       type="button"
-      onClick={() => setActivated(true)}
+      onClick={onPlay}
       aria-label={`Play ${title}`}
       className="group relative aspect-video w-full max-w-full overflow-hidden border border-juow-accent bg-black md:w-[640px]"
     >
@@ -232,6 +252,7 @@ export default function HomePage() {
   const [contactError, setContactError] = useState('');
   const [continueTrack, setContinueTrack] = useState(null);
   const [singerIndex, setSingerIndex] = useState(0);
+  const [activeFavSong, setActiveFavSong] = useState(null);
   const playSong = usePlayerStore((s) => s.playSong);
   const activeSlug = usePlayerStore((s) => s.currentSong?.slug);
 
@@ -525,7 +546,13 @@ export default function HomePage() {
                 <p className="mt-3 text-base leading-relaxed text-white/80 md:text-lg">{song.description}</p>
               </Reveal>
               <Reveal variant="scale" className="w-full shrink-0 md:w-auto">
-                <YouTubeFacade embed={song.embed} title={song.title} />
+                <YouTubeFacade
+                  embed={song.embed}
+                  title={song.title}
+                  isActive={activeFavSong === song.title}
+                  onPlay={() => setActiveFavSong(song.title)}
+                  onStop={() => setActiveFavSong(null)}
+                />
               </Reveal>
             </article>
           ))}
