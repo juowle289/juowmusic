@@ -1,122 +1,260 @@
-# JuowMusic
+# 🎵 JuowMusic
 
-Web nghe nhạc/lyric cá nhân — build lại từ project HTML/CSS/JS thuần sang **Vite + React 19 + React Router 7**, có Firebase Auth thật, audio engine tự viết (crossfade/gapless + chuẩn hoá âm lượng), và tính năng nghe nhạc chung real-time.
+> Ứng dụng web nghe nhạc & xem lời cá nhân với audio engine tự viết, xác thực Firebase thật, và tính năng nghe nhạc chung real-time.
 
-## Cài đặt & chạy
+Được build lại từ project HTML/CSS/JS thuần sang **Vite + React 19 + React Router 7** với đầy đủ tính năng hiện đại: crossfade/gapless, chuẩn hoá âm lượng, Listen-Together, xác thực người dùng, và giao diện đáp ứng đẹp mắt.
+
+---
+
+## 🚀 Bắt đầu nhanh
+
+### Cài đặt dependencies
 
 ```bash
 npm install
-npm run dev       # dev server
-npm run build     # build production vào dist/
-npm run preview   # xem thử bản build
 ```
 
-## Stack
+### Chạy development server
 
-- **Frontend**: Vite, React 19, React Router 7, Tailwind v4, Zustand
-- **Auth**: Firebase Authentication (Email/Password + Google Sign-In)
-- **Realtime**: Firebase Firestore (tính năng Listen-Together)
-- **Email**: EmailJS (mail chào mừng sau khi đăng ký)
-- **Audio**: Web Audio API tự viết (không dùng thư viện ngoài) cho crossfade, gapless, chuẩn hoá âm lượng, equalizer
+```bash
+npm run dev       # Mở tại http://localhost:5173
+```
 
-## Cấu trúc chính
+### Build production
+
+```bash
+npm run build     # Output: dist/
+npm run preview   # Xem trước bản build
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Chức năng              | Công nghệ                                                |
+| ---------------------- | -------------------------------------------------------- |
+| **Frontend Framework** | Vite, React 19, React Router 7                           |
+| **Styling**            | Tailwind CSS v4, shadcn/ui components                    |
+| **State Management**   | Zustand (player), React Context (auth)                   |
+| **Authentication**     | Firebase Auth v9+ (Email/Password, Google Sign-In)       |
+| **Real-time Database** | Firebase Firestore (Listen-Together)                     |
+| **Email**              | EmailJS (welcome emails)                                 |
+| **Audio Processing**   | Web Audio API (custom crossfade, gapless, normalization) |
+| **Hosting Assets**     | Vercel Blob Storage                                      |
+
+---
+
+## 📂 Cấu trúc dự án
 
 ```
 src/
-  components/
-    AppHeader.jsx          Header chính (search, tài khoản, nav) — phản ánh trạng thái đăng nhập thật
-    SearchBox.jsx          Search dropdown, hỗ trợ điều hướng bằng phím ↑/↓/Enter
-    GlobalAudioPlayer.jsx  Player toàn cục (mini + full-screen), điều khiển audio engine
-    QueuePanel.jsx         Hàng chờ, kéo-thả sắp xếp lại
-    VinylDisc.jsx          Đĩa than xoay khi phát nhạc
-    ThemeProvider.jsx      Toggle dark/light (setTheme/toggleTheme)
-
-  hooks/
-    useAudioEngine.js      Engine 2 buffer <audio> — crossfade + gapless + gain node
-    useLoudness.js         Phân tích RMS loudness từng bài, tính gain chuẩn hoá âm lượng
-    useCoverPalette.js     Trích màu chủ đạo từ ảnh bìa → gradient nền tự động cho trang lyric
-    useWaveform.js         Decode audio → dữ liệu waveform hiển thị trên seek bar
-    usePartySync.js        Đồng bộ real-time phòng nghe chung (Firestore)
-    useLyricPlayer.js      Nạp playlist 8 bài lyric vào player khi vào trang lyric
-    usePageStyles.js       Nạp/gỡ CSS gốc theo route (giữ hành vi multi-page cũ)
-
-  context/
-    AuthContext.jsx        Firebase Auth: register/login/loginWithGoogle/logout/resetPassword/updateUserProfile
-
-  stores/
-    usePlayerStore.js      Zustand: bài đang phát, playlist, queue, volume, crossfade toggle, seek request
-    (auth KHÔNG còn ở store — đã chuyển hẳn sang AuthContext/Firebase)
-
-  pages/
-    HomePage, ArtistPage, LyricPage, ProfilePage, LoginPage, SignupPage
-    PartyPage.jsx           Phòng nghe chung + chat real-time
-    LyricSyncTool.jsx       Công cụ nội bộ tap-sync timestamp cho lyric (không có trong nav)
-
-  lib/
-    imageFallback.js        onError dùng chung cho mọi <img>, tránh icon "ảnh vỡ" mặc định
-    lyricLines.js            Trích các dòng lyric thực sự được hát (bỏ qua [Verse]/[Chorus]...)
-    party.js                 Tạo phòng Listen-Together
-
-  data/
-    songs.js                 Danh sách bài hát/nghệ sĩ cho ô tìm kiếm
-    lyrics/*.json             8 bài: lyric, meta, customStyle, coverSrc, audioSrc, lineTimestamps (nếu có)
-    artists/*.json            Nội dung 2 trang nghệ sĩ
-
-  firebase.js                Khởi tạo Firebase App + Auth (dùng toàn app)
-  firebaseFirestore.js       Firestore riêng — chỉ tải khi vào tính năng Party (tránh phình bundle chính)
+├── components/
+│   ├── AppHeader.jsx          # Header chính (search, tài khoản, nav)
+│   ├── SearchBox.jsx          # Search dropdown (↑/↓/Enter navigation)
+│   ├── GlobalAudioPlayer.jsx  # Player (mini + full-screen)
+│   ├── QueuePanel.jsx         # Danh sách phát (drag-and-drop)
+│   ├── VinylDisc.jsx          # Hình minh họa đĩa than xoay
+│   ├── ThemeProvider.jsx      # Dark/light mode toggle
+│   └── ui/                    # shadcn components (button, dialog, etc.)
+│
+├── hooks/
+│   ├── useAudioEngine.js      # Web Audio API engine (crossfade + gapless)
+│   ├── useLoudness.js         # Loudness analysis & normalization
+│   ├── useCoverPalette.js     # Extract dominant colors from cover art
+│   ├── useWaveform.js         # Waveform visualization
+│   ├── usePartySync.js        # Real-time sync (Firestore)
+│   ├── useLyricPlayer.js      # Load lyric playlist
+│   ├── usePageStyles.js       # Dynamic CSS loading per route
+│   └── useListeningHistory.js # Track listening stats
+│
+├── context/
+│   └── AuthContext.jsx        # Firebase Auth provider
+│
+├── stores/
+│   └── usePlayerStore.js      # Zustand: player state
+│
+├── pages/
+│   ├── HomePage.jsx
+│   ├── ArtistPage.jsx
+│   ├── LyricPage.jsx
+│   ├── PartyPage.jsx          # Listen-Together room
+│   ├── ProfilePage.jsx
+│   ├── LoginPage.jsx
+│   ├── SignupPage.jsx
+│   └── LyricSyncTool.jsx      # Internal tool
+│
+├── lib/
+│   ├── imageFallback.js       # Fallback SVG for broken images
+│   ├── lyricLines.js          # Parse lyric sections
+│   ├── party.js               # Party room logic
+│   ├── mood.js                # Mood detection
+│   ├── geo.js                 # Geolocation
+│   └── utils.js               # Utilities
+│
+├── data/
+│   ├── songs.js               # Track database
+│   ├── lyrics/                # Lyric files (JSON with timestamps)
+│   ├── artists/               # Artist pages data
+│   └── songCountries.js       # Country data
+│
+├── config/
+│   ├── emailjs.js             # EmailJS config
+│   └── navigation.js          # Route config
+│
+├── firebase.js                # Firebase App & Auth init
+└── firebaseFirestore.js       # Firestore (lazy-loaded)
 
 public/
-  styles/                     CSS gốc từng trang, nạp động qua usePageStyles
+└── styles/                    # Per-page CSS (loaded dynamically)
 ```
 
-## Tính năng
+---
 
-### Xác thực (Firebase Auth)
-- Đăng ký/đăng nhập bằng email + mật khẩu, validate mật khẩu mạnh (13+ ký tự, hoa, số, ký tự đặc biệt) và username tối thiểu 6 ký tự — chặn ngay trên form, không chỉ cảnh báo.
-- Đăng nhập bằng Google (`signInWithPopup`).
-- Quên mật khẩu gửi email reset thật (`sendPasswordResetEmail`).
-- Phiên đăng nhập tự khôi phục khi F5 (Firebase tự lưu session).
-- Trang Settings cho đổi username/email/mật khẩu, yêu cầu xác thực lại bằng mật khẩu hiện tại trước khi đổi (theo đúng yêu cầu bảo mật của Firebase).
+## ✨ Tính năng chính
 
-### Email chào mừng (EmailJS)
-- Gửi tự động ngay sau khi đăng ký thành công (cả email/password lẫn lần đầu đăng ký bằng Google).
-- Cấu hình 3 thông số tại `src/config/emailjs.js`.
-- Gửi kiểu fire-and-forget — lỗi gửi mail không chặn việc tạo tài khoản.
+### 🔐 Authentication (Firebase Auth)
 
-### Trang Lyric — nền tự sinh theo màu ảnh bìa
-- `useCoverPalette` phân tích ảnh bìa (canvas nhỏ, không cần backend), chọn màu chủ đạo có bão hoà thật (không lấy trung bình cộng gây xỉn màu), tạo gradient 2 tông giống phong cách viết tay ban đầu.
-- Chữ trong nav (title/about/meta) tự đổi đen/trắng theo độ sáng nền để luôn đọc được.
-- Vinyl trượt ngang khi phát nhạc, không đè lên nội dung text.
+**Đăng ký / Đăng nhập**
 
-### Audio Engine tự viết
-- **Crossfade & Gapless**: 2 buffer `<audio>` song song, dùng GainNode để crossfade mượt ~5 giây cuối bài và preload sẵn bài kế tiếp — không còn khoảng lặng giữa 2 bài. Bật/tắt qua icon `Blend` ở full-screen player. Next/Prev/chọn bài trong Queue vẫn chuyển tức thì (không fade).
-- **Loudness Normalization**: đo RMS loudness từng bài (cache lại), tự bù gain để các bài phát liền nhau nghe đều tai, không giật âm lượng.
-- **Equalizer**: bars trực quan lấy dữ liệu từ AnalyserNode dùng chung với engine trên.
+- Email + Password với validation bắt buộc:
+  - Mật khẩu: ≥13 ký tự, chữ hoa, số, ký tự đặc biệt (kiểm tra ngay trên form)
+  - Username: ≥6 ký tự (không chỉ cảnh báo, chặn hoàn toàn)
+- Đăng nhập bằng Google (`signInWithPopup`)
+- Phiên tự khôi phục khi F5 (Firebase lưu session trong IndexedDB)
 
-### Search
-- Gõ để tìm bài hát/nghệ sĩ, điều hướng kết quả bằng phím **↑/↓**, chọn bằng **Enter** (không bắt buộc dùng chuột).
+**Quên mật khẩu**
 
-### Seek theo lời — bán tự động
-- Công cụ nội bộ tại `/tools/lyric-sync/<slug>` (không có trong nav): phát nhạc, bấm **Space** đúng lúc từng câu bắt đầu để ghi timestamp, tự nhảy sang câu kế tiếp. Bấm vào bất kỳ dòng nào trong danh sách để tap lại đúng dòng đó (không mất các dòng đã đúng phía sau). Xong bấm **Copy JSON**, dán vào field `lineTimestamps` trong file `src/data/lyrics/<slug>.json`.
-- Bài nào có `lineTimestamps` thì trang Lyric tự cho phép bấm vào dòng để tua nhạc tới đúng lúc đó. Chỉ cần làm 1 lần/bài, deploy 1 lần là mọi người dùng đều có ngay, không cần làm lại.
+- Gửi email reset link thông qua `sendPasswordResetEmail`
+- Link mở trang reset mặc định của Firebase (không custom URL)
+- Xử lý lỗi phổ biến: user-not-found, invalid-email, too-many-requests
 
-### Listen-Together (phòng nghe chung + chat)
-- Bấm icon `Users` ở full-screen player để tạo phòng từ bài đang phát → chuyển tới `/party/<id>`, copy link mời bạn bè.
-- Người vào bằng link tự đồng bộ đúng bài + đúng thời điểm + trạng thái play/pause theo host (bù trừ độ trễ mạng qua Firestore server timestamp), kèm chat real-time.
-- **Cần bật Firestore Database trên Firebase Console + set rule** trước khi dùng (xem mục Cấu hình Firebase bên dưới) — chưa bật sẽ lỗi âm thầm khi bấm "Start Party".
+**Quản lý tài khoản**
 
-### Độ bền giao diện
-- Mọi `<img>` trong app (cover, avatar, icon Google/Apple...) có fallback SVG placeholder khi ảnh lỗi/mất mạng, không còn icon "ảnh vỡ" mặc định của trình duyệt.
+- Trang Settings: đổi username, email, mật khẩu
+- Re-authentication bắt buộc (nhập mật khẩu hiện tại) trước khi thay đổi nhạy cảm
 
-## Cấu hình Firebase (bắt buộc)
+---
 
-### 1. Authentication
-Đã cấu hình sẵn trong `src/firebase.js`. Vào Firebase Console → Authentication → Sign-in method → bật **Email/Password** và **Google**, và thêm domain đang chạy (localhost lúc dev, domain thật lúc deploy) vào **Authorized domains**.
+### 📧 Email Chào mừng (EmailJS)
 
-### 2. Firestore (chỉ cần nếu dùng Listen-Together)
-Firebase Console → Build → Firestore Database → Create database (Production mode) → tab Rules, dán:
+- Gửi tự động ngay sau khi đăng ký (email/password hoặc lần đầu Google Sign-In)
+- Fire-and-forget: lỗi gửi mail không chặn việc tạo tài khoản
+- Cấu hình tại `src/config/emailjs.js`
 
-```
+**Template mẫu**: Nền đen, accent vàng `#feec93`, khớp theme app (xem tệp `juowmusic-welcome-email.html`)
+
+---
+
+### 🎨 Trang Lyric — Nền tự sinh từ màu ảnh bìa
+
+- **Phân tích màu** (`useCoverPalette`):
+  - Canvas nhỏ, không cần backend
+  - Chọn màu chủ đạo có bão hoà thật (tránh lấy trung bình cộng gây xỉn)
+  - Tạo gradient 2 tông giống phong cách ban đầu
+
+- **Tự động điều chỉnh text**:
+  - Chữ nav (title, about, meta) đổi đen/trắng theo độ sáng nền
+  - Đảm bảo độ tương phản & dễ đọc
+
+- **Hình ảnh**:
+  - Vinyl xoay song song khi phát nhạc
+  - Không đè lên nội dung text
+
+---
+
+### 🔊 Audio Engine Tự viết
+
+**Crossfade & Gapless**
+
+- 2 buffer `<audio>` song song với GainNode
+- Crossfade mượt ~5 giây ở cuối mỗi bài
+- Preload bài kế tiếp → không khoảng lặng
+- Bật/tắt qua icon "Blend" ở full-screen player
+- Next/Prev/chọn bài Queue vẫn chuyển tức thì (không fade)
+
+**Loudness Normalization**
+
+- Đo RMS loudness từng bài (cache)
+- Tự bù gain → các bài nghe đều tai
+- Tránh giật âm lượng khi chuyển bài
+
+**Equalizer**
+
+- Bars trực quan từ AnalyserNode
+- Dùng chung với engine chính
+
+---
+
+### 🔍 Search
+
+- Gõ để tìm bài hát / nghệ sĩ
+- Điều hướng kết quả bằng phím **↑/↓**
+- Chọn bằng **Enter** (không cần chuột)
+
+---
+
+### ⏰ Seek theo lời (Lyric Sync Tool)
+
+**Công cụ nội bộ** tại `/tools/lyric-sync/<slug>` (không trong nav):
+
+1. Phát nhạc
+2. Bấm **Space** ở đúng lúc bắt đầu mỗi câu → ghi timestamp
+3. Tự nhảy sang câu kế
+4. Bấm câu bất kỳ để tap lại (không mất câu trước)
+5. Bấm "Copy JSON" → dán vào `lineTimestamps` trong `src/data/lyrics/<slug>.json`
+
+**Kết quả**: Bài có `lineTimestamps` sẽ cho phép bấm vào dòng để tua nhạc tới lúc đó. Chỉ làm 1 lần/bài, mọi người dùng đều có ngay (không cần làm lại).
+
+---
+
+### 👥 Listen-Together (Phòng nghe chung)
+
+**Tạo & tham gia phòng**:
+
+- Bấm icon "Users" ở full-screen player
+- Tự động chuyển tới `/party/<id>`
+- Copy link mời bạn bè
+
+**Tính năng**:
+
+- Đồng bộ bài hát + thời điểm + play/pause theo host
+- Bù trừ độ trễ mạng qua Firestore server timestamp
+- Chat real-time trong phòng
+
+**⚠️ Yêu cầu**: Phải bật & cấu hình Firestore Database trên Firebase Console (xem bên dưới), nếu không sẽ lỗi âm thầm khi bấm "Start Party".
+
+---
+
+### 🖼️ Độ bền giao diện
+
+- Mọi `<img>` (cover, avatar, icon...) có fallback SVG placeholder khi lỗi/mất mạng
+- Không còn icon "ảnh vỡ" mặc định của trình duyệt
+
+---
+
+## 🔧 Cấu hình bắt buộc
+
+### Firebase Console
+
+#### 1️⃣ Authentication
+
+**Đã cấu hình sẵn** trong `src/firebase.js`. Cần kiểm tra:
+
+1. Vào Firebase Console → **Authentication** → **Sign-in method**
+2. Bật **Email/Password** và **Google**
+3. Thêm domain vào **Authorized domains**:
+   - Dev: `localhost` (nếu chạy localhost)
+   - Deploy: domain thật (vd: `juowmusic.com`)
+
+---
+
+#### 2️⃣ Firestore Database (chỉ cần nếu dùng Listen-Together)
+
+1. Vào Firebase Console → **Build** → **Firestore Database**
+2. Click **Create database** → chọn **Production mode**
+3. Sau khi tạo xong, vào tab **Rules** → dán:
+
+```firestore-rules
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -130,34 +268,78 @@ service cloud.firestore {
 }
 ```
 
-Rule này mở (ai có link cũng đọc/ghi được) — đủ dùng cho tính năng nghe chung thông thường, không nên dùng để truyền dữ liệu nhạy cảm.
+**⚠️ Lưu ý**: Rule này mở cho phép ai có link cũng đọc/ghi → đủ dùng cho MVP, không nên truyền dữ liệu nhạy cảm.
 
-## Cấu hình EmailJS (bắt buộc nếu muốn gửi mail chào mừng)
+---
 
-Sửa `src/config/emailjs.js`:
+### EmailJS (tùy chọn, chỉ cần nếu muốn gửi mail)
 
-```js
-export const EMAILJS_SERVICE_ID = 'service_juow289';
-export const EMAILJS_WELCOME_TEMPLATE_ID = 'template_xxxxxxx'; // lấy từ EmailJS dashboard
-export const EMAILJS_PUBLIC_KEY = 'xxxxxxxxxxxx';               // Account -> General
+Chỉnh sửa `src/config/emailjs.js`:
+
+```javascript
+export const EMAILJS_SERVICE_ID = "service_xxxxx"; // Dashboard -> Services
+export const EMAILJS_WELCOME_TEMPLATE_ID = "template_xxxxx"; // Dashboard -> Templates
+export const EMAILJS_PUBLIC_KEY = "xxxxxxxxxx"; // Account -> General
 ```
 
-Template HTML mẫu (nền đen, accent vàng `#feec93`, khớp theme app) dán vào Code editor của EmailJS Template — xem file `juowmusic-welcome-email.html` đã gửi riêng (không nằm trong repo).
+Dán template HTML (nền đen, accent vàng `#feec93`) vào Code editor của EmailJS Template (xem tệp riêng: `juowmusic-welcome-email.html`).
 
-## Asset hosting
+---
 
-Ảnh, nhạc, video hiện phục vụ qua URL Vercel Blob (`*.public.blob.vercel-storage.com`).
+## 💾 Asset Hosting
 
-## Ghi chú kỹ thuật quan trọng
+Hiện tại phục vụ qua **Vercel Blob Storage** (`*.public.blob.vercel-storage.com`).
 
-- **`firebase.js` vs `firebaseFirestore.js`**: tách riêng có chủ đích — `firebase.js` (chỉ Auth) được import toàn app nên nằm trong bundle chính; Firestore khá nặng nên tách file riêng, chỉ được `import()` động khi thực sự vào tính năng Party, giữ bundle chính nhẹ.
-- **`useAudioEngine`**: mọi thao tác đọc/ghi `<audio>` (2 phần tử A/B) đều đi qua đây — không thao tác trực tiếp audio element ở nơi khác để tránh phá vỡ crossfade/gain node.
-- **`createMediaElementSource` chỉ gọi được đúng 1 lần/phần tử `<audio>`** trong suốt vòng đời — graph Web Audio được cache thẳng trên DOM node (`audio._engineGraph`) để sống sót qua React re-render/StrictMode.
-- **2 thẻ `<audio>` của engine luôn phải render** (không được đặt sau early-return kiểu `if (!currentSong) return null`) — nếu không, hook gắn listener 1 lần lúc mount sẽ chạy trong khi ref còn `null`, khiến `timeupdate`/`loadedmetadata` không bao giờ được gắn (progress bar sẽ đứng im dù nhạc vẫn phát).
+Thay đổi URL ảnh/nhạc:
 
-## Việc có thể làm tiếp
+- Sửa trong `src/data/lyrics/<slug>.json` (field `coverSrc`, `audioSrc`)
+- Sửa trong `src/data/artists/*.json`
 
-- Tap timestamp (`lineTimestamps`) cho 8 bài hiện có qua `/tools/lyric-sync/<slug>` — hiện chưa bài nào có sẵn.
-- Siết chặt Firestore rule cho Party (hiện đang mở, phù hợp MVP) nếu cần bảo mật hơn.
-- Thêm danh sách "đang online trong phòng" cho Listen-Together (hiện chỉ có chat).
-- Xem xét bỏ bớt thư viện nặng (`recharts` ở ProfilePage đang chiếm ~400KB) nếu chỉ cần biểu đồ đơn giản.
+---
+
+## 📝 Ghi chú kỹ thuật quan trọng
+
+### Firebase modules
+
+**`firebase.js` vs `firebaseFirestore.js`** (tách riêng có chủ đích):
+
+- `firebase.js`: chỉ Auth → import toàn app → nằm trong bundle chính
+- `firebaseFirestore.js`: Firestore khá nặng → `import()` động khi thực sự vào Party
+- **Lợi ích**: bundle chính nhẹ hơn
+
+### Audio Engine
+
+**`useAudioEngine`** là bộ điều khiển duy nhất:
+
+- Mọi thao tác `<audio>` đều qua đây (không thao tác trực tiếp ở nơi khác)
+- Tránh phá vỡ crossfade / gain node
+
+**Web Audio Graph caching**:
+
+- `createMediaElementSource` chỉ gọi được 1 lần/phần tử `<audio>` trong suốt vòng đời
+- Graph được cache trên DOM node (`audio._engineGraph`) → sống sót qua React re-render & StrictMode
+
+**2 thẻ `<audio>` bắt buộc phải render**:
+
+- ❌ Không được đặt sau early-return kiểu `if (!currentSong) return null`
+- ✅ Luôn render (có thể ẩn bằng CSS `hidden` hoặc `display: none`)
+- **Lý do**: Hook gắn listener 1 lần lúc mount; nếu ref còn `null` sẽ không gắn `timeupdate`/`loadedmetadata` → progress bar sẽ đứng im dù nhạc vẫn phát
+
+---
+
+## 🚧 Việc có thể làm tiếp
+
+- [ ] Tap timestamp (`lineTimestamps`) cho 8 bài hiện có qua `/tools/lyric-sync/<slug>` (hiện chưa bài nào có sẵn)
+- [ ] Siết chặt Firestore rule cho Party (hiện đang mở, phù hợp MVP)
+- [ ] Thêm danh sách "đang online trong phòng" cho Listen-Together (hiện chỉ có chat)
+- [ ] Xem xét bỏ bớt thư viện nặng (vd: `recharts` ở ProfilePage ~400KB) nếu chỉ cần biểu đồ đơn giản
+- [ ] Thêm PWA support (offline mode, install as app)
+- [ ] Tối ưu hóa chunk size & code-splitting
+
+---
+
+## 📞 Support & Liên hệ
+
+Nếu có câu hỏi hoặc tìm thấy lỗi, vui lòng tạo Issue hoặc liên hệ trực tiếp.
+
+**Happy listening! 🎶**

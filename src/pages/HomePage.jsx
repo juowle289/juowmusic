@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Play } from 'lucide-react';
@@ -137,6 +137,90 @@ function Reveal({ variant = 'scale', className, delay = 0, as: Component = motio
       className={className}
       {...props}
     />
+  );
+}
+
+/** Extracts the video id out of a `/embed/<id>?...` YouTube URL. */
+function getYouTubeId(embedUrl) {
+  try {
+    return new URL(embedUrl).pathname.split('/').filter(Boolean).pop() || '';
+  } catch {
+    return '';
+  }
+}
+
+/** Adds/overrides query params on a YouTube embed URL, keeping the rest
+ * (like `start=`) untouched. */
+function withParams(embedUrl, params) {
+  try {
+    const url = new URL(embedUrl);
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, String(value)));
+    return url.toString();
+  } catch {
+    return embedUrl;
+  }
+}
+
+/**
+ * A "click to play" facade over a YouTube embed, so the FAV SONGS section
+ * shows nothing but our own poster + play button until someone actually
+ * wants to watch - not YouTube's own pre-play thumbnail card (channel
+ * avatar, video title bar, the big red play button, "Watch on YouTube").
+ * That whole info card only exists in the *unstarted* iframe state, so
+ * swapping it for a plain <img> + custom button removes it entirely; once
+ * clicked we mount the real iframe with autoplay so it goes straight into
+ * playback instead of showing that card at all. YouTube's small logo in the
+ * player controls during actual playback can't be removed (their embed
+ * terms require it) - modestbranding/rel/iv_load_policy just keep what's
+ * left as minimal as YouTube allows.
+ */
+function YouTubeFacade({ embed, title }) {
+  const [activated, setActivated] = useState(false);
+  const videoId = useMemo(() => getYouTubeId(embed), [embed]);
+  const [posterSrc, setPosterSrc] = useState(() => `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+
+  const playSrc = useMemo(
+    () => withParams(embed, { autoplay: 1, rel: 0, modestbranding: 1, iv_load_policy: 3, playsinline: 1 }),
+    [embed],
+  );
+
+  if (activated) {
+    return (
+      <iframe
+        title={title}
+        src={playSrc}
+        className="aspect-video w-full max-w-full border border-juow-accent md:w-[640px]"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setActivated(true)}
+      aria-label={`Play ${title}`}
+      className="group relative aspect-video w-full max-w-full overflow-hidden border border-juow-accent bg-black md:w-[640px]"
+    >
+      <img
+        src={posterSrc}
+        alt=""
+        loading="lazy"
+        className="size-full object-cover opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+        onError={() => {
+          // Not every video has a maxresdefault thumbnail (needs a
+          // high-res source) - hqdefault always exists, so fall back to it
+          // rather than showing a broken image.
+          if (posterSrc.includes('maxresdefault')) setPosterSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        }}
+      />
+      <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/0">
+        <span className="flex size-14 items-center justify-center rounded-full bg-black/70 ring-2 ring-juow-accent transition-transform duration-300 group-hover:scale-110 md:size-16">
+          <Play className="ml-1 size-6 fill-juow-accent text-juow-accent md:size-7" />
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -441,12 +525,7 @@ export default function HomePage() {
                 <p className="mt-3 text-base leading-relaxed text-white/80 md:text-lg">{song.description}</p>
               </Reveal>
               <Reveal variant="scale" className="w-full shrink-0 md:w-auto">
-                <iframe
-                  title={song.title}
-                  src={song.embed}
-                  className="aspect-video w-full max-w-full border border-juow-accent md:w-[640px]"
-                  allowFullScreen
-                />
+                <YouTubeFacade embed={song.embed} title={song.title} />
               </Reveal>
             </article>
           ))}
