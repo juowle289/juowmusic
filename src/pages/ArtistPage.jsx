@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
+import useCoverPalette from '@/hooks/useCoverPalette';
 import { cn } from '@/lib/utils';
 
 import sonTung from '@/data/artists/son-tung-mtp.json';
@@ -24,6 +25,21 @@ const COLOR = {
 };
 const SHADOW_S = '1px 1px 5px rgba(0,0,0,0.1)';
 const SHADOW_XL_DROP = 'drop-shadow(0px 0px 10px rgba(0,0,0,.5))';
+
+/** Mixes a '#rrggbb' color toward black (amount < 0) or white (amount > 0)
+ * and returns it as an rgba() string at the given alpha - same idea as the
+ * shade() helper useCoverPalette uses internally to build its gradients. */
+function tint(hex, amount, alpha = 1) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const t = amount < 0 ? 0 : 255;
+  const p = Math.abs(amount);
+  const nr = Math.round(r + (t - r) * p);
+  const ng = Math.round(g + (t - g) * p);
+  const nb = Math.round(b + (t - b) * p);
+  return `rgba(${nr}, ${ng}, ${nb}, ${alpha})`;
+}
 
 function resolveLink(link) {
   if (!link) return null;
@@ -76,12 +92,12 @@ function SectionHeading({ id, children, controls }) {
 
 function BioRow({ icon, label, value }) {
   return (
-    <tr>
-      <td className="p-2">
-        <i className={cn(icon, 'mr-1')} /> {label}
-      </td>
-      <td className="p-2 text-right font-medium">{value}</td>
-    </tr>
+    <div className="flex items-start justify-between gap-3 border-b border-black/5 p-2 text-sm last:border-b-0 sm:text-base">
+      <span className="flex shrink-0 items-center gap-1 text-black/80">
+        <i className={icon} /> {label}
+      </span>
+      <span className="text-right font-medium break-words">{value}</span>
+    </div>
   );
 }
 
@@ -119,7 +135,7 @@ function SongCard({ img, title, artist, date, to }) {
   return (
     <Comp
       to={to}
-      className="group relative flex h-fit w-[23.8em] max-w-full shrink-0 gap-4 rounded-md border border-[#ddd] bg-white p-2"
+      className="group relative flex h-fit w-[85vw] max-w-[23.8em] shrink-0 gap-3 rounded-md border border-[#ddd] bg-white p-2 sm:w-[23.8em] sm:gap-4"
       style={{ boxShadow: SHADOW_S }}
     >
       <img src={img} alt="" className="size-24 shrink-0 rounded object-cover" onError={handleImageError} />
@@ -199,6 +215,14 @@ export default function ArtistPage() {
   const recommendedScroll = useRef(null);
   const scroll = (ref, dir) => ref.current?.scrollBy({ left: dir * 560, behavior: 'smooth' });
 
+  // Same sampling technique as the /lyrics hero nav (useCoverPalette), just
+  // fed the artist's avatar instead of a song cover - so the Bio/Links cards
+  // pick up a color actually lifted from the artist photo instead of a
+  // hardcoded tan/navy pair.
+  const avatarPalette = useCoverPalette(artist?.avatarImg);
+  const bioBg = `linear-gradient(270deg, ${tint(avatarPalette.accent, 0.35, 1)} 0%, ${tint(avatarPalette.accent, 0.35, 0.1)} 100%, rgb(245,245,251) 100%)`;
+  const linksBg = `linear-gradient(270deg, ${tint(avatarPalette.accent, -0.45, 1)} 0%, ${tint(avatarPalette.accent, -0.45, 0.1)} 100%, rgb(245,245,251) 100%)`;
+
   const popularLinks = useMemo(
     () => artist?.popularSongs.map((s) => ({ ...s, to: resolveLink(s.link) })) ?? [],
     [artist],
@@ -251,46 +275,39 @@ export default function ArtistPage() {
           {/* Left: profile / bio / links / about */}
           <div className="w-full px-4 pt-16 sm:w-1/2 sm:px-6 sm:pt-40" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
-              <p className="mx-auto w-full text-3xl font-bold sm:w-3/4" style={{ textShadow: '0px 3px 5px rgba(0,0,0,0.25)' }}>
+              <p className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl" style={{ textShadow: '0px 3px 5px rgba(0,0,0,0.25)' }}>
                 {artist.displayName}
               </p>
               <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
                 {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" onError={handleImageError} />}
-                <span className="text-black/90">{artist.countryName}</span>
+                <span className="text-sm text-black/90 sm:text-base">{artist.countryName}</span>
               </div>
             </div>
 
-            <div className="mb-6 flex flex-wrap items-start gap-3 sm:flex-nowrap">
+            {/* items-stretch (default) instead of items-start so both cards
+                match the height of the taller one (Bio Artist) - Links then
+                fills that same height and just centers its icon grid in it. */}
+            <div className="mb-6 flex flex-wrap items-stretch gap-3 sm:flex-nowrap">
               {/* Bio */}
               <div
                 className="w-full rounded-md border border-[#ddd] sm:w-[68%]"
-                style={{
-                  boxShadow: SHADOW_S,
-                  background:
-                    'linear-gradient(270deg, rgb(185,169,157) 0%, rgba(185,169,157,0.1) 100%, rgb(245,245,251) 100%)',
-                }}
+                style={{ boxShadow: SHADOW_S, background: bioBg }}
               >
                 <p className="rounded-t-md border-b border-black px-3 py-1 font-medium">Bio Artist</p>
-                <table className="w-full">
-                  <tbody>
-                    {artist.bio.map((row) => (
-                      <BioRow key={row.label} {...row} />
-                    ))}
-                  </tbody>
-                </table>
+                <div className="px-1">
+                  {artist.bio.map((row) => (
+                    <BioRow key={row.label} {...row} />
+                  ))}
+                </div>
               </div>
 
               {/* Links */}
               <div
-                className="w-full shrink-0 rounded-md sm:w-[28%]"
-                style={{
-                  boxShadow: SHADOW_S,
-                  background:
-                    'linear-gradient(270deg, rgb(41,47,58) 0%, rgba(41,47,58,0.1) 100%, rgb(245,245,251) 100%)',
-                }}
+                className="flex w-full shrink-0 flex-col rounded-md sm:w-[28%]"
+                style={{ boxShadow: SHADOW_S, background: linksBg }}
               >
                 <p className="rounded-t-md border-b border-black px-3 py-1 font-medium">Links</p>
-                <div className="grid grid-cols-4 gap-3 p-3">
+                <div className="grid flex-1 grid-cols-4 content-center gap-3 p-3">
                   {artist.links.map((l, i) => (
                     <div key={i} className="flex justify-center">
                       <LinkIcon {...l} />
@@ -324,21 +341,31 @@ export default function ArtistPage() {
               <SectionHeading id="topTracks">Top Tracks</SectionHeading>
 
               <div
-                className="m-3 flex flex-wrap gap-4 rounded-md p-4"
+                className="m-3 flex flex-wrap gap-4 rounded-md p-3 sm:p-4"
                 style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
               >
-                <div className="flex w-full flex-col p-1 sm:w-[45%]">
+                <div className="relative flex w-full flex-col p-1 sm:w-[45%]">
                   <img src={artist.topTrack.img} alt="" className="w-full rounded object-cover" onError={handleImageError} />
-                  <p className="relative mt-3 text-center text-xl font-bold font-[family-name:var(--font-anton)]">
+                  <p className="mt-3 text-center text-lg font-bold font-[family-name:var(--font-anton)] sm:text-xl">
                     {artist.topTrack.title}
-                    <span className="absolute -left-4 top-8 text-xs opacity-50">{artist.topTrack.legal}</span>
                   </p>
+                  {/* Stacks centered under the title on mobile (there's no
+                      room to the side); becomes the original absolutely
+                      positioned side-note once the image column is a fixed
+                      45% next to the achievements list on sm+. */}
+                  <span className="mt-1 block text-center text-xs opacity-50 sm:absolute sm:-left-4 sm:top-8 sm:mt-0 sm:text-left">
+                    {artist.topTrack.legal}
+                  </span>
                 </div>
 
-                <div className="flex-1 border-l-4 border-[#ddd] pl-6">
+                {/* Achievements: a top border/padding when stacked full-width
+                    below the image on mobile, switching to the original
+                    left border + left padding once it sits beside the image
+                    on sm+. */}
+                <div className="w-full border-t-4 border-[#ddd] pt-4 sm:w-auto sm:flex-1 sm:border-l-4 sm:border-t-0 sm:pl-6 sm:pt-0">
                   {artist.topTrack.achievements.map((a, i) => (
                     <div key={i} className="mb-4">
-                      <div className="text-xl font-bold uppercase" style={{ color: COLOR.blue }}>
+                      <div className="text-lg font-bold uppercase sm:text-xl" style={{ color: COLOR.blue }}>
                         {a.number}
                       </div>
                       <span className="text-sm uppercase text-black/70">{a.label}</span>
@@ -348,9 +375,9 @@ export default function ArtistPage() {
               </div>
 
               {/* About song */}
-              <div className="relative m-3 rounded-md p-4" style={{ background: 'linear-gradient(#fff, #f5f5fc 90%)' }}>
+              <div className="relative m-3 rounded-md p-3 sm:p-4" style={{ background: 'linear-gradient(#fff, #f5f5fc 90%)' }}>
                 <div
-                  className={cn('text-[1.05em] leading-relaxed', !songExpanded && 'line-clamp-[13]')}
+                  className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[13]')}
                   dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
                 />
                 <div className="mt-2 flex justify-end">

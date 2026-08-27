@@ -7,11 +7,11 @@
 export default function MusicLoader({ label = 'Loading' }) {
   return (
     <div className="flex flex-col items-center gap-5">
-      <div className="flex h-14 items-end gap-2" aria-hidden>
+      <div className="flex h-14 items-center gap-2" aria-hidden>
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="w-2.5 origin-bottom rounded-full bg-juow-accent animate-[soundbar-bounce_1s_ease-in-out_infinite]"
+            className="w-2.5 rounded-full bg-white animate-[soundbar-bounce_1s_ease-in-out_infinite]"
             style={{ height: '100%', animationDelay: `${i * 0.15}s` }}
           />
         ))}

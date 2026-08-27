@@ -425,19 +425,31 @@ export default function GlobalAudioPlayer() {
           >
             <div className="relative size-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]">
               <VinylDisc labelId="mini" className="size-full" />
-              <motion.img
-                layoutId="player-cover-art"
-                src={currentSong.coverSrc}
-                alt=""
-                draggable={false}
-                className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-white/70"
-                animate={{ rotate: isPlaying ? 360 : 0 }}
-                transition={
-                  isPlaying
-                    ? { repeat: Infinity, duration: 3, ease: 'linear' }
-                    : { duration: 0.3 }
-                }
-              />
+              {/* Centered via flexbox, not a -translate-x/y-1/2 transform.
+                  Framer Motion drives this element's `transform` directly
+                  (for the layoutId FLIP animation, plus the infinite `rotate`
+                  loop below) and fully owns that CSS property once it does -
+                  it has no idea about a separate -50%/-50% translate baked
+                  into a Tailwind utility class, so it would occasionally
+                  overwrite/drop that centering offset mid-animation, making
+                  the cover art appear to drift sideways and vanish off the
+                  vinyl's label. Doing the centering with a non-transformed
+                  wrapper sidesteps the conflict entirely. */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.img
+                  layoutId="player-cover-art"
+                  src={currentSong.coverSrc}
+                  alt=""
+                  draggable={false}
+                  className="size-11 rounded-full object-cover ring-2 ring-white/70"
+                  animate={{ rotate: isPlaying ? 360 : 0 }}
+                  transition={
+                    isPlaying
+                      ? { repeat: Infinity, duration: 3, ease: 'linear' }
+                      : { duration: 0.3 }
+                  }
+                />
+              </div>
             </div>
           </motion.div>
         ) : (

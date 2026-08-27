@@ -315,9 +315,11 @@
     }
   }
 
-  /* The 3 soundwave bars in MusicLoader (site loading screen). Bar height
-     is fixed via inline style; this just scales it down and back up from
-     the bottom edge, staggered per bar via animation-delay. */
+  /* The 3 soundwave bars in MusicLoader (site loading screen). Each bar
+     scales from its own center (no transform-origin override → defaults to
+     50% 50%), so both the top and bottom edges pull in and stretch back out
+     together, instead of only the top edge moving while the bottom stays
+     pinned. Staggered per bar via animation-delay. */
   @keyframes soundbar-bounce {
     0%, 100% { transform: scaleY(0.25); }
     50% { transform: scaleY(1); }
