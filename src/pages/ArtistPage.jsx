@@ -236,10 +236,10 @@ export default function ArtistPage() {
       >
         {/* Avatar sits in the left ~35% column, not centered across the page
             (matches figcaption{width:35%;margin-left:2.3%;padding-top:40vh}). */}
-        <figcaption className="flex w-full items-start justify-center pt-[12em] sm:w-[35%] sm:pt-[21em] sm:pl-[15%]">
+        <figcaption className="flex w-full items-start justify-center pt-[12em] sm:w-[35%] sm:pt-[23em] sm:pl-[15%]">
           <img
             src={artist.avatarImg}
-            alt={artist.displayName}
+            alt={artist.displayName}  
             className="pointer-events-none size-32 rounded-full object-cover sm:size-72"
             style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }} onError={handleImageError} />
         </figcaption>
