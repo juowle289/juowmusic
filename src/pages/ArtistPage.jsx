@@ -347,7 +347,12 @@ export default function ArtistPage() {
                 style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
               >
                 <div className="relative flex w-full flex-col p-1 sm:w-[45%]">
-                  <img src={artist.topTrack.img} alt="" className="w-full rounded object-cover" onError={handleImageError} />
+                  <img
+                    src={artist.topTrack.img}
+                    alt=""
+                    className="aspect-square w-full rounded object-cover"
+                    onError={handleImageError}
+                  />
                   <p className="mt-3 text-center text-lg font-bold font-[family-name:var(--font-anton)] sm:text-xl">
                     {artist.topTrack.title}
                   </p>
