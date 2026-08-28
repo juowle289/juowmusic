@@ -187,11 +187,28 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
         )}
       >
         <nav className="flex flex-col gap-4">
+          <Link
+            to="/"
+            className={cn("text-lg text-juow-soft hover:text-juow-accent", homeRouteActive && "text-juow-accent")}
+            onClick={() => setMobileOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            to="/explore"
+            className={cn("text-lg text-juow-soft hover:text-juow-accent", exploreActive && "text-juow-accent")}
+            onClick={() => setMobileOpen(false)}
+          >
+            Explore
+          </Link>
           {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="text-lg text-juow-soft hover:text-juow-accent"
+              className={cn(
+                "text-lg text-juow-soft hover:text-juow-accent",
+                activeId === item.id && "text-juow-accent",
+              )}
               onClick={() => setMobileOpen(false)}
             >
               {item.label}
