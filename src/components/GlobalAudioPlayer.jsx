@@ -114,7 +114,19 @@ function SeekBar({ value, onChange, onCommit, dark = false, waveform }) {
         step={0.1}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        onPointerUp={(e) => onCommit(parseFloat(e.target.value))}
+        onPointerUp={(e) => {
+          onCommit(parseFloat(e.target.value));
+          // Click-to-seek leaves the native focus ring on this input (the
+          // white outline in the screenshot) - while it's focused, the
+          // browser's own range-input keydown handling intercepts
+          // ArrowLeft/Right itself (holding the key nudges the slider's own
+          // value in tiny native steps, only actually seeking on release)
+          // instead of letting them reach the document-level keydown
+          // listener that does the real +-5s jump. Blurring right after the
+          // click commits hands keyboard control back to that global
+          // shortcut, which is what people actually expect here.
+          e.currentTarget.blur();
+        }}
         onKeyUp={(e) => onCommit(parseFloat(e.target.value))}
         style={{ '--seek-progress': value }}
         className={cn('seek-range absolute inset-0 w-full', dark && 'seek-range--dark')}
