@@ -9,14 +9,19 @@ import { cn } from '@/lib/utils';
  * escalation: the flame gets hotter-colored and visibly bigger the longer
  * the streak runs, capping out at 500. */
 const TIERS = [
-  { min: 500, color: '#c084fc', label: 'Legendary', scale: 1.55, glow: true },
-  { min: 200, color: '#60a5fa', label: 'Unstoppable', scale: 1.42, glow: true },
-  { min: 100, color: '#f472b6', label: 'On fire', scale: 1.3, glow: true },
-  { min: 50, color: '#fb7185', label: 'Blazing', scale: 1.22, glow: false },
-  { min: 30, color: '#f87171', label: 'Red hot', scale: 1.15, glow: false },
-  { min: 20, color: '#fb923c', label: 'Heating up', scale: 1.1, glow: false },
+  { min: 500, color: '#c084fc', label: 'Legendary', scale: 1.7, glow: true },
+  { min: 365, color: '#a78bfa', label: 'Mythic', scale: 1.62, glow: true },
+  { min: 300, color: '#818cf8', label: 'Immortal', scale: 1.54, glow: true },
+  { min: 200, color: '#60a5fa', label: 'Unstoppable', scale: 1.46, glow: true },
+  { min: 100, color: '#38bdf8', label: 'Radiant', scale: 1.38, glow: true },
+  { min: 50, color: '#f472b6', label: 'On fire', scale: 1.3, glow: false },
+  { min: 30, color: '#fb7185', label: 'Blazing', scale: 1.22, glow: false },
+  { min: 25, color: '#f87171', label: 'Red hot', scale: 1.17, glow: false },
+  { min: 20, color: '#fb923c', label: 'Heating up', scale: 1.12, glow: false },
+  { min: 15, color: '#f97316', label: 'Picking up', scale: 1.08, glow: false },
   { min: 10, color: '#f59e0b', label: 'Building', scale: 1.04, glow: false },
-  { min: 3, color: '#fbbf24', label: 'Getting started', scale: 1, glow: false },
+  { min: 7, color: '#fbbf24', label: 'Warming up', scale: 1, glow: false },
+  { min: 3, color: '#fde68a', label: 'Getting started', scale: 0.96, glow: false },
   { min: 1, color: '#e5e7eb', label: 'Day one', scale: 0.92, glow: false },
   { min: 0, color: '#52525b', label: 'No streak yet', scale: 0.85, glow: false },
 ];
@@ -100,15 +105,17 @@ export default function StreakCard({ streakDays, insights, delay = 0 }) {
                 to zero.
               </p>
               <p className="mt-2">
-                The flame levels up as it grows: <span className="text-juow-soft">1 → 3 → 10 → 20 → 30 → 50 → 100 →
-                200 → 500</span> days (max).
+                The flame levels up as it grows: <span className="text-juow-soft">1 → 3 → 7 → 10 → 15 → 20 → 25 →
+                30 → 50 → 100 → 200 → 300 → 365 → 500</span> days (max).
               </p>
             </div>
           )}
         </div>
       </div>
 
-      <p className="mt-2 font-[family-name:var(--font-anton)] text-3xl tabular-nums">{animated} days</p>
+      <p className="mt-2 font-[family-name:var(--font-anton)] text-3xl tabular-nums" style={{ color: tier.color }}>
+        {animated} days
+      </p>
       <p className="mt-1 text-sm text-juow-soft/50">{tier.label}</p>
 
       {nudge && (
@@ -128,5 +135,5 @@ export default function StreakCard({ streakDays, insights, delay = 0 }) {
 }
 
 function cnFlame(glow) {
-  return glow ? 'size-5 streak-glow' : 'size-5';
+  return glow ? 'size-7 streak-glow' : 'size-7';
 }
