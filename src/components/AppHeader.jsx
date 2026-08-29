@@ -53,7 +53,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-[102] flex h-[4.3rem] items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:px-7",
+        "fixed inset-x-0 top-0 z-[102] flex h-14 items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:h-[4.3rem] sm:px-7",
         scrolled
           ? "border-b border-white/10 bg-black/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent",
@@ -64,7 +64,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <img
             src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
             alt="Juowle logo"
-            className="h-12 w-auto" onError={handleImageError} />
+            className="h-9 w-auto sm:h-12" onError={handleImageError} />
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
@@ -216,18 +216,34 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           ))}
         </nav>
 
-        <div className="mt-8 border-t border-white/10 pt-6">
+        <div className="mt-8 space-y-4 border-t border-white/10 pt-6">
           {user ? (
-            <button
-              type="button"
-              onClick={async () => {
-                await logout();
-                setMobileOpen(false);
-              }}
-              className="flex items-center gap-2 text-juow-soft hover:text-juow-accent"
-            >
-              <LogOut className="size-4" /> Log out ({displayName})
-            </button>
+            <>
+              <Link
+                to="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 text-lg text-juow-soft hover:text-juow-accent"
+              >
+                <User className="size-4" /> Profile
+              </Link>
+              <Link
+                to="/profile?tab=settings"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 text-lg text-juow-soft hover:text-juow-accent"
+              >
+                <Settings className="size-4" /> Settings
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  setMobileOpen(false);
+                }}
+                className="flex items-center gap-2 text-juow-soft hover:text-juow-accent"
+              >
+                <LogOut className="size-4" /> Log out ({displayName})
+              </button>
+            </>
           ) : (
             <div className="flex gap-3">
               <Link

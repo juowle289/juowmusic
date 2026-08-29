@@ -402,8 +402,14 @@ export default function HomePage() {
             + horizontal padding so the curved ring spans the entire
             viewport edge-to-edge (the ring's own radius auto-fits to
             whatever width it's given - see PlaylistCarousel), while the
-            heading above it stays inside the normal content column. */}
-        <div className="relative left-1/2 w-screen -translate-x-1/2">
+            heading above it stays inside the normal content column.
+            `overflow-hidden` clips exactly at that same viewport edge - the
+            3D ring's rotateY/translateZ cards curving toward the ends
+            geometrically extend past this box even though they're not
+            visually meant to be seen there, and with nothing clipping them
+            the browser was treating that as real scrollable content,
+            making the *whole page* swipeable sideways. */}
+        <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
           {/* A genuine 3D curved carousel - see PlaylistCarousel. Cards sit
               at fixed angles around a ring (rotateY + translateZ) that's
               only ever partially turned toward the viewer, so it reads as a

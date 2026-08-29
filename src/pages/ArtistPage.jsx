@@ -24,8 +24,14 @@ const COLOR = {
   gray2: '#979797',
   blue: '#337ab7',
 };
-const SHADOW_S = '1px 1px 5px rgba(0,0,0,0.1)';
-const SHADOW_XL_DROP = 'drop-shadow(0px 0px 10px rgba(0,0,0,.5))';
+// Responsive shadow/glow/text-shadow classes - lighter/thinner on mobile
+// (dense stacked cards make the desktop-tuned shadow feel heavy at that
+// size), unchanged from `sm:` up. Used wherever a card previously only had
+// a fixed inline `style={{ boxShadow: ... }}` (an inline style can't vary
+// by breakpoint the way a className can).
+const CARD_SHADOW = 'shadow-[1px_1px_3px_rgba(0,0,0,0.06)] sm:shadow-[1px_1px_5px_rgba(0,0,0,0.1)]';
+const GLOW_SHADOW = 'drop-shadow-[0px_0px_4px_rgba(0,0,0,0.25)] sm:drop-shadow-[0px_0px_10px_rgba(0,0,0,0.5)]';
+const TITLE_SHADOW = '[text-shadow:0px_1px_2px_rgba(0,0,0,0.12)] sm:[text-shadow:0px_3px_5px_rgba(0,0,0,0.25)]';
 
 /** Mixes a '#rrggbb' color toward black (amount < 0) or white (amount > 0)
  * and returns it as an rgba() string at the given alpha - same idea as the
@@ -82,7 +88,10 @@ function SectionHeading({ id, children, controls }) {
     <div className="flex items-center justify-between border-b border-[#ddd] px-4 pb-4 pt-4 sm:px-6">
       <h1
         id={id}
-        className="scroll-mt-24 font-[family-name:var(--font-anton)] text-2xl font-bold [text-shadow:0px_3px_5px_rgba(0,0,0,0.25)] sm:text-4xl"
+        className={cn(
+          'scroll-mt-24 font-[family-name:var(--font-anton)] text-2xl font-bold sm:text-4xl',
+          TITLE_SHADOW,
+        )}
       >
         {children}
       </h1>
@@ -118,8 +127,8 @@ function LinkIcon({ href, icon, color }) {
 function FanbaseCard({ icon, iconColor, platform, number, label, bg }) {
   return (
     <div
-      className="flex h-40 w-40 shrink-0 cursor-pointer flex-col justify-between rounded-md p-3 text-center"
-      style={{ background: bg || '#f0f0f0', boxShadow: SHADOW_S }}
+      className={cn('flex h-40 w-40 shrink-0 cursor-pointer flex-col justify-between rounded-md p-3 text-center', CARD_SHADOW)}
+      style={{ background: bg || '#f0f0f0' }}
     >
       <div>
         <i className={icon} style={{ color: iconColor }} />
@@ -136,26 +145,31 @@ function SongCard({ img, title, artist, date, to }) {
   return (
     <Comp
       to={to}
-      className="group relative flex h-fit w-[85vw] max-w-[23.8em] shrink-0 gap-3 rounded-md border border-[#ddd] bg-white p-2 sm:w-[23.8em] sm:gap-4"
-      style={{ boxShadow: SHADOW_S }}
+      className={cn(
+        'group relative flex h-fit w-[78vw] max-w-[23.8em] shrink-0 gap-2.5 rounded-md border border-[#ddd] bg-white p-2 sm:w-[23.8em] sm:gap-4',
+        CARD_SHADOW,
+      )}
     >
-      <img src={img} alt="" className="size-24 shrink-0 rounded object-cover" onError={handleImageError} />
+      <img src={img} alt="" className="size-20 shrink-0 rounded object-cover sm:size-24" onError={handleImageError} />
       <div className="flex min-w-0 flex-col justify-between py-1">
         <div className="min-w-0 overflow-hidden border-b border-[#ddd] pb-1">
-          <h5 className="truncate font-bold" style={{ color: COLOR.blue }}>
+          <h5 className="truncate text-sm font-bold sm:text-base" style={{ color: COLOR.blue }}>
             {title}
           </h5>
-          <span className="truncate text-black/60">{artist}</span>
+          <span className="truncate text-xs text-black/60 sm:text-sm">{artist}</span>
         </div>
-        <div className="flex items-center gap-1 text-sm text-black/60">
+        <div className="flex items-center gap-1 text-xs text-black/60 sm:text-sm">
           <i className="bi bi-calendar4-event" />
           <span>{date}</span>
         </div>
       </div>
       {to && (
         <i
-          className="bi bi-play-circle-fill pointer-events-none absolute left-[8%] top-[22%] hidden text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:block"
-          style={{ color: COLOR.main, filter: SHADOW_XL_DROP }}
+          className={cn(
+            'bi bi-play-circle-fill pointer-events-none absolute left-[8%] top-[22%] hidden text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:block',
+            GLOW_SHADOW,
+          )}
+          style={{ color: COLOR.main }}
         />
       )}
     </Comp>
@@ -164,18 +178,18 @@ function SongCard({ img, title, artist, date, to }) {
 
 function AlbumCard({ img, title, meta }) {
   return (
-    <div
-      className="group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-white text-center"
-      style={{ boxShadow: SHADOW_S }}
-    >
+    <div className={cn('group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-white text-center', CARD_SHADOW)}>
       <img src={img} alt="" className="aspect-square w-full rounded object-cover" onError={handleImageError} />
       <h5 className="mt-2 truncate px-2 font-bold" style={{ color: COLOR.blue }}>
         {title}
       </h5>
       <span className="block px-2 pb-2 text-sm text-black/60">{meta}</span>
       <i
-        className="bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[55%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-        style={{ color: COLOR.main, filter: SHADOW_XL_DROP }}
+        className={cn(
+          'bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[55%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100',
+          GLOW_SHADOW,
+        )}
+        style={{ color: COLOR.main }}
       />
     </div>
   );
@@ -184,11 +198,7 @@ function AlbumCard({ img, title, meta }) {
 function RecommendedCard({ img, name, flag, to }) {
   const Comp = to ? Link : 'div';
   return (
-    <Comp
-      to={to}
-      className="group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-[#fdfbfb]"
-      style={{ boxShadow: SHADOW_S }}
-    >
+    <Comp to={to} className={cn('group relative h-fit w-60 shrink-0 cursor-pointer rounded-md border border-[#ddd] bg-[#fdfbfb]', CARD_SHADOW)}>
       <img src={img} alt="" className="aspect-square w-full rounded-t object-cover" onError={handleImageError} />
       <div className="flex items-center justify-between p-3">
         <h5 className="truncate font-bold" style={{ color: COLOR.blue }}>
@@ -198,8 +208,11 @@ function RecommendedCard({ img, name, flag, to }) {
       </div>
       {to && (
         <i
-          className="bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[45%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-          style={{ color: COLOR.main, filter: SHADOW_XL_DROP }}
+          className={cn(
+            'bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[45%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100',
+            GLOW_SHADOW,
+          )}
+          style={{ color: COLOR.main }}
         />
       )}
     </Comp>
@@ -277,7 +290,7 @@ export default function ArtistPage() {
           {/* Left: profile / bio / links / about */}
           <div className="w-full px-4 pt-16 sm:w-1/2 sm:px-6 sm:pt-40" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
-              <p className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl" style={{ textShadow: '0px 3px 5px rgba(0,0,0,0.25)' }}>
+              <p className={cn('mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl', TITLE_SHADOW)}>
                 {artist.displayName}
               </p>
               <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
@@ -292,8 +305,8 @@ export default function ArtistPage() {
             <div className="mb-6 flex flex-wrap items-stretch gap-3 sm:flex-nowrap">
               {/* Bio */}
               <div
-                className="w-full rounded-md border border-[#ddd] sm:w-[68%]"
-                style={{ boxShadow: SHADOW_S, background: bioBg }}
+                className={cn('w-full rounded-md border border-[#ddd] sm:w-[68%]', CARD_SHADOW)}
+                style={{ background: bioBg }}
               >
                 <p className="rounded-t-md border-b border-black px-3 py-1 font-medium">Bio Artist</p>
                 <div className="px-1">
@@ -305,8 +318,8 @@ export default function ArtistPage() {
 
               {/* Links */}
               <div
-                className="flex w-full shrink-0 flex-col rounded-md sm:w-[28%]"
-                style={{ boxShadow: SHADOW_S, background: linksBg }}
+                className={cn('flex w-full shrink-0 flex-col rounded-md sm:w-[28%]', CARD_SHADOW)}
+                style={{ background: linksBg }}
               >
                 <p className="rounded-t-md border-b border-black px-3 py-1 font-medium">Links</p>
                 <div className="grid flex-1 grid-cols-4 content-center gap-3 p-3">
@@ -339,7 +352,7 @@ export default function ArtistPage() {
 
           {/* Right: Top track */}
           <div className="w-full rounded-md px-4 pt-6 sm:w-1/2 sm:px-6 sm:pt-40" id="section2">
-            <div className="rounded-md bg-white" style={{ boxShadow: SHADOW_S }}>
+            <div className={cn("rounded-md bg-white", CARD_SHADOW)}>
               <SectionHeading id="topTracks">Top Tracks</SectionHeading>
 
               <div
@@ -403,7 +416,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Fanbase */}
-        <section className="mx-[1.6%] mt-6 rounded-md bg-white" style={{ boxShadow: SHADOW_S }} id="section3">
+        <section className={cn("mx-[1.6%] mt-6 rounded-md bg-white", CARD_SHADOW)} id="section3">
           <SectionHeading id="fanbase">Fanbase</SectionHeading>
           <div className="flex gap-4 overflow-x-auto px-4 pb-4 pt-3 [scroll-snap-type:x_proximity] [&::-webkit-scrollbar]:h-[0.35em] [&::-webkit-scrollbar-thumb]:bg-[#979797]">
             {artist.fanbase.map((f, i) => (
@@ -413,7 +426,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Popular Songs */}
-        <section className="mx-[1.6%] mt-6 rounded-md bg-white" style={{ boxShadow: SHADOW_S }} id="section4">
+        <section className={cn("mx-[1.6%] mt-6 rounded-md bg-white", CARD_SHADOW)} id="section4">
           <SectionHeading
             id="popularSongs"
             controls={<ScrollControls onLeft={() => scroll(popularScroll, -1)} onRight={() => scroll(popularScroll, 1)} />}
@@ -431,7 +444,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Albums */}
-        <section className="mx-[1.6%] mt-6 rounded-md bg-white" style={{ boxShadow: SHADOW_S }} id="section5">
+        <section className={cn("mx-[1.6%] mt-6 rounded-md bg-white", CARD_SHADOW)} id="section5">
           <SectionHeading
             id="albums"
             controls={<ScrollControls onLeft={() => scroll(albumScroll, -1)} onRight={() => scroll(albumScroll, 1)} />}
@@ -449,7 +462,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Recommended */}
-        <section className="mx-[1.6%] mt-6 rounded-md bg-white" style={{ boxShadow: SHADOW_S }} id="section6">
+        <section className={cn("mx-[1.6%] mt-6 rounded-md bg-white", CARD_SHADOW)} id="section6">
           <SectionHeading
             id="recommended"
             controls={

@@ -139,6 +139,11 @@
   body {
     @apply antialiased text-foreground;
     margin: 0;
+    /* Belt-and-suspenders with `html`'s `overflow-x: hidden` below: on iOS
+       Safari specifically, that rule alone doesn't reliably stop sideways
+       swipe/rubber-banding unless `body` also has it - a well-known mobile
+       Safari quirk, not a duplicate/redundant rule. */
+    overflow-x: hidden;
     background: #000;
     color: var(--color-juow-soft);
     font-family: var(--font-sans);
@@ -240,11 +245,17 @@
      bar (see components/GlobalAudioPlayer.jsx SeekBar). A plain native range
      input is used there instead of a UI-library slider specifically because
      dragging it is guaranteed to work with zero surprises. */
+  /* height: 100% (not a fixed rem value) so this fills the exact same box
+     as the <Waveform> SVG it's stacked on top of (both are h-8 / 32px) -
+     previously a fixed 1rem here, combined with `absolute inset-0` on the
+     input, pinned it to a shorter box anchored at the top of that area
+     instead of stretching to match it, which is why the thumb below always
+     sat above the waveform's true vertical center instead of on it. */
   .seek-range {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 1rem;
+    height: 100%;
     background: transparent;
     cursor: pointer;
   }
@@ -260,15 +271,23 @@
     height: 4px;
     background: transparent;
   }
+  /* Playhead as a small vertical bar rather than a dot - a dot's apparent
+     centering is finicky to get pixel-perfect across browsers (WebKit only
+     centers it on the track if `margin-top` is hand-tuned to the exact
+     track/thumb height difference), while a bar tall enough to visibly
+     span most of the waveform's height reads as "on" the track even if
+     that math is off by a pixel or two. margin-top here is still that same
+     formula - (track height - thumb height) / 2 - just solved for the new
+     18px thumb height instead of the old 14px dot. */
   .seek-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    margin-top: -5px;
-    width: 14px;
-    height: 14px;
-    border-radius: 9999px;
+    margin-top: -7px;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
     background: #fff;
-    border: 2px solid #000;
+    border: 1.5px solid #000;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: opacity 150ms ease;
@@ -279,11 +298,11 @@
     opacity: 1;
   }
   .seek-range::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 9999px;
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
     background: #fff;
-    border: 2px solid #000;
+    border: 1.5px solid #000;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: opacity 150ms ease;

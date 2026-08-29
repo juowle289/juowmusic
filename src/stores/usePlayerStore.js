@@ -103,7 +103,16 @@ export const usePlayerStore = create((set, get) => ({
     set({ playlist: next, playlistIndex });
   },
 
-  next: () => {
+  // `overrides` lets a crossfade auto-advance (see useAudioEngine's
+  // onAutoAdvance) pass in the *real* currentTime/duration of the track
+  // that's already been playing quietly in the background for the last few
+  // seconds - without it, this always reset both to 0 (correct for the
+  // plain "skip" button, where the new track genuinely hasn't loaded yet),
+  // which after a crossfade instantly stomped the accurate values right
+  // back to 0/0 a tick after they'd been set, freezing the seek bar at 0%
+  // and blocking clicks on it (`handleSeekCommit` bails out whenever
+  // `duration` is falsy).
+  next: (overrides = {}) => {
     const { playlist, playlistIndex } = get();
     if (playlistIndex < 0 || playlistIndex >= playlist.length - 1) return;
 
@@ -113,8 +122,8 @@ export const usePlayerStore = create((set, get) => ({
     set({
       playlistIndex: nextIndex,
       currentSong: nextSong,
-      currentTime: 0,
-      duration: 0,
+      currentTime: overrides.currentTime ?? 0,
+      duration: overrides.duration ?? 0,
       isPlaying: true,
     });
   },

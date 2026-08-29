@@ -206,7 +206,18 @@ export default function useAudioEngine({
       activeKeyRef.current = toKey;
       crossfadingRef.current = false;
       lastAutoAdvancedSlugRef.current = next.slug;
-      callbacksRef.current.onAutoAdvance();
+      // Pass the real, already-in-progress currentTime/duration of `toAudio`
+      // through to the caller's onAutoAdvance in the SAME call that swaps
+      // `currentSong` - not as a separate onDurationChange call beforehand,
+      // since that value would just get stomped back to 0 a moment later by
+      // whatever store action onAutoAdvance triggers to change tracks
+      // (that action has its own, separate reset-to-0 default it applies
+      // for the *normal* skip-button case, which runs unconditionally
+      // unless it's told otherwise here).
+      callbacksRef.current.onAutoAdvance({
+        currentTime: Number.isFinite(toAudio.currentTime) ? toAudio.currentTime : 0,
+        duration: Number.isFinite(toAudio.duration) ? toAudio.duration : 0,
+      });
     }, duration * 1000);
   }
 

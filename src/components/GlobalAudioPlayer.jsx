@@ -16,7 +16,19 @@ import { handleImageError } from '@/lib/imageFallback';
 
 const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimized
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
-const BAR_COUNT = 5;
+const BAR_COUNT = 9;
+const BAR_COUNT_FULLSCREEN = 14;
+
+// iOS Safari's long-press "callout" (the blue text-selection highlight, or
+// the Save/Copy Image sheet on an <img>) can steal an in-progress touch
+// gesture - the pointerup that should toggle/restore the mini vinyl, or the
+// tap right after a long-press-to-fullscreen, sometimes never fires because
+// iOS decided this hold was a selection/callout gesture instead. Applied to
+// every touchable surface of the player chrome (never to page content like
+// the Lyric page's actual lyric text, which relies on real text selection
+// for its own share feature) so holding anywhere on the player just presses
+// it - no ghost menu, no swallowed tap.
+const NO_CALLOUT = '[-webkit-touch-callout:none] [-webkit-user-select:none] select-none';
 
 // A short, sharp buzz - similar weight to the iPhone 8's Home button click.
 // Only actually does anything on browsers that support the Vibration API
@@ -35,7 +47,7 @@ function isTypingTarget(el) {
 }
 
 /** Live-updating equalizer bars driven by the audio engine's shared AnalyserNode. */
-function Visualizer({ getAnalyser, isPlaying }) {
+function Visualizer({ getAnalyser, isPlaying, barCount = BAR_COUNT, className }) {
   const barRefs = useRef([]);
   const rafRef = useRef(null);
 
@@ -50,11 +62,11 @@ function Visualizer({ getAnalyser, isPlaying }) {
     if (!analyser) return undefined;
 
     const data = new Uint8Array(analyser.frequencyBinCount);
-    const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT));
+    const bucket = Math.max(1, Math.floor(data.length / barCount));
 
     const loop = () => {
       analyser.getByteFrequencyData(data);
-      for (let i = 0; i < BAR_COUNT; i++) {
+      for (let i = 0; i < barCount; i++) {
         let sum = 0;
         for (let j = 0; j < bucket; j++) sum += data[i * bucket + j];
         const level = sum / bucket / 255;
@@ -65,11 +77,12 @@ function Visualizer({ getAnalyser, isPlaying }) {
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [isPlaying, getAnalyser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, getAnalyser, barCount]);
 
   return (
-    <div className="flex h-3 shrink-0 items-end gap-[3px]" aria-hidden>
-      {Array.from({ length: BAR_COUNT }, (_, i) => (
+    <div className={cn('flex h-3 shrink-0 items-end gap-[3px]', className)} aria-hidden>
+      {Array.from({ length: barCount }, (_, i) => (
         <span
           key={i}
           ref={(el) => (barRefs.current[i] = el)}
@@ -201,6 +214,26 @@ export default function GlobalAudioPlayer() {
   useEffect(() => {
     setFullscreen(false);
   }, [location.pathname]);
+
+  // Lock background scrolling while the full-screen overlay is open - it's
+  // `position: fixed` and covers the viewport, but that alone doesn't stop
+  // the page underneath from still scrolling on touch (especially on iOS
+  // Safari, where a fixed overlay doesn't reliably block scroll on its own).
+  // Locking both <html> and <body> (not just one) is what actually holds on
+  // iOS. Restores whatever inline overflow was there before, not just ''.
+  useEffect(() => {
+    if (!isFullscreen) return undefined;
+    const html = document.documentElement;
+    const { body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [isFullscreen]);
   // While the user is actively dragging the seek thumb, show their drag position
   // instead of fighting it with the audio's real (laggier) currentTime updates.
   const [seekPreview, setSeekPreview] = useState(null);
@@ -330,6 +363,17 @@ export default function GlobalAudioPlayer() {
     if (!wasDrag) toggleMini();
   };
 
+  // iOS can fire `pointercancel` instead of `pointerup` mid-tap (e.g. it
+  // decided the hold was the start of its own image-callout gesture) -
+  // without handling this, `dragState.current` stays set from the aborted
+  // press, so a normal tap right after doesn't ever cross the `!dragState`
+  // guard at the top of the handlers above and silently does nothing until
+  // the component re-renders for an unrelated reason. Just clear the drag
+  // state - a cancelled gesture never counts as a completed tap either way.
+  const handlePointerCancel = () => {
+    dragState.current = null;
+  };
+
   const progress = useMemo(() => {
     if (seekPreview !== null) return seekPreview;
     return duration ? (currentTime / duration) * 100 : 0;
@@ -419,9 +463,13 @@ export default function GlobalAudioPlayer() {
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerCancel}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
             style={pos ? { left: pos.x, top: pos.y, width: MINI_SIZE, height: MINI_SIZE } : { left: 12, bottom: '6%', width: MINI_SIZE, height: MINI_SIZE }}
-            className="fixed z-50 cursor-grab touch-none select-none overflow-hidden rounded-full active:cursor-grabbing"
+            className={cn(
+              'fixed z-50 cursor-grab touch-none overflow-hidden rounded-full active:cursor-grabbing',
+              NO_CALLOUT,
+            )}
           >
             <div className="relative size-full shadow-[0.15em_0.25em_0.9em_rgba(0,0,0,0.35)]">
               <VinylDisc labelId="mini" className="size-full" />
@@ -460,7 +508,10 @@ export default function GlobalAudioPlayer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-2 rounded-md border border-black/80 bg-white/40 px-2 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%] sm:gap-3 sm:px-3"
+            className={cn(
+              'fixed inset-x-[3%] bottom-[3%] z-50 flex h-[4.25rem] items-center gap-2 rounded-md border border-black/80 bg-white/40 px-2 shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] backdrop-blur-md sm:inset-x-[10%] sm:bottom-[6%] sm:gap-3 sm:px-3',
+              NO_CALLOUT,
+            )}
             ref={barRef}
             onTouchStart={handleBarTouchStart}
             onTouchMove={handleBarTouchMove}
@@ -524,6 +575,12 @@ export default function GlobalAudioPlayer() {
                 -{formatTime(remaining)}
               </span>
             </div>
+
+            {/* On mobile the crossfade/queue/expand buttons below are all
+                hidden (no room), leaving otherwise-empty space here - fill
+                it with the same equalizer bars the full-screen view gets,
+                instead of only ever showing them once you go full-screen. */}
+            <Visualizer getAnalyser={engine.getAnalyser} isPlaying={isPlaying} className="sm:hidden" />
 
             {/* Crossfade toggle - same control as the full-screen view's
                 Blend icon (see below), just also reachable without going
@@ -611,13 +668,23 @@ export default function GlobalAudioPlayer() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
-          className="fixed inset-0 z-[110] flex flex-col items-center justify-end gap-6 bg-black px-4 pb-16 pt-24 text-white sm:px-6"
+          className={cn(
+            'fixed inset-0 z-[110] flex flex-col items-center justify-end gap-6 bg-black px-4 pb-16 pt-24 text-white sm:px-6',
+            NO_CALLOUT,
+          )}
         >
           <button
             type="button"
             onClick={() => {
               vibrateTick();
               setFullscreen(false);
+              // On mobile, "Shrink" should land you back on the smallest
+              // resting state (the vinyl), not the medium docked bar - most
+              // of that bar's own controls are hidden on small screens
+              // anyway, so it isn't really a meaningful "half-way" stop
+              // there the way it is on desktop (reached deliberately via
+              // the Expand button, where returning to the bar makes sense).
+              if (!isMini && window.matchMedia('(max-width: 639px)').matches) toggleMini();
             }}
             aria-label="Exit full screen"
             className="absolute right-4 top-4 text-white/80 hover:text-white sm:right-6 sm:top-6"
@@ -698,7 +765,7 @@ export default function GlobalAudioPlayer() {
             <SeekBar value={progress} onChange={handleSeekChange} onCommit={handleSeekCommit} dark waveform={waveformBars} />
             <span className="w-10 shrink-0 text-xs tabular-nums text-white/70">-{formatTime(remaining)}</span>
           </div>
-          <Visualizer getAnalyser={engine.getAnalyser} isPlaying={isPlaying} />
+          <Visualizer getAnalyser={engine.getAnalyser} isPlaying={isPlaying} barCount={BAR_COUNT_FULLSCREEN} />
 
           <AnimatePresence>
             {queueOpen && (
