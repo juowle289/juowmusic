@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 // How long the crossfade/preload window is, in seconds. This is also what
 // makes playback gapless even when the fade itself is barely audible: the
@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 // well before the current one ends, so there's never a moment where
 // playback has to stop and wait on a fresh network fetch.
 const CROSSFADE_SECONDS = 5;
+const PLAYBACK_FADE_SECONDS = 0.5;
 
 /**
  * Owns two <audio> elements and swaps which one is "live" for true
@@ -42,9 +43,11 @@ export default function useAudioEngine({
   const audioRefs = { A: audioARef, B: audioBRef };
 
   const ctxRef = useRef(null);
+  const playbackGainRef = useRef(null);
   const masterGainRef = useRef(null);
   const analyserRef = useRef(null);
-  const activeKeyRef = useRef('A');
+  const pauseTimerRef = useRef(null);
+  const activeKeyRef = useRef("A");
   const crossfadingRef = useRef(false);
   const lastAutoAdvancedSlugRef = useRef(null);
 
@@ -52,7 +55,13 @@ export default function useAudioEngine({
   const activeGainRef = useRef(activeGain);
   const upcomingGainRef = useRef(upcomingGain);
   const nextTrackRef = useRef(nextTrack);
-  const callbacksRef = useRef({ onTimeUpdate, onDurationChange, onEnded, onAutoAdvance, onPlaybackError });
+  const callbacksRef = useRef({
+    onTimeUpdate,
+    onDurationChange,
+    onEnded,
+    onAutoAdvance,
+    onPlaybackError,
+  });
 
   useEffect(() => {
     crossfadeEnabledRef.current = crossfadeEnabled;
@@ -64,7 +73,13 @@ export default function useAudioEngine({
     nextTrackRef.current = nextTrack;
   }, [nextTrack]);
   useEffect(() => {
-    callbacksRef.current = { onTimeUpdate, onDurationChange, onEnded, onAutoAdvance, onPlaybackError };
+    callbacksRef.current = {
+      onTimeUpdate,
+      onDurationChange,
+      onEnded,
+      onAutoAdvance,
+      onPlaybackError,
+    };
   });
 
   // The active track's gain can change independently (loudness measurement
@@ -75,7 +90,10 @@ export default function useAudioEngine({
     if (crossfadingRef.current) return;
     const graph = graphFor(activeKeyRef.current);
     if (graph && ctxRef.current) {
-      graph.trackGain.gain.setValueAtTime(activeGain, ctxRef.current.currentTime);
+      graph.trackGain.gain.setValueAtTime(
+        activeGain,
+        ctxRef.current.currentTime,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeGain]);
@@ -85,14 +103,35 @@ export default function useAudioEngine({
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
     const masterGain = ctx.createGain();
+    const playbackGain = ctx.createGain();
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 64;
     analyser.smoothingTimeConstant = 0.75;
+    playbackGain.gain.value = 0;
+    playbackGain.connect(masterGain);
     masterGain.connect(analyser);
     analyser.connect(ctx.destination);
     ctxRef.current = ctx;
+    playbackGainRef.current = playbackGain;
     masterGainRef.current = masterGain;
     analyserRef.current = analyser;
+  }
+
+  function rampPlaybackGain(target) {
+    const ctx = ctxRef.current;
+    const param = playbackGainRef.current?.gain;
+    if (!ctx || !param) return false;
+
+    const now = ctx.currentTime;
+    if (typeof param.cancelAndHoldAtTime === "function") {
+      param.cancelAndHoldAtTime(now);
+    } else {
+      const currentValue = param.value;
+      param.cancelScheduledValues(now);
+      param.setValueAtTime(currentValue, now);
+    }
+    param.linearRampToValueAtTime(target, now + PLAYBACK_FADE_SECONDS);
+    return true;
   }
 
   function graphFor(key) {
@@ -104,9 +143,10 @@ export default function useAudioEngine({
     try {
       const source = ctxRef.current.createMediaElementSource(audio);
       const trackGain = ctxRef.current.createGain();
-      trackGain.gain.value = key === activeKeyRef.current ? activeGainRef.current : 0;
+      trackGain.gain.value =
+        key === activeKeyRef.current ? activeGainRef.current : 0;
       source.connect(trackGain);
-      trackGain.connect(masterGainRef.current);
+      trackGain.connect(playbackGainRef.current);
       const graph = { source, trackGain };
       audio._engineGraph = graph;
       return graph;
@@ -121,12 +161,12 @@ export default function useAudioEngine({
   }
 
   function otherKey(key) {
-    return key === 'A' ? 'B' : 'A';
+    return key === "A" ? "B" : "A";
   }
 
   // --- Wire up permanent per-element listeners once on mount --------------
   useEffect(() => {
-    const cleanups = ['A', 'B'].map((key) => {
+    const cleanups = ["A", "B"].map((key) => {
       const audio = audioRefs[key].current;
       if (!audio) return () => {};
 
@@ -138,7 +178,12 @@ export default function useAudioEngine({
 
         if (crossfadingRef.current || !crossfadeEnabledRef.current) return;
         const remaining = audio.duration - audio.currentTime;
-        if (!Number.isFinite(remaining) || remaining > CROSSFADE_SECONDS || remaining <= 0) return;
+        if (
+          !Number.isFinite(remaining) ||
+          remaining > CROSSFADE_SECONDS ||
+          remaining <= 0
+        )
+          return;
         const next = nextTrackRef.current;
         if (!next) return; // last track in the queue - let it play out naturally
         startCrossfade(next, remaining);
@@ -156,15 +201,15 @@ export default function useAudioEngine({
         if (isActive()) callbacksRef.current.onPlaybackError();
       };
 
-      audio.addEventListener('timeupdate', onTime);
-      audio.addEventListener('loadedmetadata', onLoadedMeta);
-      audio.addEventListener('ended', onTrackEnded);
-      audio.addEventListener('error', onError);
+      audio.addEventListener("timeupdate", onTime);
+      audio.addEventListener("loadedmetadata", onLoadedMeta);
+      audio.addEventListener("ended", onTrackEnded);
+      audio.addEventListener("error", onError);
       return () => {
-        audio.removeEventListener('timeupdate', onTime);
-        audio.removeEventListener('loadedmetadata', onLoadedMeta);
-        audio.removeEventListener('ended', onTrackEnded);
-        audio.removeEventListener('error', onError);
+        audio.removeEventListener("timeupdate", onTime);
+        audio.removeEventListener("loadedmetadata", onLoadedMeta);
+        audio.removeEventListener("ended", onTrackEnded);
+        audio.removeEventListener("error", onError);
       };
     });
     return () => cleanups.forEach((fn) => fn());
@@ -182,7 +227,10 @@ export default function useAudioEngine({
     const fromGraph = graphFor(fromKey);
     const toGraph = graphFor(toKey);
     const targetGain = upcomingGainRef.current ?? 1;
-    const duration = Math.max(0.3, Math.min(CROSSFADE_SECONDS, availableSeconds));
+    const duration = Math.max(
+      0.3,
+      Math.min(CROSSFADE_SECONDS, availableSeconds),
+    );
     const now = ctxRef.current.currentTime;
 
     toAudio.src = next.audioSrc;
@@ -192,12 +240,18 @@ export default function useAudioEngine({
 
     if (fromGraph) {
       fromGraph.trackGain.gain.cancelScheduledValues(now);
-      fromGraph.trackGain.gain.setValueAtTime(fromGraph.trackGain.gain.value, now);
+      fromGraph.trackGain.gain.setValueAtTime(
+        fromGraph.trackGain.gain.value,
+        now,
+      );
       fromGraph.trackGain.gain.linearRampToValueAtTime(0, now + duration);
     }
     if (toGraph) {
       toGraph.trackGain.gain.cancelScheduledValues(now);
-      toGraph.trackGain.gain.linearRampToValueAtTime(targetGain, now + duration);
+      toGraph.trackGain.gain.linearRampToValueAtTime(
+        targetGain,
+        now + duration,
+      );
     }
 
     window.setTimeout(() => {
@@ -215,7 +269,9 @@ export default function useAudioEngine({
       // for the *normal* skip-button case, which runs unconditionally
       // unless it's told otherwise here).
       callbacksRef.current.onAutoAdvance({
-        currentTime: Number.isFinite(toAudio.currentTime) ? toAudio.currentTime : 0,
+        currentTime: Number.isFinite(toAudio.currentTime)
+          ? toAudio.currentTime
+          : 0,
         duration: Number.isFinite(toAudio.duration) ? toAudio.duration : 0,
       });
     }, duration * 1000);
@@ -230,7 +286,7 @@ export default function useAudioEngine({
      * click) where an instant switch is correct, not a fade. If this slug
      * is the one a crossfade *just* auto-advanced to, it's a no-op - that
      * audio is already playing correctly in place. */
-    loadTrack(track, { autoplay } = {}) {
+    loadTrack(track) {
       if (lastAutoAdvancedSlugRef.current === track.slug) {
         lastAutoAdvancedSlugRef.current = null;
         return;
@@ -242,27 +298,45 @@ export default function useAudioEngine({
       audio.src = track.audioSrc;
       audio.load();
       const graph = graphFor(key);
-      if (graph) graph.trackGain.gain.setValueAtTime(activeGainRef.current, ctxRef.current.currentTime);
-      if (autoplay) {
-        ctxRef.current?.resume?.();
-        audio.play().catch(() => callbacksRef.current.onPlaybackError());
-      }
+      if (graph)
+        graph.trackGain.gain.setValueAtTime(
+          activeGainRef.current,
+          ctxRef.current.currentTime,
+        );
     },
 
     play() {
+      if (pauseTimerRef.current) {
+        window.clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = null;
+      }
       ensureContext();
       ctxRef.current?.resume?.();
+      rampPlaybackGain(1);
       const audio = audioRefs[activeKeyRef.current].current;
       audio?.play().catch(() => callbacksRef.current.onPlaybackError());
     },
 
     pause() {
-      audioRefs[activeKeyRef.current].current?.pause();
       // A crossfade in progress should stop dead on manual pause rather
       // than keep fading in the background while the UI reads "paused".
-      if (crossfadingRef.current) {
-        audioRefs[otherKey(activeKeyRef.current)].current?.pause();
+      const activeAudio = audioRefs[activeKeyRef.current].current;
+      const otherAudio = crossfadingRef.current
+        ? audioRefs[otherKey(activeKeyRef.current)].current
+        : null;
+
+      if (!rampPlaybackGain(0)) {
+        activeAudio?.pause();
+        otherAudio?.pause();
+        return;
       }
+
+      if (pauseTimerRef.current) window.clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = window.setTimeout(() => {
+        activeAudio?.pause();
+        otherAudio?.pause();
+        pauseTimerRef.current = null;
+      }, PLAYBACK_FADE_SECONDS * 1000);
     },
 
     seek(time) {
@@ -278,9 +352,9 @@ export default function useAudioEngine({
         // Defer the actual seek to the moment it becomes safe.
         const onLoadedMeta = () => {
           audio.currentTime = time;
-          audio.removeEventListener('loadedmetadata', onLoadedMeta);
+          audio.removeEventListener("loadedmetadata", onLoadedMeta);
         };
-        audio.addEventListener('loadedmetadata', onLoadedMeta);
+        audio.addEventListener("loadedmetadata", onLoadedMeta);
       }
     },
 

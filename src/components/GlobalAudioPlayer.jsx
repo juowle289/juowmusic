@@ -28,6 +28,68 @@ const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
 
+function MarqueeText({ children, className }) {
+  const viewportRef = useRef(null);
+  const textRef = useRef(null);
+  const [overflow, setOverflow] = useState(0);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const text = textRef.current;
+    if (!viewport || !text) return undefined;
+
+    const measure = () => {
+      const distance = Math.max(0, text.scrollWidth - viewport.clientWidth);
+      setOverflow((current) => (current === distance ? current : distance));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    observer.observe(text);
+    return () => observer.disconnect();
+  }, [children]);
+
+  const travelDuration = overflow / 36;
+  const cycleDuration = travelDuration * 2 + 4;
+
+  useEffect(() => {
+    const text = textRef.current;
+    if (!text || overflow <= 0) return undefined;
+
+    const animation = text.animate(
+      [
+        { transform: "translateX(0px)", offset: 0 },
+        { transform: "translateX(0px)", offset: 2 / cycleDuration },
+        {
+          transform: `translateX(-${overflow}px)`,
+          offset: (2 + travelDuration) / cycleDuration,
+        },
+        {
+          transform: `translateX(-${overflow}px)`,
+          offset: (4 + travelDuration) / cycleDuration,
+        },
+        { transform: "translateX(0px)", offset: 1 },
+      ],
+      {
+        duration: cycleDuration * 1000,
+        iterations: Infinity,
+        easing: "linear",
+      },
+    );
+
+    return () => animation.cancel();
+  }, [cycleDuration, overflow, travelDuration]);
+
+  return (
+    <div ref={viewportRef} className={cn("min-w-0 overflow-hidden", className)}>
+      <div ref={textRef} className="w-max whitespace-nowrap">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // iOS Safari's long-press "callout" (the blue text-selection highlight, or
 // the Save/Copy Image sheet on an <img>) can steal an in-progress touch
 // gesture - the pointerup that should toggle/restore the mini vinyl, or the
@@ -620,7 +682,7 @@ export default function GlobalAudioPlayer() {
                   type="button"
                   onClick={toggleMini}
                   aria-label="Minimize player"
-                  className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-md px-1 py-1 transition-colors hover:bg-black/5 sm:-mx-1.5 sm:-my-1 sm:max-w-[22em] sm:flex-none sm:gap-2.5 sm:hover:bg-gray-100"
+                  className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-md px-1 py-1 transition-colors hover:bg-black/5 sm:-mx-1.5 sm:-my-1 sm:w-[12em] sm:flex-none sm:gap-2.5 sm:hover:bg-gray-100 md:w-[15em] lg:w-[18em]"
                 >
                   {/* layoutId shared with the mini widget's cover art below -
                   Framer Motion FLIP-animates this square thumbnail
@@ -634,13 +696,13 @@ export default function GlobalAudioPlayer() {
                     className="size-10 shrink-0 rounded-md object-cover sm:size-11 sm:rounded-sm"
                     onError={handleImageError}
                   />
-                  <div className="min-w-0 flex-col text-left">
-                    <p className="truncate text-sm font-semibold text-black sm:text-base">
+                  <div className="flex min-w-0 flex-1 flex-col text-left">
+                    <MarqueeText className="w-full text-sm font-semibold text-black sm:text-base">
                       {currentSong.songTitle}
-                    </p>
-                    <p className="truncate text-xs text-black/60 sm:text-sm">
+                    </MarqueeText>
+                    <MarqueeText className="w-full text-xs text-black/60 sm:text-sm">
                       {currentSong.artistName}
-                    </p>
+                    </MarqueeText>
                   </div>
                 </button>
 
