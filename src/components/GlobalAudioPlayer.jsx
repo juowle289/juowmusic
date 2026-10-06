@@ -775,12 +775,20 @@ export default function GlobalAudioPlayer() {
                   <Expand className="size-5" />
                 </button>
 
-                <img
-                  src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
-                  alt="Juowle"
-                  className="hidden h-8 w-auto shrink-0 opacity-80 lg:block"
-                  onError={handleImageError}
-                />
+                <button
+                  type="button"
+                  onClick={handleStartParty}
+                  disabled={starting}
+                  aria-label="Start a listening party"
+                  title={
+                    starting
+                      ? "Starting listening party..."
+                      : "Start a listening party"
+                  }
+                  className="hidden shrink-0 rounded-full p-1.5 text-black/50 transition-colors hover:bg-gray-100 hover:text-black disabled:opacity-50 sm:block"
+                >
+                  <Users className="size-5" />
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
