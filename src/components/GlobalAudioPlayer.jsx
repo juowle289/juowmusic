@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatTime, usePlayerStore } from "@/stores/usePlayerStore";
 import { handleImageError } from "@/lib/imageFallback";
 
-const MINI_SIZE = 112; // px, size of the fused vinyl+cover widget when minimized
+const MINI_SIZE = 72; // px, matches the mobile player dock height
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
@@ -131,8 +131,8 @@ function SeekBar({
 }) {
   if (compact) {
     return (
-      <div className="relative h-3 w-full">
-        <div className="pointer-events-none absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full bg-black/15">
+      <div className="relative h-2 w-full">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] overflow-hidden rounded-full bg-black/15">
           <div
             className="h-full rounded-full bg-black"
             style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
@@ -580,7 +580,7 @@ export default function GlobalAudioPlayer() {
                   same element can make the shrink animation restart or drift. */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <motion.div
-                      className="size-11"
+                      className="size-7"
                       animate={{ rotate: isPlaying ? 360 : 0 }}
                       transition={
                         isPlaying
@@ -608,7 +608,7 @@ export default function GlobalAudioPlayer() {
                 exit={{ opacity: 0 }}
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 className={cn(
-                  "fixed inset-x-3 bottom-3 z-50 flex h-[4.5rem] items-center gap-1.5 rounded-lg border border-black/10 bg-white/85 px-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.16)] backdrop-blur-2xl sm:inset-x-[10%] sm:bottom-[6%] sm:h-[4.25rem] sm:gap-3 sm:rounded-md sm:border-black/80 sm:bg-white/40 sm:px-3 sm:shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] sm:backdrop-blur-md",
+                  "fixed inset-x-3 bottom-3 z-50 flex h-[4.5rem] items-center gap-1.5 rounded-lg border border-black/10 bg-white/85 p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.16)] backdrop-blur-2xl sm:inset-x-[10%] sm:bottom-[6%] sm:h-[4.25rem] sm:gap-3 sm:rounded-md sm:border-black/80 sm:bg-white/40 sm:px-3 sm:py-0 sm:shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] sm:backdrop-blur-md",
                   NO_CALLOUT,
                 )}
                 onTouchStart={handleBarTouchStart}
@@ -694,7 +694,7 @@ export default function GlobalAudioPlayer() {
                   </span>
                 </div>
 
-                <div className="absolute inset-x-2 bottom-0.5 sm:hidden">
+                <div className="absolute inset-x-1.5 bottom-0 sm:hidden">
                   <SeekBar
                     value={progress}
                     onChange={handleSeekChange}
