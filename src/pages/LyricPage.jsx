@@ -1,30 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowDown, Share2 } from 'lucide-react';
-import SiteFooter from '@/components/SiteFooter';
-import Loader from '@/components/Loader';
-import Comments from '@/components/Comments';
-import QASection from '@/components/QASection';
-import VinylDisc from '@/components/VinylDisc';
-import PartyBubbles from '@/components/PartyBubbles';
-import LyricShareModal, { extractAccentColor } from '@/components/LyricShareModal';
-import useInlineStyle from '@/hooks/useInlineStyle';
-import useCoverPalette from '@/hooks/useCoverPalette';
-import useDocumentTitle from '@/hooks/useDocumentTitle';
-import useLyricPlayer from '@/hooks/useLyricPlayer';
-import { findClickedLineIndex } from '@/lib/lyricLines';
-import { usePlayerStore } from '@/stores/usePlayerStore';
-import { cn } from '@/lib/utils';
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowDown, Share2 } from "lucide-react";
+import SiteFooter from "@/components/SiteFooter";
+import Loader from "@/components/Loader";
+import Comments from "@/components/Comments";
+import QASection from "@/components/QASection";
+import VinylDisc from "@/components/VinylDisc";
+import PartyBubbles from "@/components/PartyBubbles";
+import LyricShareModal, {
+  extractAccentColor,
+} from "@/components/LyricShareModal";
+import useInlineStyle from "@/hooks/useInlineStyle";
+import useCoverPalette from "@/hooks/useCoverPalette";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import useLyricPlayer from "@/hooks/useLyricPlayer";
+import { findClickedLineIndex } from "@/lib/lyricLines";
+import { usePlayerStore } from "@/stores/usePlayerStore";
+import { cn } from "@/lib/utils";
 
-import afterHours from '@/data/lyrics/afterHours.json';
-import ballroomExtravaganza from '@/data/lyrics/ballroomExtravaganza.json';
-import blue from '@/data/lyrics/blue.json';
-import chungTaCuaTuongLai from '@/data/lyrics/chungTaCuaTuongLai.json';
-import hayTraoChoAnh from '@/data/lyrics/hayTraoChoAnh.json';
-import nerves from '@/data/lyrics/nerves.json';
-import oneOfTheGirls from '@/data/lyrics/oneOfTheGirls.json';
-import theColorViolet from '@/data/lyrics/theColorViolet.json';
-import { handleImageError } from '@/lib/imageFallback';
+import afterHours from "@/data/lyrics/afterHours.json";
+import ballroomExtravaganza from "@/data/lyrics/ballroomExtravaganza.json";
+import blue from "@/data/lyrics/blue.json";
+import chungTaCuaTuongLai from "@/data/lyrics/chungTaCuaTuongLai.json";
+import hayTraoChoAnh from "@/data/lyrics/hayTraoChoAnh.json";
+import nerves from "@/data/lyrics/nerves.json";
+import oneOfTheGirls from "@/data/lyrics/oneOfTheGirls.json";
+import theColorViolet from "@/data/lyrics/theColorViolet.json";
+import { handleImageError } from "@/lib/imageFallback";
 
 const SONGS = {
   afterHours,
@@ -55,7 +57,8 @@ export default function LyricPage() {
   const requestSeek = usePlayerStore((s) => s.requestSeek);
   const isThisSongPlaying = isPlaying && activeSlug === song?.slug;
 
-  const hasLineTimestamps = Array.isArray(song?.lineTimestamps) && song.lineTimestamps.length > 0;
+  const hasLineTimestamps =
+    Array.isArray(song?.lineTimestamps) && song.lineTimestamps.length > 0;
 
   /** Click-to-seek: only wired up when this song actually has tapped
    * timestamps (see /tools/lyric-sync) - songs without them keep the lyric
@@ -66,7 +69,7 @@ export default function LyricPage() {
     const lineIndex = findClickedLineIndex(lyricRef.current, event.target);
     if (lineIndex === null) return;
     const time = song.lineTimestamps[lineIndex];
-    if (typeof time !== 'number') return;
+    if (typeof time !== "number") return;
     requestSeek(time, {
       slug: song.slug,
       songTitle: song.songTitle,
@@ -79,7 +82,7 @@ export default function LyricPage() {
   const lyricRef = useRef(null);
   const shareButtonRef = useRef(null);
   const [selectionBubble, setSelectionBubble] = useState(null); // { text, top, left }
-  const [shareText, setShareText] = useState('');
+  const [shareText, setShareText] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
 
   // Lets people highlight a line or two of the lyrics and turn it into a
@@ -112,7 +115,13 @@ export default function LyricPage() {
       const text = sel?.toString().trim();
       const container = lyricRef.current;
 
-      if (!sel || sel.isCollapsed || !text || !container || !container.contains(sel.anchorNode)) {
+      if (
+        !sel ||
+        sel.isCollapsed ||
+        !text ||
+        !container ||
+        !container.contains(sel.anchorNode)
+      ) {
         setSelectionBubble(null);
         return;
       }
@@ -130,13 +139,13 @@ export default function LyricPage() {
     };
 
     const dismiss = () => setSelectionBubble(null);
-    document.addEventListener('mouseup', readSelection);
-    document.addEventListener('touchend', readSelection);
-    window.addEventListener('scroll', dismiss, { passive: true });
+    document.addEventListener("mouseup", readSelection);
+    document.addEventListener("touchend", readSelection);
+    window.addEventListener("scroll", dismiss, { passive: true });
     return () => {
-      document.removeEventListener('mouseup', readSelection);
-      document.removeEventListener('touchend', readSelection);
-      window.removeEventListener('scroll', dismiss);
+      document.removeEventListener("mouseup", readSelection);
+      document.removeEventListener("touchend", readSelection);
+      window.removeEventListener("scroll", dismiss);
     };
   }, []);
 
@@ -151,13 +160,15 @@ export default function LyricPage() {
   if (!song) {
     return (
       <main className="flex min-h-screen items-center justify-center px-8 pt-24 text-juow-soft">
-        <h1 className="font-[family-name:var(--font-anton)] text-3xl">Song not found</h1>
+        <h1 className="font-[family-name:var(--font-anton)] text-3xl">
+          Song not found
+        </h1>
       </main>
     );
   }
 
   return (
-    <div className="bg-white">
+    <div className="lyric-page bg-white">
       <Loader />
 
       {/* Hero: colored per-song gradient set via useInlineStyle(customStyle), white text.
@@ -178,30 +189,34 @@ export default function LyricPage() {
               title/meta text instead of beside it. */}
           <div
             className={cn(
-              'relative hidden h-[22em] shrink-0 transition-[width] duration-500 ease-out sm:block',
-              isThisSongPlaying ? 'w-[28em]' : 'w-[22em]',
+              "relative hidden h-[22em] shrink-0 transition-[width] duration-500 ease-out sm:block",
+              isThisSongPlaying ? "w-[28em]" : "w-[22em]",
             )}
           >
             <VinylDisc
               labelId="hero"
               spinning={isThisSongPlaying}
               className={cn(
-                'absolute left-0 top-0 size-[22em] transition-transform duration-500 ease-out [animation-duration:3s]',
+                "absolute left-0 top-0 size-[22em] transition-transform duration-500 ease-out [animation-duration:3s]",
                 // Purely horizontal - it should peek out to the right from
                 // behind the cover, not drift diagonally down-right.
-                isThisSongPlaying ? 'translate-x-[6em]' : 'translate-x-0',
+                isThisSongPlaying ? "translate-x-[6em]" : "translate-x-0",
               )}
             />
             <img
               src={song.coverSrc}
               alt={song.songTitle}
-              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl" onError={handleImageError} />
+              className="absolute left-0 top-0 size-[22em] object-cover shadow-2xl"
+              onError={handleImageError}
+            />
           </div>
           {/* Mobile cover: simple, non-overflowing, sits above the text block. */}
           <img
             src={song.coverSrc}
             alt={song.songTitle}
-            className="relative z-[2] mx-auto size-40 object-cover shadow-[0_18px_35px_-8px_rgba(0,0,0,0.75)] sm:mx-0 sm:hidden" onError={handleImageError} />
+            className="relative z-[2] mx-auto size-40 object-cover shadow-[0_18px_35px_-8px_rgba(0,0,0,0.75)] sm:mx-0 sm:hidden"
+            onError={handleImageError}
+          />
 
           {/* Right: text column. flex-col + mt-auto on the meta row (instead of
               absolutely pinning it to the column's bottom) keeps title/about
@@ -214,23 +229,29 @@ export default function LyricPage() {
               background, light or dark. */}
           <div
             className={cn(
-              'relative flex min-w-0 flex-1 flex-col self-stretch pt-2 sm:pt-4',
-              palette.isLight ? 'text-black' : 'text-[#f5f5fc]',
+              "relative flex min-w-0 flex-1 flex-col self-stretch pt-2 sm:pt-4",
+              palette.isLight ? "text-black" : "text-[#f5f5fc]",
             )}
           >
             <div className="min-w-0">
-              <h1 className="font-[family-name:var(--font-anton)] text-4xl font-medium leading-tight md:text-5xl">{song.songTitle}</h1>
+              <h1 className="font-[family-name:var(--font-anton)] text-[1.875rem] font-medium leading-tight md:text-5xl">
+                {song.songTitle}
+              </h1>
               <h2
                 className={cn(
-                  'mt-3 text-base [&_a:hover]:underline',
-                  palette.isLight ? 'text-black/70 [&_a]:text-black' : 'text-white/80 [&_a]:text-[#f5f5fc]',
+                  "mt-3 text-[0.9375rem] [&_a:hover]:underline md:text-base",
+                  palette.isLight
+                    ? "text-black/70 [&_a]:text-black"
+                    : "text-white/80 [&_a]:text-[#f5f5fc]",
                 )}
                 dangerouslySetInnerHTML={{ __html: song.songMetaHtml }}
               />
               <p
                 className={cn(
-                  'mt-1 text-sm',
-                  palette.isLight ? 'text-black/60 [&_a]:text-black' : 'text-white/70 [&_a]:text-[#f5f5fc]',
+                  "mt-1 text-sm",
+                  palette.isLight
+                    ? "text-black/60 [&_a]:text-black"
+                    : "text-white/70 [&_a]:text-[#f5f5fc]",
                 )}
                 dangerouslySetInnerHTML={{ __html: song.producerHtml }}
               />
@@ -241,14 +262,19 @@ export default function LyricPage() {
                     free (bounded only by the max-w-xl wrapper above), only
                     the line count is capped. */}
                 <p
-                  className={cn('line-clamp-3 text-sm leading-relaxed', palette.isLight ? 'text-black/70' : 'text-white/80')}
+                  className={cn(
+                    "line-clamp-3 text-sm leading-relaxed",
+                    palette.isLight ? "text-black/70" : "text-white/80",
+                  )}
                   dangerouslySetInnerHTML={{ __html: song.tinyAboutHtml }}
                 />
                 <a
                   href="#about"
                   className={cn(
-                    'mt-2 inline-flex items-center gap-2 rounded border px-2 py-0.5 text-sm hover:border-[#337ab7] hover:text-[#337ab7]',
-                    palette.isLight ? 'border-black/50 text-black' : 'border-white text-[#f5f5fc]',
+                    "mt-2 inline-flex items-center gap-2 rounded border px-2 py-0.5 text-sm hover:border-[#337ab7] hover:text-[#337ab7]",
+                    palette.isLight
+                      ? "border-black/50 text-black"
+                      : "border-white text-[#f5f5fc]",
                   )}
                 >
                   More <ArrowDown className="size-4" />
@@ -260,8 +286,8 @@ export default function LyricPage() {
                 column by mt-auto, never overlapping the content above it. */}
             <div
               className={cn(
-                'mt-auto flex flex-wrap gap-4 pt-4 text-xs [&_p]:flex [&_p]:items-center [&_p]:gap-1',
-                palette.isLight ? 'text-black/60' : 'text-[#ddd]',
+                "mt-auto flex flex-wrap gap-4 pt-4 text-xs [&_p]:flex [&_p]:items-center [&_p]:gap-1",
+                palette.isLight ? "text-black/60" : "text-[#ddd]",
               )}
               dangerouslySetInnerHTML={{ __html: song.metaHtml }}
             />
@@ -271,29 +297,42 @@ export default function LyricPage() {
 
       {/* Lyrics + About + Q&A + Comments: white background, black text (matches original main{background:#fff}) */}
       <main className="bg-white px-[5%] pb-32 sm:px-[10%]">
-        <section id="lyrics" className="scroll-mt-24 flex flex-wrap justify-between gap-10 bg-white py-8">
+        <section
+          id="lyrics"
+          className="scroll-mt-24 flex flex-wrap justify-between gap-10 bg-white py-8"
+        >
           <div
             ref={lyricRef}
             onClick={handleLyricClick}
             className={cn(
-              'lyric min-w-0 flex-1 text-black',
-              hasLineTimestamps && '[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5',
+              "lyric min-w-0 flex-1 text-black",
+              hasLineTimestamps &&
+                "[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5",
             )}
           >
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 
           <aside className="sticky top-0 h-fit w-full shrink-0 pt-[4%] md:w-80">
-            <div className="mb-0 rounded-t bg-black py-2 text-center text-lg text-[#f5f5fc]">You may also like</div>
+            <div className="mb-0 rounded-t bg-black py-2 text-center text-lg text-[#f5f5fc]">
+              You may also like
+            </div>
             {song.recommended.map((rec) => (
               <Link
                 to={rec.link}
                 key={rec.title}
                 className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-gray-100"
               >
-                <img src={rec.img} alt={rec.title} className="size-16 shrink-0 object-cover" onError={handleImageError} />
+                <img
+                  src={rec.img}
+                  alt={rec.title}
+                  className="size-16 shrink-0 object-cover"
+                  onError={handleImageError}
+                />
                 <div className="min-w-0">
-                  <h3 className="truncate text-lg font-medium text-black">{rec.title}</h3>
+                  <h3 className="truncate text-lg font-medium text-black">
+                    {rec.title}
+                  </h3>
                   <p className="truncate text-black/50">{rec.artist}</p>
                 </div>
               </Link>
@@ -305,10 +344,13 @@ export default function LyricPage() {
 
         {/* Full width of main's content box (up to where the aside above ends),
             not the narrower 60% column the original design used. */}
-        <section id="about" className="about scroll-mt-24 mb-12 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0">
+        <section
+          id="about"
+          className="about scroll-mt-24 mb-12 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0"
+        >
           <h1 className="section-heading mb-8 text-black">About</h1>
           <div
-            className="mx-auto max-w-3xl text-[1.2em] text-black [&_p]:mb-2 [&_p]:indent-4 [&_p]:leading-relaxed"
+            className="mx-auto max-w-3xl text-[1.05em] text-black [&_p]:mb-2 [&_p]:indent-4 [&_p]:leading-relaxed md:text-[1.2em]"
             dangerouslySetInnerHTML={{ __html: song.aboutHtml }}
           />
         </section>

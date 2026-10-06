@@ -8,7 +8,7 @@
    default (an animation between two of them would jump instantly instead of
    interpolating) unless registered with a typed syntax like this. */
 @property --snake-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
@@ -52,9 +52,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', 'Niveau Grotesk', sans-serif;
-  --font-anton: 'Anton', sans-serif;
-  --font-display: 'TANAMERA', sans-serif;
+  --font-sans: "Geist Variable", "Niveau Grotesk", sans-serif;
+  --font-anton: "Anton", sans-serif;
+  --font-display: "TANAMERA", sans-serif;
   --color-juow-accent: #feec93;
   --color-juow-soft: #f5f5fc;
   --radius-2xl: calc(var(--radius) * 1.8);
@@ -172,19 +172,19 @@
      has a lot of icon-only / div-as-button style controls. */
   button:not(:disabled),
   a[href],
-  [role='button'],
-  [role='link'],
+  [role="button"],
+  [role="link"],
   summary,
-  input[type='checkbox'],
-  input[type='radio'],
-  input[type='range'],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"],
   select,
   label[for] {
     cursor: pointer;
   }
 
   button:disabled,
-  [aria-disabled='true'] {
+  [aria-disabled="true"] {
     cursor: not-allowed;
   }
 }
@@ -218,7 +218,7 @@
   }
 
   .lyric q {
-    quotes: '[' ']';
+    quotes: "[" "]";
   }
 
   .section-heading {
@@ -227,12 +227,27 @@
     font-size: clamp(3rem, 6vw, 5rem);
   }
 
+  @media (max-width: 767px) {
+    .lyric-page .lyric {
+      font-size: 18px;
+    }
+
+    .lyric-page .lyric p {
+      line-height: 1.55;
+    }
+
+    .lyric-page .section-heading {
+      font-size: 2.25rem;
+      line-height: 1.2;
+    }
+  }
+
   .nav-link-underline {
     @apply relative inline-block px-1 py-0.5 text-juow-soft transition-colors hover:text-juow-accent;
   }
 
   .nav-link-underline::before {
-    content: '';
+    content: "";
     @apply absolute right-0 -bottom-0.5 h-0.5 w-0 bg-juow-accent transition-all duration-300;
   }
 
@@ -340,50 +355,89 @@
      together, instead of only the top edge moving while the bottom stays
      pinned. Staggered per bar via animation-delay. */
   @keyframes soundbar-bounce {
-    0%, 100% { transform: scaleY(0.25); }
-    50% { transform: scaleY(1); }
+    0%,
+    100% {
+      transform: scaleY(0.25);
+    }
+    50% {
+      transform: scaleY(1);
+    }
   }
 
   /* ---- Listening Weather (ProfilePage) ---- */
 
   @keyframes weather-rain-fall {
-    0% { transform: translateY(-10%); opacity: 0; }
-    10% { opacity: 0.7; }
-    100% { transform: translateY(340%); opacity: 0; }
+    0% {
+      transform: translateY(-10%);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(340%);
+      opacity: 0;
+    }
   }
   .weather-raindrop {
     animation: weather-rain-fall linear infinite;
   }
 
   @keyframes weather-cloud-drift {
-    from { transform: translateX(-6%); }
-    to { transform: translateX(6%); }
+    from {
+      transform: translateX(-6%);
+    }
+    to {
+      transform: translateX(6%);
+    }
   }
   .weather-cloud {
     animation: weather-cloud-drift ease-in-out infinite alternate;
   }
 
   @keyframes weather-sun-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.06); opacity: 1; }
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.06);
+      opacity: 1;
+    }
   }
   .weather-sun {
     animation: weather-sun-pulse 4.5s ease-in-out infinite;
   }
 
   @keyframes weather-wind-streak {
-    0% { transform: translateX(-20%); opacity: 0; }
-    15% { opacity: 0.55; }
-    85% { opacity: 0.55; }
-    100% { transform: translateX(120%); opacity: 0; }
+    0% {
+      transform: translateX(-20%);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.55;
+    }
+    85% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translateX(120%);
+      opacity: 0;
+    }
   }
   .weather-wind {
     animation: weather-wind-streak linear infinite;
   }
 
   @keyframes weather-twinkle {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 0.9; }
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 0.9;
+    }
   }
   .weather-twinkle {
     animation: weather-twinkle ease-in-out infinite;
@@ -401,8 +455,13 @@
      --bob-delay) set in PartyBubbles.jsx so the whole cluster doesn't
      bob in unison like one rigid grid. */
   @keyframes party-bubble-bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
   }
   .party-bubble {
     animation: party-bubble-bob var(--bob-duration, 4s) ease-in-out infinite;

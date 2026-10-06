@@ -292,13 +292,11 @@ export default function GlobalAudioPlayer() {
   const [isFullscreen, setFullscreen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
 
-  // Long-press (750ms) anywhere on the docked bar's own background opens
+  // Long-press (750ms) anywhere on the docked bar opens
   // fullscreen on touch devices - the explicit fullscreen button is hidden
   // below `sm` since there's no room for it there, so this is how mobile
-  // gets to the same view. Deliberately scoped to *touch* events only (not
-  // mouse), and skipped entirely if the press started on an actual control
-  // (button/input/link), so it never fights normal taps, the seek bar drag,
-  // or desktop click-and-hold.
+  // gets to the same view. Movement cancels the timer so seeking and scrolling
+  // remain gestures; a short press still reaches the control normally.
   const longPressTimerRef = useRef(null);
   const longPressStartRef = useRef(null);
   const longPressFiredRef = useRef(false);
@@ -312,8 +310,7 @@ export default function GlobalAudioPlayer() {
   };
 
   const handleBarTouchStart = (event) => {
-    if (event.touches.length !== 1 || event.target.closest("button, input, a"))
-      return;
+    if (event.touches.length !== 1) return;
     const { clientX, clientY } = event.touches[0];
     longPressStartRef.current = { x: clientX, y: clientY };
     longPressFiredRef.current = false;
@@ -482,6 +479,8 @@ export default function GlobalAudioPlayer() {
       moved: false,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
+      startX: event.clientX,
+      startY: event.clientY,
       width: rect.width,
       height: rect.height,
     };
@@ -490,11 +489,15 @@ export default function GlobalAudioPlayer() {
 
   const handlePointerMove = (event) => {
     if (!isMini || !dragState.current) return;
+    const dx = event.clientX - dragState.current.startX;
+    const dy = event.clientY - dragState.current.startY;
+    if (!dragState.current.moved && Math.hypot(dx, dy) <= 8) return;
+
     dragState.current.moved = true;
     const x = event.clientX - dragState.current.offsetX;
     const y = event.clientY - dragState.current.offsetY;
-    const maxX = window.innerWidth - dragState.current.width;
-    const maxY = window.innerHeight - dragState.current.height;
+    const maxX = Math.max(0, window.innerWidth - dragState.current.width);
+    const maxY = Math.max(0, window.innerHeight - dragState.current.height);
     setPos({
       x: Math.min(Math.max(x, 0), maxX),
       y: Math.min(Math.max(y, 0), maxY),
