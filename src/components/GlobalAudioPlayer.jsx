@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { formatTime, usePlayerStore } from "@/stores/usePlayerStore";
 import { handleImageError } from "@/lib/imageFallback";
 
-const MINI_SIZE = 72; // px, matches the mobile player dock height
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
@@ -483,6 +482,8 @@ export default function GlobalAudioPlayer() {
       moved: false,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
+      width: rect.width,
+      height: rect.height,
     };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
@@ -492,8 +493,8 @@ export default function GlobalAudioPlayer() {
     dragState.current.moved = true;
     const x = event.clientX - dragState.current.offsetX;
     const y = event.clientY - dragState.current.offsetY;
-    const maxX = window.innerWidth - MINI_SIZE;
-    const maxY = window.innerHeight - MINI_SIZE;
+    const maxX = window.innerWidth - dragState.current.width;
+    const maxY = window.innerHeight - dragState.current.height;
     setPos({
       x: Math.min(Math.max(x, 0), maxX),
       y: Math.min(Math.max(y, 0), maxY),
@@ -616,22 +617,10 @@ export default function GlobalAudioPlayer() {
                 onPointerCancel={handlePointerCancel}
                 transition={{ type: "spring", stiffness: 380, damping: 32 }}
                 style={
-                  pos
-                    ? {
-                        left: pos.x,
-                        top: pos.y,
-                        width: MINI_SIZE,
-                        height: MINI_SIZE,
-                      }
-                    : {
-                        left: 12,
-                        bottom: "6%",
-                        width: MINI_SIZE,
-                        height: MINI_SIZE,
-                      }
+                  pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: "6%" }
                 }
                 className={cn(
-                  "fixed z-50 cursor-grab touch-none overflow-hidden rounded-full active:cursor-grabbing",
+                  "fixed size-[72px] z-50 cursor-grab touch-none overflow-hidden rounded-full active:cursor-grabbing sm:size-[112px]",
                   NO_CALLOUT,
                 )}
               >
@@ -642,7 +631,7 @@ export default function GlobalAudioPlayer() {
                   same element can make the shrink animation restart or drift. */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <motion.div
-                      className="size-7"
+                      className="size-7 sm:size-11"
                       animate={{ rotate: isPlaying ? 360 : 0 }}
                       transition={
                         isPlaying
