@@ -828,7 +828,7 @@ export default function GlobalAudioPlayer() {
                 >
                   <Expand className="size-5" />
                 </button>
-
+                    
                 <button
                   type="button"
                   onClick={handleStartParty}

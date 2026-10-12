@@ -9,7 +9,7 @@ const CY = VIEW / 2;
 const RADIUS = 220;
 
 const AUTO_SPEED = 4; // degrees/second
-const AXIS_TILT_DEG = -18; // visual-only roll so the pole reads as a "/" diagonal, like real Earth globes, instead of dead vertical
+const AXIS_TILT_DEG = 18; // visual-only roll so the pole reads as a "/" diagonal, like real Earth globes, instead of dead vertical
 const DRAG_SENSITIVITY = 0.3; // degrees per px
 const DRAG_THRESHOLD = 4; // px of movement before a press counts as a drag (not a click)
 const MOMENTUM_DECAY = 0.92; // per-frame (60fps-normalized) velocity retention
