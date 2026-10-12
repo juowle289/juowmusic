@@ -98,106 +98,107 @@ export default function SearchBox() {
     }
   };
 
+  const dropdownVisible = open && query.trim().length > 0;
+
   return (
     <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex size-10 items-center justify-center rounded-full text-juow-soft transition-colors hover:text-juow-accent"
-        aria-label="Search"
+      {/* Search bar: the icon lives inside the field itself (no separate icon
+          button). Narrow on phones so it still fits next to the logo and the
+          hamburger, wider from `sm` up. */}
+      <div
+        className={cn(
+          'flex items-center gap-2 rounded-full border bg-white/[0.04] px-3 py-1.5 transition-colors duration-200 sm:px-3.5 sm:py-2',
+          open ? 'border-juow-accent' : 'border-white/15 hover:border-juow-accent/70',
+        )}
       >
-        <Search className="size-5" />
-      </button>
+        <Search className="size-4 shrink-0 text-juow-soft/50" />
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={handleInputKeyDown}
+          placeholder="Search..."
+          role="combobox"
+          aria-label="Search songs and artists"
+          aria-expanded={dropdownVisible}
+          aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
+          className="w-20 bg-transparent text-sm text-juow-soft outline-none placeholder:text-juow-soft/40 sm:w-40 md:w-48"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => {
+              setQuery('');
+              inputRef.current?.focus({ preventScroll: true });
+            }}
+            aria-label="Clear search"
+            className="shrink-0 text-juow-soft/40 hover:text-juow-soft"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
 
       <AnimatePresence>
-        {open && (
+        {dropdownVisible && (
           <motion.div
             initial={{ opacity: 0, y: -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-white/10 bg-black text-juow-soft shadow-2xl"
+            className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-white/10 bg-black text-juow-soft shadow-2xl"
           >
-          <div className="flex items-center gap-2 border-b border-white/10 p-3">
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder="Search for songs..."
-              role="combobox"
-              aria-expanded={showResults}
-              aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
-              className="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-juow-soft outline-none placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-juow-accent/40"
-            />
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close search"
-              className="shrink-0 text-white/50 hover:text-white"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
+            <div className="max-h-72 overflow-y-auto">
+              {!hasResults && (
+                <p className="px-4 py-6 text-center text-sm text-white/50">No results found</p>
+              )}
 
-          <div className="max-h-72 overflow-y-auto">
-            {!showResults && query.trim() && (
-              <p className="px-4 py-6 text-center text-sm text-white/50">No results found</p>
-            )}
-
-            {results.map((result, index) => {
-              const isActive = index === activeIndex;
-              if (result.type === 'artist') {
-                const artist = result.data;
+              {results.map((result, index) => {
+                const isActive = index === activeIndex;
+                const isArtist = result.type === 'artist';
+                const item = result.data;
                 return (
                   <button
                     key={result.key}
                     id={`search-result-${index}`}
                     ref={(el) => (itemRefs.current[index] = el)}
                     type="button"
-                    onClick={() => goTo(artist.link)}
+                    onClick={() => goTo(item.link)}
                     onMouseEnter={() => setActiveIndex(index)}
                     className={cn(
                       'flex w-full items-center gap-3 border-b border-white/10 px-3 py-3 text-left transition-colors',
                       isActive ? 'bg-juow-accent text-black' : 'hover:bg-juow-accent hover:text-black',
                     )}
                   >
-                    <img src={artist.avtArtist} alt="" className="size-12 rounded-full object-cover" onError={handleImageError} />
-                    <div className="min-w-0">
-                      <p className="truncate font-[family-name:var(--font-anton)]">{artist.nameArtist}</p>
-                      <p className="text-sm opacity-80">Artist · Pop</p>
-                    </div>
+                    {isArtist ? (
+                      <>
+                        <img src={item.avtArtist} alt="" className="size-12 rounded-full object-cover" onError={handleImageError} />
+                        <div className="min-w-0">
+                          <p className="truncate font-[family-name:var(--font-anton)]">{item.nameArtist}</p>
+                          <p className="text-sm opacity-80">Artist · Pop</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <img src={item.imgSrc} alt="" className="size-12 object-cover" onError={handleImageError} />
+                        <div className="min-w-0">
+                          <p className="truncate font-[family-name:var(--font-anton)]">{item.title}</p>
+                          <p className="truncate text-sm opacity-80">{item.artist}</p>
+                          <p className="flex items-center gap-1 text-xs opacity-70">
+                            <Eye className="size-3" /> {item.views}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </button>
                 );
-              }
-
-              const song = result.data;
-              return (
-                <button
-                  key={result.key}
-                  id={`search-result-${index}`}
-                  ref={(el) => (itemRefs.current[index] = el)}
-                  type="button"
-                  onClick={() => goTo(song.link)}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  className={cn(
-                    'flex w-full items-center gap-3 border-b border-white/10 px-3 py-3 text-left transition-colors',
-                    isActive ? 'bg-juow-accent text-black' : 'hover:bg-juow-accent hover:text-black',
-                  )}
-                >
-                  <img src={song.imgSrc} alt="" className="size-12 object-cover" onError={handleImageError} />
-                  <div className="min-w-0">
-                    <p className="truncate font-[family-name:var(--font-anton)]">{song.title}</p>
-                    <p className="truncate text-sm opacity-80">{song.artist}</p>
-                    <p className="flex items-center gap-1 text-xs opacity-70">
-                      <Eye className="size-3" /> {song.views}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

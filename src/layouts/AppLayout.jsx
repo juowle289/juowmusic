@@ -3,6 +3,7 @@ import AppHeader from '@/components/AppHeader';
 import GlobalAudioPlayer from '@/components/GlobalAudioPlayer';
 import ScrollToTop from '@/components/ScrollToTop';
 import useListeningTracker from '@/hooks/useListeningTracker';
+import useHashScroll from '@/hooks/useHashScroll';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
 
 function useHeaderConfig() {
@@ -30,6 +31,7 @@ function useHeaderConfig() {
 export default function AppLayout() {
   const headerConfig = useHeaderConfig();
   useListeningTracker();
+  useHashScroll();
 
   return (
     <>

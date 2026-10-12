@@ -70,3 +70,33 @@ export function useScrollSpy(sectionIds) {
 
   return activeId;
 }
+
+/**
+ * Lyric page: true once the hero block (the element with `heroId`) has scrolled
+ * up past the bottom of the fixed header, false again as soon as any part of it
+ * is back under the header. `routeKey` re-runs the check when navigating
+ * between songs, since the hero element is a new node each time.
+ */
+export function useHeroPassed(heroId, enabled, routeKey, headerOffset = 72) {
+  const [passed, setPassed] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) {
+      setPassed(false);
+      return undefined;
+    }
+    const check = () => {
+      const hero = document.getElementById(heroId);
+      setPassed(hero ? hero.getBoundingClientRect().bottom <= headerOffset : false);
+    };
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [heroId, enabled, routeKey, headerOffset]);
+
+  return passed;
+}

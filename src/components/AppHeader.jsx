@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useMatch } from "react-router-dom";
+import { Link, useLocation, useMatch } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, Menu, Settings, User, X } from "lucide-react";
 import SearchBox from "@/components/SearchBox";
 import { cn } from "@/lib/utils";
 import {
   useEffHeader,
+  useHeroPassed,
   useHomeNavBorder,
   useScrollSpy,
 } from "@/hooks/useHeaderScroll";
@@ -27,7 +28,8 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email;
   const exploreActive = useMatch('/explore');
-  const homeRouteActive = useMatch('/');
+  const lyricMatch = useMatch('/lyrics/:slug');
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!accountOpen) return undefined;
@@ -40,15 +42,29 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   }, [accountOpen]);
 
   const isHome = variant === "home";
-  const activeId = isHome ? homeActive : sectionActive;
+  const isLyric = Boolean(lyricMatch);
+  // Lyric page: the header starts out with the home-page menu, then swaps to
+  // the song's own sections (no Explore) once the hero has scrolled out of
+  // view, and swaps back when it's visible again.
+  const heroPassed = useHeroPassed("song-hero", isLyric, pathname);
+  const showSectionMenu = isLyric && heroPassed;
+  const showExplore = !showSectionMenu;
+  const activeId = isHome ? homeActive : isLyric && !heroPassed ? null : sectionActive;
 
-  const navItems = isHome
-    ? [
-        { href: "#featured", label: "Featured", id: "featured" },
-        { href: "#news", label: "News", id: "news" },
-        { href: "#songs", label: "Songs", id: "songs" },
-      ]
-    : menuItems;
+  const HOME_MENU = [
+    { href: "#featured", label: "Featured", id: "featured" },
+    { href: "#news", label: "News", id: "news" },
+    { href: "#songs", label: "Songs", id: "songs" },
+  ];
+
+  let navItems;
+  if (isHome) navItems = HOME_MENU;
+  else if (isLyric && !heroPassed)
+    // Those sections live on the home page, so link there (the in-page
+    // #anchors only exist on "/").
+    navItems = HOME_MENU.map((item) => ({ ...item, href: `/${item.href}`, route: true }));
+  else navItems = menuItems;
+  const menuKey = showSectionMenu ? "sections" : "default";
 
   return (
     <header
@@ -67,32 +83,40 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
             className="h-9 w-auto sm:h-12" onError={handleImageError} />
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex">
-          <Link
-            to="/"
-            className={cn("nav-link-underline text-base", homeRouteActive && "active text-juow-accent")}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.nav
+            key={menuKey}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="hidden items-center gap-5 lg:flex"
           >
-            Home
-          </Link>
-          <Link
-            to="/explore"
-            className={cn("nav-link-underline text-base", exploreActive && "active text-juow-accent")}
-          >
-            Explore
-          </Link>
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={cn(
+            {showExplore && (
+              <Link
+                to="/explore"
+                className={cn("nav-link-underline text-base", exploreActive && "active text-juow-accent")}
+              >
+                Explore
+              </Link>
+            )}
+            {navItems.map((item) => {
+              const cls = cn(
                 "nav-link-underline text-base",
                 activeId === item.id && "active text-juow-accent",
-              )}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+              );
+              return item.route ? (
+                <Link key={item.href} to={item.href} className={cls}>
+                  {item.label}
+                </Link>
+              ) : (
+                <a key={item.href} href={item.href} className={cls}>
+                  {item.label}
+                </a>
+              );
+            })}
+          </motion.nav>
+        </AnimatePresence>
       </div>
 
       <div className="flex items-center gap-3 sm:gap-4">
@@ -187,33 +211,30 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
         )}
       >
         <nav className="flex flex-col gap-4">
-          <Link
-            to="/"
-            className={cn("text-lg text-juow-soft hover:text-juow-accent", homeRouteActive && "text-juow-accent")}
-            onClick={() => setMobileOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/explore"
-            className={cn("text-lg text-juow-soft hover:text-juow-accent", exploreActive && "text-juow-accent")}
-            onClick={() => setMobileOpen(false)}
-          >
-            Explore
-          </Link>
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-lg text-juow-soft hover:text-juow-accent",
-                activeId === item.id && "text-juow-accent",
-              )}
+          {showExplore && (
+            <Link
+              to="/explore"
+              className={cn("text-lg text-juow-soft hover:text-juow-accent", exploreActive && "text-juow-accent")}
               onClick={() => setMobileOpen(false)}
             >
-              {item.label}
-            </a>
-          ))}
+              Explore
+            </Link>
+          )}
+          {navItems.map((item) => {
+            const cls = cn(
+              "text-lg text-juow-soft hover:text-juow-accent",
+              activeId === item.id && "text-juow-accent",
+            );
+            return item.route ? (
+              <Link key={item.href} to={item.href} className={cls} onClick={() => setMobileOpen(false)}>
+                {item.label}
+              </Link>
+            ) : (
+              <a key={item.href} href={item.href} className={cls} onClick={() => setMobileOpen(false)}>
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="mt-8 space-y-4 border-t border-white/10 pt-6">

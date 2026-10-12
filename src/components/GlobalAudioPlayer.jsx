@@ -26,6 +26,7 @@ import { handleImageError } from "@/lib/imageFallback";
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
+const MINIMIZE_HOLD_MS = 2000; // hold the title/cover block this long to collapse into the vinyl
 
 function MarqueeText({ children, className }) {
   const viewportRef = useRef(null);
@@ -105,12 +106,12 @@ const NO_CALLOUT =
 // Only actually does anything on browsers that support the Vibration API
 // (Android Chrome/Firefox etc.) - iOS Safari has never implemented it, in
 // the browser or as an installed PWA, so this is a silent no-op there.
-function vibrateTick() {
+function vibrateTick(ms = 15) {
   if (
     typeof navigator !== "undefined" &&
     typeof navigator.vibrate === "function"
   ) {
-    navigator.vibrate(15);
+    navigator.vibrate(ms);
   }
 }
 
@@ -291,6 +292,38 @@ export default function GlobalAudioPlayer() {
 
   const [isFullscreen, setFullscreen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
+
+  // Press-and-hold (2s) on the cover/title block collapses the bar into the
+  // vinyl. While held, a bright circle grows from the block's centre until it
+  // fills the whole block; letting go early shrinks it back and nothing happens.
+  const [minimizeHold, setMinimizeHold] = useState(false);
+  const minimizeTimerRef = useRef(null);
+
+  const cancelMinimizeHold = () => {
+    if (minimizeTimerRef.current) {
+      clearTimeout(minimizeTimerRef.current);
+      minimizeTimerRef.current = null;
+    }
+    setMinimizeHold(false);
+  };
+
+  const startMinimizeHold = () => {
+    if (minimizeTimerRef.current) return;
+    setMinimizeHold(true);
+    minimizeTimerRef.current = setTimeout(() => {
+      minimizeTimerRef.current = null;
+      vibrateTick(30); // Android only - iOS Safari has no Vibration API
+      setMinimizeHold(false);
+      toggleMini();
+    }, MINIMIZE_HOLD_MS);
+  };
+
+  useEffect(
+    () => () => {
+      if (minimizeTimerRef.current) clearTimeout(minimizeTimerRef.current);
+    },
+    [],
+  );
 
   // Long-press (750ms) anywhere on the docked bar opens
   // fullscreen on touch devices - the explicit fullscreen button is hidden
@@ -546,8 +579,12 @@ export default function GlobalAudioPlayer() {
   const waveformBars = useWaveform(currentSong?.audioSrc);
   const canNext = playlistIndex >= 0 && playlistIndex < playlist.length - 1;
 
+  // Creating a room navigates to /party/:id, so being on that route means a
+  // room already exists - the docked Party button shows its "on" state then.
+  const partyActive = location.pathname.startsWith("/party/");
+
   const handleStartParty = async () => {
-    if (!currentSong || starting) return;
+    if (!currentSong || starting || partyActive) return;
     setStarting(true);
     try {
       const { createParty } = await import("@/lib/party");
@@ -662,7 +699,7 @@ export default function GlobalAudioPlayer() {
                 exit={{ opacity: 0 }}
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 className={cn(
-                  "fixed inset-x-3 bottom-3 z-50 flex h-[4.5rem] items-center gap-1.5 rounded-lg border border-black/10 bg-white/85 p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.16)] backdrop-blur-2xl sm:inset-x-[10%] sm:bottom-[6%] sm:h-[4.25rem] sm:gap-3 sm:rounded-md sm:border-black/80 sm:bg-white/40 sm:px-3 sm:py-0 sm:shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] sm:backdrop-blur-md",
+                  "fixed inset-x-3 bottom-3 z-50 flex h-[4.5rem] items-center gap-1.5 rounded-[2px] border border-black/10 bg-white/85 p-0 pr-1 shadow-[0_8px_28px_rgba(0,0,0,0.16)] backdrop-blur-2xl sm:inset-x-[10%] sm:bottom-[6%] sm:h-[4.25rem] sm:gap-3 sm:rounded-[2px] sm:border-black/80 sm:bg-white/40 sm:p-0 sm:pr-2 sm:shadow-[0.1em_0.2em_0.8em_rgba(0,0,0,0.25)] sm:backdrop-blur-md",
                   NO_CALLOUT,
                 )}
                 onTouchStart={handleBarTouchStart}
@@ -672,10 +709,43 @@ export default function GlobalAudioPlayer() {
               >
                 <button
                   type="button"
-                  onClick={toggleMini}
-                  aria-label="Minimize player"
-                  className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-md px-1 py-1 transition-colors hover:bg-black/5 sm:-mx-1.5 sm:-my-1 sm:w-[12em] sm:flex-none sm:gap-2.5 sm:hover:bg-gray-100 md:w-[15em] lg:w-[18em]"
+                  aria-label="Hold to minimize player"
+                  title="Hold for 2 seconds to minimize"
+                  onPointerDown={(e) => {
+                    if (e.button !== 0) return;
+                    startMinimizeHold();
+                  }}
+                  onPointerUp={cancelMinimizeHold}
+                  onPointerLeave={cancelMinimizeHold}
+                  onPointerCancel={cancelMinimizeHold}
+                  onBlur={cancelMinimizeHold}
+                  onKeyDown={(e) => {
+                    if ((e.key === "Enter" || e.key === " ") && !e.repeat) startMinimizeHold();
+                  }}
+                  onKeyUp={cancelMinimizeHold}
+                  onContextMenu={(e) => e.preventDefault()}
+                  // The bar's own 750ms long-press opens fullscreen on touch -
+                  // this block has its own (2s) hold, so don't let the touch
+                  // reach the bar's handler.
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="group relative flex h-full min-w-0 flex-1 items-center overflow-hidden rounded-l-[2px] px-2 sm:w-[12em] sm:flex-none md:w-[15em] lg:w-[18em]"
                 >
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-0 bg-juow-accent"
+                    initial={false}
+                    animate={{
+                      clipPath: minimizeHold
+                        ? "circle(75% at 50% 50%)"
+                        : "circle(0% at 50% 50%)",
+                    }}
+                    transition={
+                      minimizeHold
+                        ? { duration: MINIMIZE_HOLD_MS / 1000, ease: "linear" }
+                        : { duration: 0.35, ease: "easeOut" }
+                    }
+                  />
+                  <span className="relative z-10 flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2.5">
                   {/* layoutId shared with the mini widget's cover art below -
                   Framer Motion FLIP-animates this square thumbnail
                   morphing into the mini vinyl's circular center label
@@ -689,13 +759,14 @@ export default function GlobalAudioPlayer() {
                     onError={handleImageError}
                   />
                   <div className="flex min-w-0 flex-1 flex-col text-left">
-                    <MarqueeText className="w-full text-sm font-semibold text-black sm:text-base">
+                    <MarqueeText className="w-full text-sm font-semibold text-black group-hover:underline sm:text-base">
                       {currentSong.songTitle}
                     </MarqueeText>
-                    <MarqueeText className="w-full text-xs text-black/60 sm:text-sm">
+                    <MarqueeText className="w-full text-xs text-black/60 group-hover:underline sm:text-sm">
                       {currentSong.artistName}
                     </MarqueeText>
                   </div>
+                  </span>
                 </button>
 
                 <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
@@ -772,7 +843,7 @@ export default function GlobalAudioPlayer() {
                   className={cn(
                     "hidden shrink-0 rounded-full p-1.5 transition-colors sm:block hover:bg-gray-100 hover:font-bold hover:text-black hover:[&>svg]:stroke-[2.5]",
                     crossfadeEnabled
-                      ? "bg-black/70 font-bold text-juow-accent [&>svg]:stroke-[2.5]"
+                      ? "bg-black font-bold text-juow-accent [&>svg]:stroke-[2.5]"
                       : "text-black/40",
                   )}
                 >
@@ -790,7 +861,7 @@ export default function GlobalAudioPlayer() {
                     className={cn(
                       "rounded-full p-1.5 transition-colors hover:bg-gray-100 hover:font-bold hover:text-black hover:[&>svg]:stroke-[2.5]",
                       queueOpen
-                        ? "bg-black/70 font-bold text-juow-accent [&>svg]:stroke-[2.5]"
+                        ? "bg-black font-bold text-juow-accent [&>svg]:stroke-[2.5]"
                         : "text-black/50",
                     )}
                   >
@@ -822,26 +893,36 @@ export default function GlobalAudioPlayer() {
 
                 <button
                   type="button"
-                  onClick={() => setFullscreen(true)}
-                  aria-label="Full screen"
-                  className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:font-bold hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black/70 active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5] sm:block"
-                >
-                  <Expand className="size-5" />
-                </button>
-                    
-                <button
-                  type="button"
                   onClick={handleStartParty}
                   disabled={starting}
                   aria-label="Start a listening party"
+                  aria-pressed={partyActive}
+                  aria-busy={starting}
                   title={
-                    starting
-                      ? "Starting listening party..."
-                      : "Start a listening party"
+                    partyActive
+                      ? "You're in a listening party"
+                      : starting
+                        ? "Starting listening party..."
+                        : "Start a listening party"
                   }
-                  className="hidden shrink-0 rounded-full p-1.5 text-black/50 transition-colors hover:bg-gray-100 hover:text-black disabled:opacity-50 sm:block"
+                  className={cn(
+                    "hidden shrink-0 rounded-full p-1.5 transition-colors sm:block",
+                    partyActive || starting
+                      ? "bg-black font-bold text-juow-accent [&>svg]:stroke-[2.5]"
+                      : "text-black/50 hover:bg-gray-100 hover:font-bold hover:text-black hover:[&>svg]:stroke-[2.5]",
+                    starting && "cursor-wait",
+                  )}
                 >
                   <Users className="size-5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFullscreen(true)}
+                  aria-label="Full screen"
+                  className="hidden shrink-0 rounded-full p-1.5 text-black/60 transition-colors hover:bg-gray-100 hover:font-bold hover:text-black hover:[&>svg]:stroke-[2.5] active:bg-black active:font-bold active:text-juow-accent active:[&>svg]:stroke-[2.5] sm:block"
+                >
+                  <Expand className="size-5" />
                 </button>
               </motion.div>
             )}

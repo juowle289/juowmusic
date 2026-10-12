@@ -38,7 +38,12 @@ export default function ScrollToTop() {
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Scroll to top"
-      className="fixed bottom-24 right-4 z-40 grid size-12 place-items-center rounded-full bg-black text-white shadow-[0_0.2em_0.8em_rgba(0,0,0,0.35)] transition-transform hover:scale-105 sm:bottom-28 sm:right-8"
+      // sm+: the player bar sits at bottom-[6%] with inset-x-[10%] and is 4.25rem tall,
+      // so this button shares its row: same baseline (+ half the height difference
+      // to centre it on the bar) and centred inside the bar's 10% right margin.
+      // Below sm the bar spans the full width, so it stays just above the bar
+      // instead of covering the controls.
+      className="fixed bottom-24 right-4 z-40 grid size-12 place-items-center rounded-full bg-black text-white shadow-[0_0.2em_0.8em_rgba(0,0,0,0.35)] transition-transform hover:scale-105 sm:bottom-[calc(6%+0.625rem)] sm:right-[calc(5%-1.5rem)]"
     >
       <svg viewBox="0 0 48 48" className="pointer-events-none absolute inset-0 size-full">
         <circle cx="24" cy="24" r={RADIUS} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />

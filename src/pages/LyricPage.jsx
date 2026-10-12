@@ -177,6 +177,7 @@ export default function LyricPage() {
           Two real flex columns with a gap (instead of viewport-wide absolute offsets)
           so the artwork and the text block never collide, at any zoom level. */}
       <nav
+        id="song-hero"
         className="song-hero relative min-h-[25em] overflow-visible px-[5%] pb-6 pt-20 sm:h-[25em] sm:px-[10%]"
         style={{ backgroundImage: palette.gradient }}
       >
