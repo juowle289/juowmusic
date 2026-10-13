@@ -55,28 +55,14 @@ function resolveLink(link) {
   return null;
 }
 
-function SeeAll() {
+/** Section title: icon + text, Geist (the site's sans stack), small, no divider line. */
+function SectionHeading({ id, icon: Icon, children, className = 'px-4 pb-2 pt-4' }) {
   return (
-    <span className="cursor-pointer rounded-[2px] border border-black px-3 py-1 text-sm transition-colors duration-200 hover:bg-black hover:text-[#feec93]">
-      See All
-    </span>
-  );
-}
-
-/** Section title with a small black/yellow icon tile in front of it. No text-shadow. */
-function SectionHeading({ id, icon: Icon, children, controls }) {
-  return (
-    <div className="flex items-center justify-between gap-3 border-b border-[#ddd] px-4 pb-4 pt-4 sm:px-6">
-      <div className="flex min-w-0 items-center gap-3">
-        <Icon aria-hidden className="size-6 shrink-0 text-black sm:size-8" />
-        <h1
-          id={id}
-          className="scroll-mt-24 truncate font-[family-name:var(--font-anton)] text-2xl font-bold sm:text-4xl"
-        >
-          {children}
-        </h1>
-      </div>
-      {controls}
+    <div className={cn('flex items-center gap-2.5', className)}>
+      <Icon aria-hidden className="size-5 shrink-0 text-black sm:size-6" />
+      <h1 id={id} className="scroll-mt-24 truncate font-sans text-lg font-semibold text-black sm:text-2xl">
+        {children}
+      </h1>
     </div>
   );
 }
@@ -302,7 +288,10 @@ function useCountUpInView(target, duration = 1200) {
   return [ref, value];
 }
 
-function FanbaseCard({ icon, iconColor, platform, number, label, featured }) {
+/** Fanbase shows these six platforms, in this order (SoundCloud is left out). */
+const FAN_ORDER = ['Spotify', 'Instagram', 'YouTube', 'TikTok', 'Twitter', 'Facebook'];
+
+function FanbaseCard({ icon, iconColor, platform, number, label }) {
   const parsed = parseStat(number);
   const [ref, animated] = useCountUpInView(parsed ? parsed.value : null);
   const display = parsed ? `${animated.toFixed(parsed.decimals)}${parsed.suffix}` : null;
@@ -312,41 +301,21 @@ function FanbaseCard({ icon, iconColor, platform, number, label, featured }) {
     <div
       ref={ref}
       className={cn(
-        'relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white p-4 sm:p-5',
-        featured && 'col-span-2',
+        'relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white px-2 py-3 text-center',
         CARD_SHADOW,
       )}
     >
-      {/* oversized faint watermark of the platform icon */}
+      {/* the platform icon lives in the tile's background */}
       <i
         aria-hidden
-        className={cn(
-          iconClass,
-          'pointer-events-none absolute -bottom-3 -right-2 select-none leading-none opacity-[0.07]',
-          featured ? 'text-[9rem]' : 'text-[6rem]',
-        )}
+        className={cn(iconClass, 'pointer-events-none absolute -bottom-2 -right-1 select-none text-[3.5rem] leading-none opacity-[0.12]')}
         style={{ color: iconColor }}
       />
-
-      <div className="relative flex items-center gap-2.5">
-        <span
-          className="grid size-9 place-items-center rounded-full text-lg text-white"
-          style={{ background: iconColor }}
-        >
-          <i className={iconClass} />
-        </span>
-        <span className="text-sm font-semibold uppercase tracking-wider text-black/70">{platform}</span>
+      <div className="relative font-[family-name:var(--font-anton)] text-xl leading-none tracking-wide text-black tabular-nums sm:text-2xl">
+        {display ?? <span className="text-base text-black/35">{number}</span>}
       </div>
-
-      <div
-        className={cn(
-          'relative mt-5 font-[family-name:var(--font-anton)] leading-none tracking-wide text-black tabular-nums',
-          featured ? 'text-5xl sm:text-6xl' : 'text-3xl sm:text-4xl',
-        )}
-      >
-        {display ?? <span className="text-xl text-black/35 sm:text-2xl">{number}</span>}
-      </div>
-      <div className="relative mt-2 text-xs uppercase tracking-[0.18em] text-black/50 sm:text-sm">{label}</div>
+      <div className="relative mt-2 truncate text-[0.65rem] font-semibold uppercase tracking-wider text-black/75">{platform}</div>
+      <div className="relative truncate text-[0.6rem] uppercase tracking-wider text-black/40">{label}</div>
     </div>
   );
 }
@@ -390,19 +359,31 @@ function SongCard({ img, title, artist, date, to }) {
 
 function AlbumCard({ img, title, meta }) {
   return (
-    <div className={cn('group relative h-fit w-60 shrink-0 cursor-pointer select-none rounded-[4px] border border-[#ddd] bg-white text-center', CARD_SHADOW)}>
-      <img src={img} alt="" draggable={false} className="aspect-square w-full select-none rounded-t-[3px] object-cover [-webkit-user-drag:none]" onError={handleImageError} />
-      <h5 data-selectable className="mt-2 select-text truncate px-2 font-bold" style={{ color: COLOR.blue }}>
-        {title}
-      </h5>
-      <span data-selectable className="block select-text px-2 pb-2 text-sm text-black/60">{meta}</span>
-      <i
-        className={cn(
-          'bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[55%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100',
-          GLOW_SHADOW,
-        )}
-        style={{ color: COLOR.main }}
+    <div
+      className={cn(
+        'group relative aspect-square w-52 shrink-0 cursor-pointer select-none overflow-hidden rounded-[4px] bg-black sm:w-60',
+        CARD_SHADOW,
+      )}
+    >
+      <img
+        src={img}
+        alt=""
+        draggable={false}
+        className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
+        onError={handleImageError}
       />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-0.5 p-3 text-center sm:p-4">
+        <h5
+          data-selectable
+          className="max-w-full select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
+        >
+          {title}
+        </h5>
+        <span data-selectable className="max-w-full select-text truncate text-xs text-white/70 sm:text-sm">
+          {meta}
+        </span>
+      </div>
     </div>
   );
 }
@@ -446,11 +427,10 @@ function ArtistFaq({ items }) {
   if (!items?.length) return null;
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
-        <CircleHelp aria-hidden className="size-6 shrink-0 text-black sm:size-8" />
-        <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold sm:text-3xl">Artist FAQ</h2>
-      </div>
-      <div className="space-y-3">
+      <SectionHeading id="artistFaq" icon={CircleHelp} className="px-0 pb-3">
+        Artist FAQ
+      </SectionHeading>
+      <div className="grid gap-3 md:grid-cols-2 md:items-start">
         {items.slice(0, 4).map((item, index) => {
           const isOpen = openIndex === index;
           return (
@@ -478,6 +458,20 @@ function ArtistFaq({ items }) {
         })}
       </div>
     </div>
+  );
+}
+
+function ExpandToggle({ expanded, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={expanded}
+      className="inline-flex items-center gap-1.5 rounded-[2px] border border-black/15 bg-white px-4 py-1.5 text-sm font-medium text-black shadow-sm transition-colors duration-200 hover:border-black hover:bg-black hover:text-[#feec93]"
+    >
+      {expanded ? 'Show less' : 'Read more'}
+      <ChevronDown className={cn('size-4 transition-transform duration-300', expanded && 'rotate-180')} />
+    </button>
   );
 }
 
@@ -588,8 +582,19 @@ export default function ArtistPage() {
               </div>
             </div>
 
-            {/* Artist FAQ (replaces the old long "about" text) */}
-            <ArtistFaq key={artist.slug} items={artist.faq} />
+            {/* Fanbase: one row of six compact stats (3 + 3 when the column is narrow) */}
+            <div className="mt-2 scroll-mt-24 @container" id="section3">
+              <SectionHeading id="fanbase" icon={Users} className="px-0 pb-3">
+                Fanbase
+              </SectionHeading>
+              <div className="grid grid-cols-3 gap-2 @md:grid-cols-6">
+                {FAN_ORDER.map((name) => artist.fanbase.find((f) => f.platform === name))
+                  .filter(Boolean)
+                  .map((f) => (
+                    <FanbaseCard key={f.platform} {...f} />
+                  ))}
+              </div>
+            </div>
           </div>
 
           {/* Right: Top track */}
@@ -629,41 +634,36 @@ export default function ArtistPage() {
                 </div>
               </div>
 
-              {/* About song */}
+              {/* About song: clamped text fading out into white, with a centered
+                  "Read more" control sitting on the fade; "Show less" once open. */}
               <div className="relative m-3 p-3 sm:p-4">
-                <div
-                  className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[13]')}
-                  dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
-                />
-                <div className="mt-2 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setSongExpanded((v) => !v)}
-                    className="flex items-center gap-2 rounded-[2px] border border-transparent px-3 py-1 text-sm transition-colors duration-200 hover:border-black hover:bg-black hover:text-[#feec93]"
-                  >
-                    <i className={cn('bi bi-caret-down-fill transition-transform duration-300', songExpanded && 'rotate-180')} />
-                    {songExpanded ? 'Collapse' : 'Expand'}
-                  </button>
+                <div className="relative">
+                  <div
+                    className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[13]')}
+                    dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
+                  />
+                  {!songExpanded && (
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
+                  )}
+                  {!songExpanded && (
+                    <div className="absolute inset-x-0 bottom-0 flex justify-center">
+                      <ExpandToggle expanded={false} onClick={() => setSongExpanded(true)} />
+                    </div>
+                  )}
                 </div>
+                {songExpanded && (
+                  <div className="mt-3 flex justify-center">
+                    <ExpandToggle expanded onClick={() => setSongExpanded(false)} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Fanbase: bento grid - the first stat is the featured 2-wide tile, the
-            other six fill the remaining cells (4 + 4 columns on desktop). */}
-        <section className={cn("mx-[1.6%] mt-6 rounded-[4px] bg-white", CARD_SHADOW)} id="section3">
-          <SectionHeading id="fanbase" icon={Users}>Fanbase</SectionHeading>
-          <div className="grid grid-cols-2 gap-3 p-4 sm:gap-4 sm:p-6 md:grid-cols-4">
-            {artist.fanbase.map((f, i) => (
-              <FanbaseCard key={f.platform} {...f} featured={i === 0} />
-            ))}
-          </div>
-        </section>
-
         {/* Popular Songs */}
         <section className="mx-[1.6%] mt-6" id="section4">
-          <SectionHeading id="popularSongs" icon={Flame} controls={<SeeAll />}>
+          <SectionHeading id="popularSongs" icon={Flame}>
             Popular Songs
           </SectionHeading>
           <Carousel key={artist.slug} className="flex h-[21em] flex-col flex-wrap content-start gap-4 px-4 py-4">
@@ -675,7 +675,7 @@ export default function ArtistPage() {
 
         {/* Albums */}
         <section className="mx-[1.6%] mt-6" id="section5">
-          <SectionHeading id="albums" icon={Disc3} controls={<SeeAll />}>
+          <SectionHeading id="albums" icon={Disc3}>
             Albums
           </SectionHeading>
           <Carousel key={artist.slug} className="flex gap-4 px-4 py-4">
@@ -687,7 +687,7 @@ export default function ArtistPage() {
 
         {/* Similar Artists */}
         <section className="mx-[1.6%] mt-6" id="section6">
-          <SectionHeading id="recommended" icon={UserRoundSearch} controls={<SeeAll />}>
+          <SectionHeading id="recommended" icon={UserRoundSearch}>
             Similar Artists
           </SectionHeading>
           <Carousel key={artist.slug} className="flex gap-4 px-4 py-4">
@@ -695,6 +695,11 @@ export default function ArtistPage() {
               <RecommendedCard key={i} img={r.img} name={r.name} flag={r.flag} to={r.to} />
             ))}
           </Carousel>
+        </section>
+
+        {/* Artist FAQ */}
+        <section className="mx-[1.6%] mt-8 pb-10" id="faq">
+          <ArtistFaq key={artist.slug} items={artist.faq} />
         </section>
       </main>
 
