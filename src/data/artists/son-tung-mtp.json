@@ -81,6 +81,24 @@
       "color": "rgba(0, 0, 0, .19)"
     }
   ],
+  "faq": [
+    {
+      "question": "Who is Sơn Tùng M-TP?",
+      "answerHtml": "<p>Sơn Tùng M-TP (Nguyễn Thanh Tùng) was born in 1994 in Thai Binh, Viet Nam. He is a singer, songwriter, producer and actor known as the \"Prince of V-pop\", and the Chairman of three companies he created: M-TP Entertainment, M-TP Talent and M-TP &amp; Friends.</p>"
+    },
+    {
+      "question": "Has Sơn Tùng M-TP won any awards?",
+      "answerHtml": "<p>Yes - his achievements include an MTV Europe Music Award and an Mnet Asian Music Award. He was also on Forbes Vietnam's 2018 30 Under 30 list and was the first Vietnamese musician to enter the Billboard Social 50.</p>"
+    },
+    {
+      "question": "What are Sơn Tùng M-TP's most popular songs?",
+      "answerHtml": "<p>His most popular songs here are Đừng Làm Trái Tim Anh Đau, Chúng Ta Của Tương Lai, Chúng Ta Của Hiện Tại, Making My Way, THERE'S NO ONE AT ALL and Hãy Trao Cho Anh, the hit he made with rapper Snoop Dogg.</p>"
+    },
+    {
+      "question": "Where can I follow Sơn Tùng M-TP?",
+      "answerHtml": "<p>His biggest audiences are on Facebook (14.2M followers), YouTube (11M subscribers) and Instagram (8M followers). The Links card next to Bio Artist and the Fanbase section list his other platforms.</p>"
+    }
+  ],
   "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/mtp-coverImg.jpg",
   "aboutHtml": "<p>\n\n                        Nguyễn Thanh Tùng, born in 1994, known professionally as Sơn Tùng M-TP, is a Vietnamese singer,\n                        songwriter, producer, and actor. He is not only known as one of the most successful Vietnamese\n                        artists and as the \"Prince of V-pop\", but also as the Chairman of three self-created companies:\n                        M-TP\n                        Entertainment, M-TP Talent and M-TP &amp; Friends.\n                        <br/><br/>\n                        He has received many achievements: a MTV Europe Music\n                        Award, an Mnet Asian Music Award, appeared on Forbes Vietnam's 2018 30 Under 30 list, and is\n                        also\n                        the first Vietnamese musician to enter the Billboard Social 50. Up until now, he has already\n                        released a total of 25 songs, such as \"Cơn mưa ngang qua\", \"Em của ngày hôm qua\", \" Âm thầm bên\n                        em\",\n                        and many more. His single \"Chạy ngay đi\" was released with a music video featuring Thai actress\n                        Davika Hoorne, and with a collaboration with rapper Snoop Dogg, he went on and created the big\n                        hit\n                        \"Hãy trao cho anh\". After releasing \"Có chắc yêu là đây\" in 2020, the song became the\n                        3rd-most-streamed Youtube premiere at the time with 902,000 live viewers.\n                        <br/><br/>\n                        As we all know, music is,\n                        without a doubt, the easie st way to connect people. For Sơn Tùng M-TP, music is everything he\n                        ever\n                        wanted to offer to the world around him with all his heart and soul.\n                    </p>",
   "topTrack": {

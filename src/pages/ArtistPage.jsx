@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Disc3, Flame, Trophy, UserRoundSearch, Users } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Disc3, Flame, Trophy, UserRoundSearch, Users } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import useCoverPalette from '@/hooks/useCoverPalette';
@@ -68,12 +68,7 @@ function SectionHeading({ id, icon: Icon, children, controls }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-[#ddd] px-4 pb-4 pt-4 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <span
-          aria-hidden
-          className="grid size-9 shrink-0 place-items-center rounded-[2px] bg-black text-[#feec93] sm:size-11"
-        >
-          <Icon className="size-[1.15rem] sm:size-5" />
-        </span>
+        <Icon aria-hidden className="size-6 shrink-0 text-black sm:size-8" />
         <h1
           id={id}
           className="scroll-mt-24 truncate font-[family-name:var(--font-anton)] text-2xl font-bold sm:text-4xl"
@@ -157,7 +152,7 @@ function CarouselEdge({ side, show, onClick }) {
     <div
       aria-hidden={!show}
       className={cn(
-        'pointer-events-none absolute inset-y-0 z-20 flex w-16 items-center from-white via-white/70 to-transparent transition-opacity duration-200 sm:w-28',
+        'pointer-events-none absolute inset-y-0 z-20 flex w-16 items-center from-[#f5f5fc] via-[#f5f5fc]/70 to-transparent transition-opacity duration-200 sm:w-28',
         isLeft ? 'left-0 justify-start bg-gradient-to-r pl-2' : 'right-0 justify-end bg-gradient-to-l pr-2',
         show ? 'opacity-100' : 'opacity-0',
       )}
@@ -168,11 +163,11 @@ function CarouselEdge({ side, show, onClick }) {
         tabIndex={show ? 0 : -1}
         aria-label={isLeft ? 'Scroll left' : 'Scroll right'}
         className={cn(
-          'hidden size-10 place-items-center rounded-[2px] bg-black text-[#feec93] shadow-md transition-colors duration-200 hover:bg-[#feec93] hover:text-black sm:grid',
+          'hidden size-14 place-items-center text-black transition-opacity duration-200 hover:opacity-60 sm:grid',
           show ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
-        <Icon className="size-5" />
+        <Icon className="size-10" strokeWidth={2.25} />
       </button>
     </div>
   );
@@ -244,7 +239,7 @@ function LinkIcon({ href, icon, color }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="grid size-8 place-items-center rounded-[2px] border border-[#ddd] bg-white text-center text-lg transition-colors duration-200 hover:border-black/40"
+      className="grid size-8 place-items-center rounded-[2px] border border-[#ddd] text-center text-lg transition-colors duration-200 hover:border-black/40"
     >
       <i className={icon} style={{ color: color || '#000' }} />
     </a>
@@ -316,20 +311,13 @@ function FanbaseCard({ icon, iconColor, platform, number, label, featured }) {
   return (
     <div
       ref={ref}
-      style={{ '--stat': iconColor }}
       className={cn(
-        'group relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:[border-color:var(--stat)] sm:p-5',
+        'relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white p-4 sm:p-5',
         featured && 'col-span-2',
         CARD_SHADOW,
       )}
     >
-      {/* platform-colored top edge, soft glow and an oversized watermark icon */}
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: iconColor }} />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full opacity-[0.14] blur-2xl"
-        style={{ background: iconColor }}
-      />
+      {/* oversized faint watermark of the platform icon */}
       <i
         aria-hidden
         className={cn(
@@ -342,7 +330,7 @@ function FanbaseCard({ icon, iconColor, platform, number, label, featured }) {
 
       <div className="relative flex items-center gap-2.5">
         <span
-          className="grid size-9 place-items-center rounded-[2px] text-lg text-white"
+          className="grid size-9 place-items-center rounded-full text-lg text-white"
           style={{ background: iconColor }}
         >
           <i className={iconClass} />
@@ -422,24 +410,74 @@ function AlbumCard({ img, title, meta }) {
 function RecommendedCard({ img, name, flag, to }) {
   const Comp = to ? Link : 'div';
   return (
-    <Comp to={to} draggable={false} className={cn('group relative h-fit w-60 shrink-0 cursor-pointer select-none rounded-[4px] border border-[#ddd] bg-[#fdfbfb]', CARD_SHADOW)}>
-      <img src={img} alt="" draggable={false} className="aspect-square w-full select-none rounded-t-[3px] object-cover [-webkit-user-drag:none]" onError={handleImageError} />
-      <div className="flex items-center justify-between p-3">
-        <h5 data-selectable className="select-text truncate font-bold" style={{ color: COLOR.blue }}>
+    <Comp
+      to={to}
+      draggable={false}
+      className={cn(
+        'group relative block aspect-[4/5] w-52 shrink-0 select-none overflow-hidden rounded-[4px] bg-black sm:w-60',
+        to && 'cursor-pointer',
+        CARD_SHADOW,
+      )}
+    >
+      <img
+        src={img}
+        alt=""
+        draggable={false}
+        className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
+        onError={handleImageError}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 p-3 sm:p-4">
+        <h5
+          data-selectable
+          className="min-w-0 select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
+        >
           {name}
         </h5>
-        {flag && <img src={flag} alt="" draggable={false} className="h-4 w-auto select-none" onError={handleImageError} />}
+        {flag && <img src={flag} alt="" draggable={false} className="h-4 w-auto shrink-0 select-none rounded-[1px]" onError={handleImageError} />}
       </div>
-      {to && (
-        <i
-          className={cn(
-            'bi bi-play-circle-fill pointer-events-none absolute right-[5%] top-[45%] text-3xl opacity-0 transition-opacity duration-200 group-hover:opacity-100',
-            GLOW_SHADOW,
-          )}
-          style={{ color: COLOR.main }}
-        />
-      )}
     </Comp>
+  );
+}
+
+/** Artist FAQ - same accordion look as the Q&A on the lyrics page (max 4). */
+function ArtistFaq({ items }) {
+  const [openIndex, setOpenIndex] = useState(null);
+  if (!items?.length) return null;
+  return (
+    <div>
+      <div className="mb-4 flex items-center gap-3">
+        <CircleHelp aria-hidden className="size-6 shrink-0 text-black sm:size-8" />
+        <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold sm:text-3xl">Artist FAQ</h2>
+      </div>
+      <div className="space-y-3">
+        {items.slice(0, 4).map((item, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div key={index} className="overflow-hidden rounded-[2px] border border-black/10">
+              <button
+                type="button"
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+                aria-expanded={isOpen}
+                className={cn(
+                  'flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors',
+                  isOpen ? 'bg-black text-[#f5f5fc] hover:bg-[#feec93] hover:text-black' : 'bg-white text-black hover:bg-black/5',
+                )}
+              >
+                <span className="font-medium">{item.question}</span>
+                <ChevronDown className={cn('size-5 shrink-0 transition-transform', isOpen && 'rotate-180')} />
+              </button>
+              {isOpen && (
+                <div
+                  className="border-t border-black/10 bg-white px-4 py-4 text-black [&_p]:leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: item.answerHtml }}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -550,22 +588,8 @@ export default function ArtistPage() {
               </div>
             </div>
 
-            {/* About artist */}
-            <div
-              className="rounded-[4px] p-4"
-              style={{
-                background: '#f5f5fc',
-                boxShadow: 'inset 5px 5px 5px #d8d8de, inset -5px -5px 5px #ffffff',
-              }}
-            >
-              {artist.aboutImg && (
-                <img src={artist.aboutImg} alt="" className="mb-3 h-48 w-full rounded-[2px] object-cover sm:hidden" onError={handleImageError} />
-              )}
-              <div
-                className="text-[1.05em] leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: artist.aboutHtml }}
-              />
-            </div>
+            {/* Artist FAQ (replaces the old long "about" text) */}
+            <ArtistFaq key={artist.slug} items={artist.faq} />
           </div>
 
           {/* Right: Top track */}
@@ -638,7 +662,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Popular Songs */}
-        <section className={cn("mx-[1.6%] mt-6 rounded-[4px] bg-white", CARD_SHADOW)} id="section4">
+        <section className="mx-[1.6%] mt-6" id="section4">
           <SectionHeading id="popularSongs" icon={Flame} controls={<SeeAll />}>
             Popular Songs
           </SectionHeading>
@@ -650,7 +674,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Albums */}
-        <section className={cn("mx-[1.6%] mt-6 rounded-[4px] bg-white", CARD_SHADOW)} id="section5">
+        <section className="mx-[1.6%] mt-6" id="section5">
           <SectionHeading id="albums" icon={Disc3} controls={<SeeAll />}>
             Albums
           </SectionHeading>
@@ -662,7 +686,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Similar Artists */}
-        <section className={cn("mx-[1.6%] mt-6 rounded-[4px] bg-white", CARD_SHADOW)} id="section6">
+        <section className="mx-[1.6%] mt-6" id="section6">
           <SectionHeading id="recommended" icon={UserRoundSearch} controls={<SeeAll />}>
             Similar Artists
           </SectionHeading>

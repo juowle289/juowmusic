@@ -81,6 +81,24 @@
       "color": "rgba(0, 0, 0, 1)"
     }
   ],
+  "faq": [
+    {
+      "question": "Who is The Weeknd?",
+      "answerHtml": "<p>The Weeknd is the stage name of Abel Makkonen Tesfaye, a singer, songwriter and producer from Scarborough, Ontario, Canada. He has been active for 13 years, blending pop, R&amp;B/soul and electronic music, and is regarded as one of the most successful and significant artists of the modern era.</p>"
+    },
+    {
+      "question": "Has The Weeknd won any awards?",
+      "answerHtml": "<p>Yes - he is a multi-platinum, 3X GRAMMY Award winner. \"Earned It (Fifty Shades of Grey)\" won Best R&amp;B Performance and earned an Academy Award nomination for Best Original Song, and Beauty Behind The Madness won a GRAMMY for Best Urban Contemporary Album. In 2018 Starboy won the same award, making him the first artist ever to win it twice.</p>"
+    },
+    {
+      "question": "What are The Weeknd's most popular songs?",
+      "answerHtml": "<p>His most popular songs here are Blinding Lights, The Hills, Starboy, Popular, One Of The Girls and Save Your Tears. Blinding Lights became a worldwide sensation in 2020, peaking at #1 in 30+ countries.</p>"
+    },
+    {
+      "question": "Where can I follow The Weeknd?",
+      "answerHtml": "<p>His biggest audiences are on Spotify (86.6M followers), Instagram (75.5M followers) and YouTube (35.4M subscribers). The Links card next to Bio Artist and the Fanbase section list his other platforms.</p>"
+    }
+  ],
   "aboutImg": "https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/Artist/TheWeeknd-coverImg.jpg",
   "aboutHtml": "<p class=\"about_artistP\">\n\n                        The Weeknd took over pop music &amp; culture on his own terms filtering R&amp;B, Pop,&amp; hip-hop through\n                        an ambitious widescreen lens. The multi-platinum 3X GRAMMY Award winner has emerged as one of\n                        the most successful &amp; significant artists of the modern era. 2012's 3X platinum Trilogy collated\n                        3 breakout mixtapes—House of Balloons, Thursday &amp; Echoes of Silence—into his 1st chart-topping\n                        collection followed by his debut LP Kiss Land in 2013. <br/><br/>\n                        Two years later, “Earned It (Fifty Shades\n                        of Grey)” won “Best R&amp;B Performance” &amp; received an Academy Award nod for “Best Original Song” &amp;\n                        4X Platinum Beauty Behind The Madness won a GRAMMY for “Best Urban Contemporary Album.” In 2018,\n                        Starboy won the same award, making him the 1st artist ever to win twice. His 6-track project My\n                        Dear Melancholy marked his 3rd consecutive #1 bow on the Billboard Top 200, &amp; “Pray For Me” with\n                        Kendrick Lamar &amp; Niels was featured in the trailer for the Academy Award winning Marvel film\n                        Black Panther. <br/><br/>\n                        In 2020 the 80's-nostalgic track Blinding Lights became a worldwide sensation,\n                        igniting viral dance challenges across social media, peaking at #1 in 30+ countries &amp; headlining\n                        Mercedes Benz EQC campaign. After Hours held the #1 spot on Billboard 200 for 4 consecutive\n                        weeks, marking his 4th #1 album &amp; becoming the first to ever rank #1 on the Billboard 200, Hot\n                        100, and Artist 100 simultaneously. After Hours is the #1 R&amp;B streaming album of all time\n                        (followed by Starboy at #2).\n                    </p>",
   "topTrack": {
