@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Play,
@@ -22,11 +22,44 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { formatTime, usePlayerStore } from "@/stores/usePlayerStore";
 import { handleImageError } from "@/lib/imageFallback";
+import { artists } from "@/data/songs";
 
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
-const MINIMIZE_HOLD_MS = 2000; // hold the title/cover block this long to collapse into the vinyl
+const MINIMIZE_HOLD_MS = 1000; // hold the cover/title block this long to collapse into the vinyl
+// The bright circle only starts growing after this short delay, so an ordinary
+// click on the title/artist links does not flash it. Total time from press
+// to minimize is still MINIMIZE_HOLD_MS.
+const MINIMIZE_VISUAL_DELAY_MS = 150;
+
+const normalizeName = (str) =>
+  str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+/** "The Weeknd, JENNIE" -> each name that has an artist page becomes its own
+ * link (own hover underline); names without a page stay plain text. */
+function ArtistLinks({ names }) {
+  const parts = String(names || "")
+    .split(/\s*,\s*/)
+    .filter(Boolean);
+  return parts.map((name, i) => {
+    const hit = artists.find(
+      (a) => a.link && a.link !== "#" && normalizeName(a.nameArtist) === normalizeName(name),
+    );
+    return (
+      <Fragment key={`${name}-${i}`}>
+        {i > 0 && ", "}
+        {hit ? (
+          <Link to={hit.link} draggable={false} className="hover:underline">
+            {name}
+          </Link>
+        ) : (
+          <span>{name}</span>
+        )}
+      </Fragment>
+    );
+  });
+}
 
 function MarqueeText({ children, className }) {
   const viewportRef = useRef(null);
@@ -48,7 +81,9 @@ function MarqueeText({ children, className }) {
     observer.observe(viewport);
     observer.observe(text);
     return () => observer.disconnect();
-  }, [children]);
+    // Not keyed on `children`: it can be a freshly created element every render,
+    // and the observers already fire whenever the text's size changes.
+  }, []);
 
   const travelDuration = overflow / 36;
   const cycleDuration = travelDuration * 2 + 4;
@@ -297,9 +332,17 @@ export default function GlobalAudioPlayer() {
   // vinyl. While held, a bright circle grows from the block's centre until it
   // fills the whole block; letting go early shrinks it back and nothing happens.
   const [minimizeHold, setMinimizeHold] = useState(false);
+  const minimizeDelayRef = useRef(null);
   const minimizeTimerRef = useRef(null);
+  // The release that ends a completed hold would otherwise "click" whatever
+  // link the finger/cursor is on - swallow exactly that one click.
+  const suppressClickRef = useRef(false);
 
   const cancelMinimizeHold = () => {
+    if (minimizeDelayRef.current) {
+      clearTimeout(minimizeDelayRef.current);
+      minimizeDelayRef.current = null;
+    }
     if (minimizeTimerRef.current) {
       clearTimeout(minimizeTimerRef.current);
       minimizeTimerRef.current = null;
@@ -308,18 +351,27 @@ export default function GlobalAudioPlayer() {
   };
 
   const startMinimizeHold = () => {
-    if (minimizeTimerRef.current) return;
-    setMinimizeHold(true);
-    minimizeTimerRef.current = setTimeout(() => {
-      minimizeTimerRef.current = null;
-      vibrateTick(30); // Android only - iOS Safari has no Vibration API
-      setMinimizeHold(false);
-      toggleMini();
-    }, MINIMIZE_HOLD_MS);
+    if (minimizeDelayRef.current || minimizeTimerRef.current) return;
+    suppressClickRef.current = false;
+    minimizeDelayRef.current = setTimeout(() => {
+      minimizeDelayRef.current = null;
+      setMinimizeHold(true);
+      minimizeTimerRef.current = setTimeout(() => {
+        minimizeTimerRef.current = null;
+        suppressClickRef.current = true;
+        setTimeout(() => {
+          suppressClickRef.current = false;
+        }, 800);
+        vibrateTick(30); // Android only - iOS Safari has no Vibration API
+        setMinimizeHold(false);
+        toggleMini();
+      }, MINIMIZE_HOLD_MS - MINIMIZE_VISUAL_DELAY_MS);
+    }, MINIMIZE_VISUAL_DELAY_MS);
   };
 
   useEffect(
     () => () => {
+      if (minimizeDelayRef.current) clearTimeout(minimizeDelayRef.current);
       if (minimizeTimerRef.current) clearTimeout(minimizeTimerRef.current);
     },
     [],
@@ -707,10 +759,10 @@ export default function GlobalAudioPlayer() {
                 onTouchEnd={handleBarTouchEnd}
                 onTouchCancel={clearLongPress}
               >
-                <button
-                  type="button"
-                  aria-label="Hold to minimize player"
-                  title="Hold for 2 seconds to minimize"
+                <div
+                  role="group"
+                  aria-label="Now playing - hold for 1 second to minimize"
+                  title="Hold for 1 second to minimize"
                   onPointerDown={(e) => {
                     if (e.button !== 0) return;
                     startMinimizeHold();
@@ -718,17 +770,19 @@ export default function GlobalAudioPlayer() {
                   onPointerUp={cancelMinimizeHold}
                   onPointerLeave={cancelMinimizeHold}
                   onPointerCancel={cancelMinimizeHold}
-                  onBlur={cancelMinimizeHold}
-                  onKeyDown={(e) => {
-                    if ((e.key === "Enter" || e.key === " ") && !e.repeat) startMinimizeHold();
+                  onClickCapture={(e) => {
+                    if (suppressClickRef.current) {
+                      suppressClickRef.current = false;
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
                   }}
-                  onKeyUp={cancelMinimizeHold}
                   onContextMenu={(e) => e.preventDefault()}
                   // The bar's own 750ms long-press opens fullscreen on touch -
-                  // this block has its own (2s) hold, so don't let the touch
+                  // this block has its own (1s) hold, so don't let the touch
                   // reach the bar's handler.
                   onTouchStart={(e) => e.stopPropagation()}
-                  className="group relative flex h-full min-w-0 flex-1 items-center overflow-hidden rounded-l-[2px] px-2 sm:w-[12em] sm:flex-none md:w-[15em] lg:w-[18em]"
+                  className="relative flex h-full min-w-0 flex-1 select-none items-center overflow-hidden rounded-l-[2px] px-2 sm:w-[12em] sm:flex-none md:w-[15em] lg:w-[18em]"
                 >
                   <motion.span
                     aria-hidden
@@ -741,33 +795,43 @@ export default function GlobalAudioPlayer() {
                     }}
                     transition={
                       minimizeHold
-                        ? { duration: MINIMIZE_HOLD_MS / 1000, ease: "linear" }
-                        : { duration: 0.35, ease: "easeOut" }
+                        ? {
+                            duration: (MINIMIZE_HOLD_MS - MINIMIZE_VISUAL_DELAY_MS) / 1000,
+                            ease: "linear",
+                          }
+                        : { duration: 0.3, ease: "easeOut" }
                     }
                   />
                   <span className="relative z-10 flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2.5">
-                  {/* layoutId shared with the mini widget's cover art below -
-                  Framer Motion FLIP-animates this square thumbnail
-                  morphing into the mini vinyl's circular center label
-                  (position, size, and border-radius all interpolate)
-                  instead of the two states just cross-fading in place. */}
-                  <motion.img
-                    layoutId="player-cover-art"
-                    src={currentSong.coverSrc}
-                    alt=""
-                    className="size-10 shrink-0 rounded-md object-cover sm:size-11 sm:rounded-sm"
-                    onError={handleImageError}
-                  />
-                  <div className="flex min-w-0 flex-1 flex-col text-left">
-                    <MarqueeText className="w-full text-sm font-semibold text-black group-hover:underline sm:text-base">
-                      {currentSong.songTitle}
-                    </MarqueeText>
-                    <MarqueeText className="w-full text-xs text-black/60 group-hover:underline sm:text-sm">
-                      {currentSong.artistName}
-                    </MarqueeText>
-                  </div>
+                    {/* layoutId shared with the mini widget's cover art below -
+                    Framer Motion FLIP-animates this square thumbnail
+                    morphing into the mini vinyl's circular center label
+                    (position, size, and border-radius all interpolate)
+                    instead of the two states just cross-fading in place. */}
+                    <motion.img
+                      layoutId="player-cover-art"
+                      src={currentSong.coverSrc}
+                      alt=""
+                      draggable={false}
+                      className="size-10 shrink-0 rounded-[2px] object-cover sm:size-11"
+                      onError={handleImageError}
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col text-left">
+                      <MarqueeText className="w-full text-sm font-semibold text-black sm:text-base">
+                        <Link
+                          to={`/lyrics/${currentSong.slug}`}
+                          draggable={false}
+                          className="hover:underline"
+                        >
+                          {currentSong.songTitle}
+                        </Link>
+                      </MarqueeText>
+                      <MarqueeText className="w-full text-xs text-black/60 sm:text-sm">
+                        <ArtistLinks names={currentSong.artistName} />
+                      </MarqueeText>
+                    </div>
                   </span>
-                </button>
+                </div>
 
                 <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
                   <button

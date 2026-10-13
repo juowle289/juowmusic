@@ -4,6 +4,9 @@ const FALLBACK = {
   gradient: 'linear-gradient(#2a2a2a, #474747)',
   isLight: false,
   accent: '#feec93',
+  // Flat color matching the gradient above (its midpoint) - used where a
+  // gradient isn't wanted, e.g. the site header on the lyrics page.
+  solid: '#383838',
 };
 
 function clampByte(n) {
@@ -173,6 +176,9 @@ export default function useCoverPalette(coverSrc) {
           gradient: `linear-gradient(#${toHex(top1)}${toHex(top2)}${toHex(top3)}, #${toHex(bot1)}${toHex(bot2)}${toHex(bot3)})`,
           isLight: luminance > 150,
           accent: `#${toHex(ar)}${toHex(ag)}${toHex(ab)}`,
+          // The gradient above is this color shaded -16% (top) to +16% (bottom),
+          // so the un-shaded base color is exactly its flat equivalent.
+          solid: `#${toHex(ar)}${toHex(ag)}${toHex(ab)}`,
         });
       } catch {
         if (!cancelled) setPalette(FALLBACK);

@@ -107,11 +107,11 @@ export default function SearchBox() {
           hamburger, wider from `sm` up. */}
       <div
         className={cn(
-          'flex items-center gap-2 rounded-full border bg-white/[0.04] px-3 py-1.5 transition-colors duration-200 sm:px-3.5 sm:py-2',
-          open ? 'border-juow-accent' : 'border-white/15 hover:border-juow-accent/70',
+          'flex items-center gap-2 rounded-[2px] border bg-[color-mix(in_srgb,var(--color-juow-soft)_5%,transparent)] px-3 py-1.5 transition-colors duration-200 sm:px-3.5 sm:py-2',
+          open ? 'border-juow-accent' : 'border-[color-mix(in_srgb,var(--color-juow-soft)_30%,transparent)] hover:border-juow-accent',
         )}
       >
-        <Search className="size-4 shrink-0 text-juow-soft/50" />
+        <Search className="size-4 shrink-0 text-[color-mix(in_srgb,var(--color-juow-soft)_50%,transparent)]" />
         <input
           ref={inputRef}
           value={query}
@@ -126,7 +126,7 @@ export default function SearchBox() {
           aria-label="Search songs and artists"
           aria-expanded={dropdownVisible}
           aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
-          className="w-20 bg-transparent text-sm text-juow-soft outline-none placeholder:text-juow-soft/40 sm:w-40 md:w-48"
+          className="w-20 bg-transparent text-sm text-juow-soft outline-none placeholder:text-[color-mix(in_srgb,var(--color-juow-soft)_40%,transparent)] sm:w-40 md:w-48"
         />
         {query && (
           <button
@@ -136,7 +136,7 @@ export default function SearchBox() {
               inputRef.current?.focus({ preventScroll: true });
             }}
             aria-label="Clear search"
-            className="shrink-0 text-juow-soft/40 hover:text-juow-soft"
+            className="shrink-0 text-[color-mix(in_srgb,var(--color-juow-soft)_40%,transparent)] hover:text-juow-soft"
           >
             <X className="size-4" />
           </button>
@@ -151,7 +151,7 @@ export default function SearchBox() {
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-white/10 bg-black text-juow-soft shadow-2xl"
+            className="absolute right-0 top-[calc(100%+0.75rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[2px] border border-white/10 bg-black text-juow-soft shadow-2xl [--color-juow-soft:#f5f5fc] [--color-juow-accent:#feec93]"
           >
             <div className="max-h-72 overflow-y-auto">
               {!hasResults && (

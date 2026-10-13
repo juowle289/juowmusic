@@ -246,7 +246,7 @@
     margin-left: -0.1em;
     width: 3em;
     height: 3em;
-    border-radius: 0.1em;
+    border-radius: 2px;
     image-rendering: pixelated;
     pointer-events: none;
     touch-action: none;
@@ -372,7 +372,7 @@ nav img {
   width: 22em;
   height: 22em;
   object-fit: contain;
-  border-radius: 0.1em;
+  border-radius: 2px;
   margin: 6em 0 0 0;
   position: absolute;
   /* image-rendering: pixelated; */
@@ -386,7 +386,7 @@ nav #vinylRecordAlbum {
   width: 22em;
   height: 22em;
   object-fit: contain;
-  border-radius: 0.1em;
+  border-radius: 2px;
   margin: 0 1.3em 0 0;
   /* visibility: hidden; */
   margin: 5.9em 2.3em 0 -0.16em;
@@ -452,7 +452,7 @@ nav #vinylRecordAlbum {
 .expand a {
   color: var(--color-white);
   border: 1px solid #fff;
-  border-radius: 0.3em;
+  border-radius: 2px;
   padding: 0.1em;
   font-size: 0.8em;
 }
@@ -530,7 +530,7 @@ aside .head-aside {
   font-size: 1.2em;
   text-align: center;
   align-content: center;
-  border-radius: 0.1em;
+  border-radius: 2px;
   background: #000;
   color: #f5f5fc;
 }
@@ -644,7 +644,7 @@ article .audio-play {
   align-items: center;
   border: var(--border-black);
   background: var(--opac-white);
-  border-radius: 0.1em;
+  border-radius: 2px;
   backdrop-filter: blur(10px);
   box-shadow: 0.1em 0.2em 0.8em rgba(0, 0, 0, 0.25);
   z-index: 10;
@@ -665,7 +665,7 @@ article .img-control:hover {
 article .img-control img {
   width: 3.125em;
   height: 3.125em;
-  border-radius: 0.1em;
+  border-radius: 2px;
   image-rendering: pixelated;
 }
 
@@ -690,7 +690,7 @@ input[type="range"] {
   height: fit-content;
   /* height: .3em; */
   margin-top: 0.5em;
-  border-radius: 1em;
+  border-radius: 2px;
   /* background: #7b7b7b; */
   cursor: pointer;
 }
@@ -718,7 +718,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 input[type="range"]::-webkit-slider-runnable-track {
   appearance: none;
   background: #000;
-  border-radius: 1em;
+  border-radius: 2px;
   height: 0.3em;
 }
 
@@ -804,7 +804,7 @@ article .logo {
   padding: 1em;
   margin-bottom: 1.3em;
   font-size: 1.2em;
-  border-radius: 0.2em;
+  border-radius: 2px;
   border: var(--border-black);
   /* opacity: 0.5; */
 }
@@ -816,7 +816,7 @@ article .logo {
   width: fit-content;
   padding: 0.3em 2em;
   background: transparent;
-  border-radius: 0.5em;
+  border-radius: 2px;
   border: var(--border-black);
   cursor: pointer;
   /* opacity: 0.5; */

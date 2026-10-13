@@ -100,6 +100,8 @@ export function usePartySync(partyId, role, displayName) {
           },
           isPlaying: s.isPlaying,
           position: s.currentTime,
+          // (Re)opening the room clears a previous "host left" mark.
+          ended: false,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
@@ -116,6 +118,15 @@ export function usePartySync(partyId, role, displayName) {
     return () => {
       unsubscribeStore();
       clearInterval(heartbeat);
+      // The host leaving the room (Leave button, navigating away, ...) ends
+      // the party: flag it so the lyrics-page bubble disappears right away
+      // instead of lingering until its heartbeat times out. Guests are
+      // unaffected (their sync follows song/isPlaying/position only). If the
+      // tab is just closed this can't run - the heartbeat timeout in
+      // useActiveParties covers that case.
+      setDoc(partyRef, { ended: true, updatedAt: serverTimestamp() }, { merge: true }).catch((error) => {
+        console.warn('[juowmusic] Could not mark party as ended:', error);
+      });
     };
   }, [role, partyId]);
 

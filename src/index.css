@@ -15,6 +15,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Deliberately NOT `inline`: utilities built from these two tokens must emit
+   var(--color-juow-*) instead of the literal color, so a container (the site
+   header on a lyrics page) can re-point them for everything inside it. */
+@theme {
+  --color-juow-accent: #feec93;
+  --color-juow-soft: #f5f5fc;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -55,8 +63,6 @@
   --font-sans: "Geist Variable", "Niveau Grotesk", sans-serif;
   --font-anton: "Anton", sans-serif;
   --font-display: "TANAMERA", sans-serif;
-  --color-juow-accent: #feec93;
-  --color-juow-soft: #f5f5fc;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '@/firebaseFirestore';
 
@@ -10,14 +10,20 @@ const ACTIVE_WINDOW_MS = 30_000;
 // happens client-side (see below) so this stays a plain single-field
 // `orderBy`, which needs no composite Firestore index to deploy.
 const CANDIDATE_LIMIT = 24;
+// How often "is this room still fresh?" is re-evaluated. Firestore only
+// delivers a snapshot when data *changes* - and once a host has left,
+// nothing changes any more - so staleness has to be re-checked on a clock,
+// otherwise the last-seen bubble would sit there forever.
+const RECHECK_MS = 5_000;
 
 /**
  * Real-time list of Listening Party rooms that are actually live right now
- * (playing + recently heard from), newest activity first. Backs the
- * "join a party" rail on the lyrics page.
+ * (playing + recently heard from + not explicitly ended by the host), newest
+ * activity first. Backs the "join a party" rail on the lyrics page.
  */
 export default function useActiveParties() {
-  const [parties, setParties] = useState([]);
+  const [docs, setDocs] = useState([]);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const q = query(collection(db, 'parties'), orderBy('updatedAt', 'desc'), limit(CANDIDATE_LIMIT));
@@ -25,11 +31,8 @@ export default function useActiveParties() {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const now = Date.now();
-        const active = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .filter((p) => p.isPlaying && p.song && p.updatedAt && now - p.updatedAt.toMillis() < ACTIVE_WINDOW_MS);
-        setParties(active);
+        setDocs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setNow(Date.now());
       },
       (error) => {
         // Silently empty is indistinguishable from "nobody's listening" -
@@ -37,12 +40,28 @@ export default function useActiveParties() {
         // rules not allowing signed-out visitors to read `parties`) show
         // up as something debuggable instead of just "no bubbles".
         console.error('[juowmusic] Failed to load active parties:', error);
-        setParties([]);
+        setDocs([]);
       },
     );
 
-    return unsubscribe;
+    const clock = setInterval(() => setNow(Date.now()), RECHECK_MS);
+
+    return () => {
+      unsubscribe();
+      clearInterval(clock);
+    };
   }, []);
 
-  return parties;
+  return useMemo(
+    () =>
+      docs.filter(
+        (p) =>
+          !p.ended &&
+          p.isPlaying &&
+          p.song &&
+          p.updatedAt &&
+          now - p.updatedAt.toMillis() < ACTIVE_WINDOW_MS,
+      ),
+    [docs, now],
+  );
 }

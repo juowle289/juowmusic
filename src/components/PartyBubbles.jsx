@@ -83,7 +83,7 @@ function PartyBubble({ party, index }) {
       <div
         style={{ transform: 'translate(-50%, -50%)' }}
         className={cn(
-          'pointer-events-none absolute left-1/2 top-1/2 z-50 w-36 -translate-x-1/2 rounded-md border border-white/10 bg-[#111] px-2.5 py-2 text-center text-xs text-white shadow-xl transition-all duration-200',
+          'pointer-events-none absolute left-1/2 top-1/2 z-50 w-36 -translate-x-1/2 rounded-[2px] border border-white/10 bg-[#111] px-2.5 py-2 text-center text-xs text-white shadow-xl transition-all duration-200',
           active ? 'translate-y-[calc(-50%-2.4rem)] opacity-100' : 'translate-y-[calc(-50%-2rem)] opacity-0',
         )}
       >

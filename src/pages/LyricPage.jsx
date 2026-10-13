@@ -16,6 +16,7 @@ import useDocumentTitle from "@/hooks/useDocumentTitle";
 import useLyricPlayer from "@/hooks/useLyricPlayer";
 import { findClickedLineIndex } from "@/lib/lyricLines";
 import { usePlayerStore } from "@/stores/usePlayerStore";
+import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
 import { cn } from "@/lib/utils";
 
 import afterHours from "@/data/lyrics/afterHours.json";
@@ -45,6 +46,17 @@ export default function LyricPage() {
   useDocumentTitle(song?.docTitle);
   useInlineStyle(song?.customStyle);
   const palette = useCoverPalette(song?.coverSrc);
+
+  // Tint the site header with the cover's flat dominant color (same hue as the
+  // hero's gradient, just without the gradient). Cleared when leaving the page.
+  const setHeaderTheme = useHeaderThemeStore((s) => s.setTheme);
+  const clearHeaderTheme = useHeaderThemeStore((s) => s.clearTheme);
+  const hasSong = Boolean(song);
+  useEffect(() => {
+    if (!hasSong) return undefined;
+    setHeaderTheme({ bg: palette.solid, isLight: palette.isLight });
+    return clearHeaderTheme;
+  }, [hasSong, palette.solid, palette.isLight, setHeaderTheme, clearHeaderTheme]);
   useLyricPlayer(song);
 
   // The vinyl behind the cover art should stay fully tucked out of sight
@@ -272,7 +284,7 @@ export default function LyricPage() {
                 <a
                   href="#about"
                   className={cn(
-                    "mt-2 inline-flex items-center gap-2 rounded border px-2 py-0.5 text-sm hover:border-[#337ab7] hover:text-[#337ab7]",
+                    "mt-2 inline-flex items-center gap-2 rounded-[2px] border px-2 py-0.5 text-sm hover:border-[#337ab7] hover:text-[#337ab7]",
                     palette.isLight
                       ? "border-black/50 text-black"
                       : "border-white text-[#f5f5fc]",
@@ -308,14 +320,14 @@ export default function LyricPage() {
             className={cn(
               "lyric min-w-0 flex-1 text-black",
               hasLineTimestamps &&
-                "[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5",
+                "[&_p:not(:has(q))]:cursor-pointer [&_p:not(:has(q))]:rounded-[2px] [&_p:not(:has(q))]:transition-colors [&_p:not(:has(q))]:hover:bg-black/5",
             )}
           >
             <div dangerouslySetInnerHTML={{ __html: song.lyricHtml }} />
           </div>
 
           <aside className="sticky top-0 h-fit w-full shrink-0 pt-[4%] md:w-80">
-            <div className="mb-0 rounded-t bg-black py-2 text-center text-lg text-[#f5f5fc]">
+            <div className="mb-0 rounded-t-[2px] bg-black py-2 text-center text-lg text-[#f5f5fc]">
               You may also like
             </div>
             {song.recommended.map((rec) => (
@@ -369,7 +381,7 @@ export default function LyricPage() {
           onMouseDown={(e) => e.preventDefault()} // keep the text selection alive through the click
           onClick={openShareCard}
           style={{ top: selectionBubble.top, left: selectionBubble.left }}
-          className="fixed z-[150] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black px-3 py-1.5 text-xs text-white shadow-xl transition-opacity"
+          className="fixed z-[150] flex -translate-x-1/2 items-center gap-1.5 rounded-[2px] bg-black px-3 py-1.5 text-xs text-white shadow-xl transition-opacity"
         >
           <Share2 className="size-3.5" /> Share
         </button>

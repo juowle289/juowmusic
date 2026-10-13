@@ -12,6 +12,7 @@ import {
 } from "@/hooks/useHeaderScroll";
 import { useAuth } from "@/context/AuthContext";
 import { handleImageError } from '@/lib/imageFallback';
+import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
 
 /**
  * @param {'home' | 'section'} variant
@@ -66,14 +67,33 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
   else navItems = menuItems;
   const menuKey = showSectionMenu ? "sections" : "default";
 
+  // Lyric page: flat dominant-color background (published by LyricPage) with
+  // black/white text picked from its brightness. The two CSS variables re-point
+  // the site's soft/accent tokens for everything inside the header, so links,
+  // underline, search bar etc. follow without touching each class. Panels that
+  // keep their own black background re-set the tokens (see HEADER_PANEL_TOKENS).
+  const headerTheme = useHeaderThemeStore((s) => s.theme);
+  const themed = isLyric && headerTheme ? headerTheme : null;
+  const headerStyle = themed
+    ? {
+        backgroundColor: themed.bg,
+        "--color-juow-soft": themed.isLight ? "#111111" : "#f5f5fc",
+        "--color-juow-accent": themed.isLight ? "#000000" : "#feec93",
+        "--juow-on-soft": themed.bg,
+      }
+    : undefined;
+
   return (
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-[102] flex h-14 items-center justify-between px-4 text-juow-soft transition-colors duration-300 sm:h-[4.3rem] sm:px-7",
-        scrolled
-          ? "border-b border-white/10 bg-black/80 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent",
+        themed
+          ? "border-b border-transparent"
+          : scrolled
+            ? "border-b border-white/10 bg-black/80 backdrop-blur-md"
+            : "border-b border-transparent bg-transparent",
       )}
+      style={headerStyle}
     >
       <div className="flex min-w-0 items-center gap-6 lg:gap-10">
         <Link to="/" className="shrink-0">
@@ -127,9 +147,9 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
             <button
               type="button"
               onClick={() => setAccountOpen((v) => !v)}
-              className="inline-flex items-center gap-2 rounded-full border border-juow-soft py-1 pl-1.5 pr-3 text-sm transition-colors hover:border-juow-accent hover:text-juow-accent"
+              className="inline-flex items-center gap-2 rounded-[2px] py-1 pl-1.5 pr-3 text-sm transition-colors hover:text-juow-accent"
             >
-              <span className="grid size-6 place-items-center rounded-full bg-juow-soft text-black">
+              <span className="grid size-6 place-items-center rounded-full bg-juow-soft text-[color:var(--juow-on-soft,#000)]">
                 <User className="size-3.5" />
               </span>
               {displayName}
@@ -143,7 +163,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
                   exit={{ opacity: 0, y: -8, scale: 0.97 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-[calc(100%+0.6rem)] w-48 overflow-hidden rounded-lg border border-white/10 bg-black shadow-2xl"
+                  className="absolute right-0 top-[calc(100%+0.6rem)] w-48 overflow-hidden rounded-[2px] border border-white/10 bg-black shadow-2xl [--color-juow-soft:#f5f5fc] [--color-juow-accent:#feec93]"
                 >
                   <Link
                     to="/profile"
@@ -165,7 +185,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
                       await logout();
                       setAccountOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-3 text-left text-sm text-juow-soft transition-colors hover:bg-juow-accent hover:text-black"
+                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-3 text-left text-sm text-red-500 transition-colors hover:bg-red-500 hover:text-white"
                   >
                     <LogOut className="size-4" /> Log out
                   </button>
@@ -177,13 +197,13 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
           <>
             <Link
               to="/signup"
-              className="hidden rounded-full border border-juow-soft px-3 py-1.5 text-sm transition-colors hover:border-juow-accent hover:text-juow-accent md:inline-flex"
+              className="hidden rounded-[2px] border border-juow-soft px-3 py-1.5 text-sm transition-colors hover:border-juow-accent hover:text-juow-accent md:inline-flex"
             >
               Sign Up
             </Link>
             <Link
               to="/login"
-              className="hidden rounded-full border border-juow-soft bg-juow-soft px-3 py-1.5 text-sm text-black transition-opacity hover:opacity-90 md:inline-flex"
+              className="hidden rounded-[2px] border border-juow-soft bg-juow-soft px-3 py-1.5 text-sm text-[color:var(--juow-on-soft,#000)] transition-opacity hover:opacity-90 md:inline-flex"
             >
               Log In
             </Link>
@@ -192,7 +212,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
         <button
           type="button"
-          className="inline-flex size-10 items-center justify-center rounded-lg text-juow-soft lg:hidden"
+          className="inline-flex size-10 items-center justify-center rounded-[2px] text-juow-soft lg:hidden"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
@@ -206,7 +226,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
       <div
         className={cn(
-          "fixed right-0 top-0 z-[101] h-dvh w-[80%] max-w-xs overflow-y-auto bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed right-0 top-0 z-[101] h-dvh w-[80%] max-w-xs overflow-y-auto bg-black px-6 py-20 shadow-2xl transition-transform duration-300 lg:hidden [--color-juow-soft:#f5f5fc] [--color-juow-accent:#feec93]",
           mobileOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -260,7 +280,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
                   await logout();
                   setMobileOpen(false);
                 }}
-                className="flex items-center gap-2 text-juow-soft hover:text-juow-accent"
+                className="flex items-center gap-2 text-red-500 hover:text-red-400"
               >
                 <LogOut className="size-4" /> Log out ({displayName})
               </button>
@@ -270,14 +290,14 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
               <Link
                 to="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-full border border-juow-soft px-3 py-1.5 text-sm text-juow-soft hover:border-juow-accent hover:text-juow-accent"
+                className="rounded-[2px] border border-juow-soft px-3 py-1.5 text-sm text-juow-soft hover:border-juow-accent hover:text-juow-accent"
               >
                 Sign Up
               </Link>
               <Link
                 to="/login"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-full border border-juow-soft bg-juow-soft px-3 py-1.5 text-sm text-black"
+                className="rounded-[2px] border border-juow-soft bg-juow-soft px-3 py-1.5 text-sm text-black"
               >
                 Log In
               </Link>

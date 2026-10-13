@@ -13,7 +13,7 @@ export default function QASection({ items }) {
         {items.map((item, index) => {
           const isOpen = openIndex === index;
           return (
-            <div key={index} className="overflow-hidden rounded-xl border border-black/10">
+            <div key={index} className="overflow-hidden rounded-[2px] border border-black/10">
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}

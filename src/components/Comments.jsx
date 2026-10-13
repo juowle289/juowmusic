@@ -100,13 +100,13 @@ function CommentRow({
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 rows={2}
-                className="min-h-16 border-black/15 bg-white text-black"
+                className="min-h-16 rounded-[2px] border-black/15 bg-white text-black"
               />
               <div className="flex gap-2">
-                <Button type="button" size="sm" onClick={() => onSaveEdit(draft)} disabled={!draft.trim()} className="gap-1 bg-black text-white hover:bg-juow-accent hover:text-black">
+                <Button type="button" size="sm" onClick={() => onSaveEdit(draft)} disabled={!draft.trim()} className="gap-1 rounded-[2px] bg-black text-white hover:bg-juow-accent hover:text-black">
                   <Check className="size-3.5" /> {t('comments.menu.save')}
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={onCancelEdit} className="gap-1 border-black/15">
+                <Button type="button" size="sm" variant="outline" onClick={onCancelEdit} className="gap-1 rounded-[2px] border-black/15">
                   <X className="size-3.5" /> {t('comments.menu.cancel')}
                 </Button>
               </div>
@@ -127,12 +127,12 @@ function CommentRow({
           (isOwn ? (
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="shrink-0 rounded-full p-1.5 text-black/40 outline-none hover:bg-black/5 hover:text-black"
+                className="shrink-0 rounded-[2px] p-1.5 text-black/40 outline-none hover:bg-black/5 hover:text-black"
                 aria-label="Comment options"
               >
                 <MoreVertical className="size-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="rounded-[2px]">
                 <DropdownMenuItem onClick={onStartEdit}>
                   <Pencil className="size-4" /> {t('comments.menu.edit')}
                 </DropdownMenuItem>
@@ -145,7 +145,7 @@ function CommentRow({
             <button
               type="button"
               onClick={onRequestReport}
-              className="shrink-0 rounded-full p-1.5 text-black/40 hover:bg-black/5 hover:text-black"
+              className="shrink-0 rounded-[2px] p-1.5 text-black/40 hover:bg-black/5 hover:text-black"
               aria-label={t('comments.menu.report')}
             >
               <Flag className="size-4" />
@@ -161,7 +161,7 @@ function CommentRow({
             onChange={(e) => setReplyDraft(e.target.value)}
             placeholder={t('comments.replyPlaceholder')}
             rows={2}
-            className="min-h-14 flex-1 border-black/15 bg-white text-sm text-black placeholder:text-black/40"
+            className="min-h-14 flex-1 rounded-[2px] border-black/15 bg-white text-sm text-black placeholder:text-black/40"
           />
           <div className="flex flex-col gap-1.5 self-end">
             <Button
@@ -169,11 +169,11 @@ function CommentRow({
               size="sm"
               onClick={() => onSubmitReply(replyDraft)}
               disabled={!replyDraft.trim()}
-              className="bg-black text-white hover:bg-black/80"
+              className="rounded-[2px] bg-black text-white hover:bg-black/80"
             >
               {t('comments.replySubmit')}
             </Button>
-            <Button type="button" size="sm" variant="outline" onClick={onCancelReply} className="border-black/15">
+            <Button type="button" size="sm" variant="outline" onClick={onCancelReply} className="rounded-[2px] border-black/15">
               {t('comments.replyCancel')}
             </Button>
           </div>
@@ -365,7 +365,7 @@ export default function Comments({ slug }) {
           <p className="text-center text-sm text-black/50">{t('comments.empty')}</p>
         ) : (
           <div className="relative">
-            <div ref={scrollRef} className="max-h-[480px] overflow-y-auto rounded-lg border border-black/10">
+            <div ref={scrollRef} className="max-h-[480px] overflow-y-auto rounded-[2px] border border-black/10">
               <div className="divide-y divide-black/10">
                 {visibleTopLevel.map((comment) => (
                   <div key={comment.id}>
@@ -410,11 +410,11 @@ export default function Comments({ slug }) {
             </div>
 
             {hasMore && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center rounded-b-lg bg-gradient-to-t from-white via-white/90 to-transparent pt-12 pb-3">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center rounded-b-[2px] bg-gradient-to-t from-white via-white/90 to-transparent pt-12 pb-3">
                 <button
                   type="button"
                   onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-                  className="pointer-events-auto rounded-full border border-black/15 bg-white px-4 py-1.5 text-sm font-medium text-black shadow-sm hover:border-black/30"
+                  className="pointer-events-auto rounded-[2px] border border-black/15 bg-white px-4 py-1.5 text-sm font-medium text-black shadow-sm hover:border-black/30"
                 >
                   {t('comments.loadMore')}
                 </button>
@@ -430,13 +430,13 @@ export default function Comments({ slug }) {
               onChange={(e) => setText(e.target.value)}
               placeholder={t('comments.placeholder')}
               rows={3}
-              className="min-h-24 flex-1 border-black/15 bg-white text-black placeholder:text-black/40"
+              className="min-h-24 flex-1 rounded-[2px] border-black/15 bg-white text-black placeholder:text-black/40"
             />
             <Button
               type="submit"
               size="icon-lg"
               disabled={submitting || !text.trim()}
-              className="shrink-0 self-end bg-black text-juow-soft hover:bg-black/80 disabled:opacity-50"
+              className="shrink-0 self-end rounded-[2px] bg-black text-juow-soft hover:bg-black/80 disabled:opacity-50"
               aria-label="Submit comment"
             >
               <Send className="size-5" />

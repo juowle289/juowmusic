@@ -57,7 +57,7 @@ export default function LyricShareModal({ open, onClose, quote, songTitle, artis
             {/* The card itself - this exact node is what gets exported to PNG. */}
             <div
               ref={cardRef}
-              className="relative flex aspect-[4/5] w-[320px] flex-col justify-between overflow-hidden rounded-2xl p-8 text-white sm:w-[380px]"
+              className="relative flex aspect-[4/5] w-[320px] flex-col justify-between overflow-hidden rounded-[2px] p-8 text-white sm:w-[380px]"
               style={{
                 backgroundImage: `linear-gradient(160deg, ${accentColor}dd, #000 85%), url(${coverSrc})`,
                 backgroundSize: 'cover',
@@ -71,7 +71,7 @@ export default function LyricShareModal({ open, onClose, quote, songTitle, artis
               </p>
 
               <div className="flex items-center gap-3">
-                <img src={coverSrc} alt="" className="size-10 rounded object-cover" onError={handleImageError} />
+                <img src={coverSrc} alt="" className="size-10 rounded-[2px] object-cover" onError={handleImageError} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{songTitle}</p>
                   <p className="truncate text-xs text-white/70">{artistName}</p>
@@ -87,14 +87,14 @@ export default function LyricShareModal({ open, onClose, quote, songTitle, artis
                 type="button"
                 onClick={handleDownload}
                 disabled={downloading}
-                className="flex items-center gap-2 rounded-full bg-juow-accent px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-[2px] bg-juow-accent px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 <Download className="size-4" /> {downloading ? 'Preparing…' : 'Download PNG'}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="flex items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm text-white/80 hover:text-white"
+                className="flex items-center gap-2 rounded-[2px] border border-white/30 px-5 py-2.5 text-sm text-white/80 hover:text-white"
               >
                 <X className="size-4" /> Close
               </button>
