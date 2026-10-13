@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Disc3, Flame, Trophy, UserRoundSearch, Users } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Disc3,
+  MessageCircleQuestionMark,
+  Music4,
+  TrendingUp,
+  UserGroup,
+  UserRoundSearch,
+} from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import useCoverPalette from '@/hooks/useCoverPalette';
@@ -31,7 +41,6 @@ const COLOR = {
 // by breakpoint the way a className can).
 const CARD_SHADOW = 'shadow-[1px_1px_3px_rgba(0,0,0,0.06)] sm:shadow-[1px_1px_5px_rgba(0,0,0,0.1)]';
 const GLOW_SHADOW = 'drop-shadow-[0px_0px_4px_rgba(0,0,0,0.25)] sm:drop-shadow-[0px_0px_10px_rgba(0,0,0,0.5)]';
-const TITLE_SHADOW = '[text-shadow:0px_1px_2px_rgba(0,0,0,0.12)] sm:[text-shadow:0px_3px_5px_rgba(0,0,0,0.25)]';
 
 /** Mixes a '#rrggbb' color toward black (amount < 0) or white (amount > 0)
  * and returns it as an rgba() string at the given alpha - same idea as the
@@ -427,10 +436,10 @@ function ArtistFaq({ items }) {
   if (!items?.length) return null;
   return (
     <div>
-      <SectionHeading id="artistFaq" icon={CircleHelp} className="px-0 pb-3">
+      <SectionHeading id="artistFaq" icon={MessageCircleQuestionMark} className="px-0 pb-3">
         Artist FAQ
       </SectionHeading>
-      <div className="grid gap-3 md:grid-cols-2 md:items-start">
+      <div className="space-y-3">
         {items.slice(0, 4).map((item, index) => {
           const isOpen = openIndex === index;
           return (
@@ -467,7 +476,7 @@ function ExpandToggle({ expanded, onClick }) {
       type="button"
       onClick={onClick}
       aria-expanded={expanded}
-      className="inline-flex items-center gap-1.5 rounded-[2px] border border-black/15 bg-white px-4 py-1.5 text-sm font-medium text-black shadow-sm transition-colors duration-200 hover:border-black hover:bg-black hover:text-[#feec93]"
+      className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-black transition-opacity duration-200 hover:opacity-60"
     >
       {expanded ? 'Show less' : 'Read more'}
       <ChevronDown className={cn('size-4 transition-transform duration-300', expanded && 'rotate-180')} />
@@ -540,10 +549,10 @@ export default function ArtistPage() {
           {/* Left: profile / bio / links / about */}
           <div className="w-full px-4 pt-16 sm:w-1/2 sm:px-6 sm:pt-40" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
-              <p className={cn('mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl', TITLE_SHADOW)}>
+              <p className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl">
                 {artist.displayName}
               </p>
-              <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
+              <div className="mx-auto mt-1.5 flex w-full items-center justify-center gap-2 sm:w-3/4">
                 {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" onError={handleImageError} />}
                 <span className="text-sm text-black/90 sm:text-base">{artist.countryName}</span>
               </div>
@@ -582,12 +591,12 @@ export default function ArtistPage() {
               </div>
             </div>
 
-            {/* Fanbase: one row of six compact stats (3 + 3 when the column is narrow) */}
-            <div className="mt-2 scroll-mt-24 @container" id="section3">
-              <SectionHeading id="fanbase" icon={Users} className="px-0 pb-3">
+            {/* Fanbase: six compact stats, two rows of three */}
+            <div className="mt-2 scroll-mt-24" id="section3">
+              <SectionHeading id="fanbase" icon={UserGroup} className="px-0 pb-3">
                 Fanbase
               </SectionHeading>
-              <div className="grid grid-cols-3 gap-2 @md:grid-cols-6">
+              <div className="grid grid-cols-3 gap-2">
                 {FAN_ORDER.map((name) => artist.fanbase.find((f) => f.platform === name))
                   .filter(Boolean)
                   .map((f) => (
@@ -600,7 +609,7 @@ export default function ArtistPage() {
           {/* Right: Top track */}
           <div className="w-full px-4 pt-6 sm:w-1/2 sm:px-6 sm:pt-40" id="section2">
             <div className={cn("rounded-[4px] bg-white", CARD_SHADOW)}>
-              <SectionHeading id="topTracks" icon={Trophy}>Top Tracks</SectionHeading>
+              <SectionHeading id="topTracks" icon={Music4}>Top Tracks</SectionHeading>
 
               <div
                 className="m-3 flex flex-wrap gap-4 rounded-[4px] p-3 sm:p-4"
@@ -643,7 +652,7 @@ export default function ArtistPage() {
                     dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
                   />
                   {!songExpanded && (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#f5f5fc] via-[#f5f5fc]/85 to-transparent" />
                   )}
                   {!songExpanded && (
                     <div className="absolute inset-x-0 bottom-0 flex justify-center">
@@ -663,7 +672,7 @@ export default function ArtistPage() {
 
         {/* Popular Songs */}
         <section className="mx-[1.6%] mt-6" id="section4">
-          <SectionHeading id="popularSongs" icon={Flame}>
+          <SectionHeading id="popularSongs" icon={TrendingUp}>
             Popular Songs
           </SectionHeading>
           <Carousel key={artist.slug} className="flex h-[21em] flex-col flex-wrap content-start gap-4 px-4 py-4">
