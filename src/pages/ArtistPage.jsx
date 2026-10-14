@@ -8,8 +8,8 @@ import {
   MessageCircleQuestionMark,
   Music4,
   TrendingUp,
-  UserGroup,
   UserRoundSearch,
+  UsersRound,
 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
@@ -593,7 +593,7 @@ export default function ArtistPage() {
 
             {/* Fanbase: six compact stats, two rows of three */}
             <div className="mt-2 scroll-mt-24" id="section3">
-              <SectionHeading id="fanbase" icon={UserGroup} className="px-0 pb-3">
+              <SectionHeading id="fanbase" icon={UsersRound} className="px-0 pb-3">
                 Fanbase
               </SectionHeading>
               <div className="grid grid-cols-3 gap-2">
@@ -608,7 +608,7 @@ export default function ArtistPage() {
 
           {/* Right: Top track */}
           <div className="w-full px-4 pt-6 sm:w-1/2 sm:px-6 sm:pt-40" id="section2">
-            <div className={cn("rounded-[4px] bg-white", CARD_SHADOW)}>
+            <div className={cn("rounded-[4px]")}>
               <SectionHeading id="topTracks" icon={Music4}>Top Tracks</SectionHeading>
 
               <div
@@ -648,7 +648,7 @@ export default function ArtistPage() {
               <div className="relative m-3 p-3 sm:p-4">
                 <div className="relative">
                   <div
-                    className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[13]')}
+                    className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[10]')}
                     dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
                   />
                   {!songExpanded && (
