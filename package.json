@@ -20,7 +20,7 @@
     "firebase": "^12.17.1",
     "framer-motion": "^12.43.0",
     "html-to-image": "^1.11.13",
-    "lucide-react": "^1.28.0",
+    "lucide-react": "^1.57.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
