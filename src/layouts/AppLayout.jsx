@@ -11,15 +11,22 @@ function useHeaderConfig() {
   const lyricMatch = useMatch('/lyrics/:slug');
   const artistMatch = useMatch('/artist/:slug');
   const exploreMatch = useMatch('/explore');
+  const profileMatch = useMatch('/profile');
 
   if (homeMatch) {
     return { variant: 'home', menuItems: HOME_NAV };
   }
+  // heroId: the element whose scrolling out of view swaps the header from the
+  // home-style menu to this page's own sections (see AppHeader).
   if (lyricMatch) {
-    return { variant: 'section', menuItems: LYRIC_NAV };
+    return { variant: 'section', menuItems: LYRIC_NAV, heroId: 'song-hero' };
   }
   if (artistMatch) {
-    return { variant: 'section', menuItems: ARTIST_NAV };
+    return { variant: 'section', menuItems: ARTIST_NAV, heroId: 'artist-hero' };
+  }
+  if (profileMatch) {
+    // No sections of its own: always the home-style menu.
+    return { variant: 'section', menuItems: [], homeMenu: true };
   }
   if (exploreMatch) {
     return { variant: 'section', menuItems: [] };
@@ -35,7 +42,14 @@ export default function AppLayout() {
 
   return (
     <>
-      {headerConfig && <AppHeader variant={headerConfig.variant} menuItems={headerConfig.menuItems} />}
+      {headerConfig && (
+        <AppHeader
+          variant={headerConfig.variant}
+          menuItems={headerConfig.menuItems}
+          heroId={headerConfig.heroId}
+          homeMenu={headerConfig.homeMenu}
+        />
+      )}
       <Outlet />
       <ScrollToTop />
       <GlobalAudioPlayer />

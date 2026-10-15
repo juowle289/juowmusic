@@ -125,6 +125,12 @@ export default function PlaylistCarousel({
   const momentumActiveRef = useRef(false);
   const lastPointerX = useRef(0);
   const lastMoveTime = useRef(0);
+  // A press only becomes a drag after moving a few px, so that a plain click on a
+  // card still reaches the card; a real drag must NOT also count as a click.
+  const startXRef = useRef(0);
+  const pointerIdRef = useRef(null);
+  const movedRef = useRef(false);
+  const DRAG_THRESHOLD_PX = 5;
 
   // Track the container's own width so auto-radius can follow it live
   // (initial screen size, orientation change, sidebar collapsing, etc).
@@ -259,16 +265,31 @@ export default function PlaylistCarousel({
     if (!draggable) return;
     if (e.pointerType === 'touch' && !mobileDrag) return;
     draggingRef.current = true;
+    movedRef.current = false;
     momentumActiveRef.current = false;
     velocityRef.current = 0;
+    startXRef.current = e.clientX;
+    pointerIdRef.current = e.pointerId;
     lastPointerX.current = e.clientX;
     lastMoveTime.current = performance.now();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
 
   const onPointerMove = (e) => {
     if (!draggingRef.current) return;
     const now = performance.now();
+    if (!movedRef.current) {
+      if (Math.abs(e.clientX - startXRef.current) < DRAG_THRESHOLD_PX) return;
+      movedRef.current = true;
+      // Capture only once it's really a drag, so a plain click keeps its target.
+      try {
+        e.currentTarget.setPointerCapture?.(pointerIdRef.current);
+      } catch {
+        // pointer already released - nothing to capture
+      }
+      lastPointerX.current = e.clientX;
+      lastMoveTime.current = now;
+      return;
+    }
     const dx = e.clientX - lastPointerX.current;
     const dt = Math.max((now - lastMoveTime.current) / 1000, 1 / 240);
     const deltaAngle = dx * dragSensitivity;
@@ -292,6 +313,16 @@ export default function PlaylistCarousel({
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
+      // No native image/link dragging (the ghost-image drag), and a click that
+      // ends a drag must not open whatever card it happened to end on.
+      onDragStart={(e) => e.preventDefault()}
+      onClickCapture={(e) => {
+        if (movedRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          movedRef.current = false;
+        }
+      }}
     >
       <div ref={ringRef} className="absolute left-1/2 top-1/2" style={{ transformStyle: 'preserve-3d' }}>
         {ringItems.map(({ item, key }, i) => (

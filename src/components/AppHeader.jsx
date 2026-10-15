@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 import {
   useEffHeader,
   useHeroPassed,
-  useHomeNavBorder,
   useScrollSpy,
 } from "@/hooks/useHeaderScroll";
+import { HOME_NAV } from "@/config/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { handleImageError } from '@/lib/imageFallback';
 import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
@@ -17,13 +17,15 @@ import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
 /**
  * @param {'home' | 'section'} variant
  * @param {{ href: string, label: string, id: string }[]} [menuItems]
+ * @param {string} [heroId] - id of the page's hero block. While it is on screen the
+ *   header shows the home-style menu; once it has scrolled away it shows `menuItems`.
+ * @param {boolean} [homeMenu] - always show the home-style menu (pages with no sections).
  */
-export default function AppHeader({ variant = "home", menuItems = [] }) {
+export default function AppHeader({ variant = "home", menuItems = [], heroId = null, homeMenu = false }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef(null);
   const scrolled = useEffHeader();
-  const homeActive = useHomeNavBorder();
   const sectionIds = menuItems.map((item) => item.id);
   const sectionActive = useScrollSpy(sectionIds);
   const { user, logout } = useAuth();
@@ -44,26 +46,23 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
   const isHome = variant === "home";
   const isLyric = Boolean(lyricMatch);
-  // Lyric page: the header starts out with the home-page menu, then swaps to
-  // the song's own sections (no Explore) once the hero has scrolled out of
-  // view, and swaps back when it's visible again.
-  const heroPassed = useHeroPassed("song-hero", isLyric, pathname);
-  const showSectionMenu = isLyric && heroPassed;
+  // Lyric + artist pages: the header starts out with the home-page menu, then
+  // swaps to the page's own sections (no Explore) once the hero has scrolled
+  // out of view, and swaps back when it's visible again.
+  const hasHeroMenu = Boolean(heroId);
+  const heroPassed = useHeroPassed(heroId, hasHeroMenu, pathname);
+  const showSectionMenu = hasHeroMenu && heroPassed;
   const showExplore = !showSectionMenu;
-  const activeId = isHome ? homeActive : isLyric && !heroPassed ? null : sectionActive;
-
-  const HOME_MENU = [
-    { href: "#featured", label: "Featured", id: "featured" },
-    { href: "#news", label: "News", id: "news" },
-    { href: "#songs", label: "Songs", id: "songs" },
-  ];
+  // Showing the home-style menu on a page other than "/": no scroll-spy highlight.
+  const homeStyleMenu = homeMenu || (hasHeroMenu && !heroPassed);
+  const activeId = homeStyleMenu ? null : sectionActive;
 
   let navItems;
-  if (isHome) navItems = HOME_MENU;
-  else if (isLyric && !heroPassed)
+  if (isHome) navItems = HOME_NAV;
+  else if (homeStyleMenu)
     // Those sections live on the home page, so link there (the in-page
     // #anchors only exist on "/").
-    navItems = HOME_MENU.map((item) => ({ ...item, href: `/${item.href}`, route: true }));
+    navItems = HOME_NAV.map((item) => ({ ...item, href: `/${item.href}`, route: true }));
   else navItems = menuItems;
   const menuKey = showSectionMenu ? "sections" : "default";
 
@@ -98,7 +97,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
       <div className="flex min-w-0 items-center gap-6 lg:gap-10">
         <Link to="/" className="shrink-0">
           <img
-            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" width={1254} height={1254}
             alt="Juowle logo"
             className="h-9 w-auto sm:h-12" onError={handleImageError} />
         </Link>
@@ -307,7 +306,7 @@ export default function AppHeader({ variant = "home", menuItems = [] }) {
 
         <div className="absolute inset-x-6 bottom-8 space-y-2 text-sm text-white/70">
           <img
-            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" width={1254} height={1254}
             alt=""
             className="mb-4 h-10 w-auto opacity-80" onError={handleImageError} />
           <p>&copy;2024 Juowle. All Rights Reserved.</p>

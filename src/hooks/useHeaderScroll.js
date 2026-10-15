@@ -90,9 +90,13 @@ export function useHeroPassed(heroId, enabled, routeKey, headerOffset = 72) {
       setPassed(hero ? hero.getBoundingClientRect().bottom <= headerOffset : false);
     };
     check();
+    // The page (and its hero) may mount a moment after this runs - e.g. lazily
+    // loaded routes - so look again a few times instead of waiting for a scroll.
+    const retries = [100, 400, 1000, 2500].map((ms) => setTimeout(check, ms));
     window.addEventListener('scroll', check, { passive: true });
     window.addEventListener('resize', check);
     return () => {
+      retries.forEach(clearTimeout);
       window.removeEventListener('scroll', check);
       window.removeEventListener('resize', check);
     };

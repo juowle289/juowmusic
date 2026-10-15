@@ -66,7 +66,7 @@ export default function SiteFooter({ dark = false, className }) {
       <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-x-12 gap-y-10">
         <div className="max-w-xs">
           <img
-            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" width={1254} height={1254}
             alt=""
             className="h-12 w-auto"
             onError={handleImageError}

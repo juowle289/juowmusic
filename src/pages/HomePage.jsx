@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Play, X } from 'lucide-react';
+import { ArrowRight, Play, X } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
 import SweepButton from '@/components/SweepButton';
@@ -15,36 +15,34 @@ import { getLastPlayedSlug, usePlayerStore } from '@/stores/usePlayerStore';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { tracksBySlug } from '@/data/playableTracks';
 import { handleImageError } from '@/lib/imageFallback';
+import { RECOMMENDED_ARTISTS } from '@/data/recommendedArtists';
 
-const SPOTIFY_LINKS = {
-  Vietnam: 'https://open.spotify.com/playlist/4YJnIVHbU50DhkGKGWKsiv?si=e24da81abcd84fdc',
-  idiosyncrasy: 'https://open.spotify.com/playlist/5FUYKwQRiVasnuxYSd32Ti?si=66071eacc48b4804',
-  female: 'https://open.spotify.com/playlist/031gqm3DJuYIITCgJFV0oC?si=576f4b88dfec48d2',
-  male: 'https://open.spotify.com/playlist/0x9GQNsycTnRauVDsVej4l?si=445aeb8d04044393',
-};
+const BLOB = 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com';
 
-const BASE_PLAYLISTS = [
-  { id: 'Vietnam', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/SonTungMTP.jpg', title: 'VN', link: SPOTIFY_LINKS.Vietnam },
-  { id: 'idiosyncrasy', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/DPRIAN.jpg', title: 'Idiosyncrasy.', link: SPOTIFY_LINKS.idiosyncrasy },
-  { id: 'female', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/TataeMcRaeStats.jpg', title: 'My Soul-Female Voice', link: SPOTIFY_LINKS.female },
-  { id: 'male', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/JustinBieber.jpg', title: 'My Soul-Male Voice', link: SPOTIFY_LINKS.male },
-];
-
-// The 3D curved carousel wants ~10 cards in the ring to read as a full,
-// dense curve edge-to-edge - there are only 4 real playlists, so the rest
-// are duplicated round-robin from those same 4 (unique ids so React keys
-// stay stable, everything else - image/title/link - identical to the
-// original card).
-const PLAYLISTS = Array.from({ length: 10 }, (_, i) => {
-  const base = BASE_PLAYLISTS[i % BASE_PLAYLISTS.length];
-  if (i < BASE_PLAYLISTS.length) return base;
-  return { ...base, id: `${base.id}-dup${Math.floor(i / BASE_PLAYLISTS.length)}` };
-});
-
-const FAVORITE_SINGERS = [
-  { name: 'DPR IAN', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/referenceDPRIAN.png' },
-  { name: 'Sơn Tùng M-TP', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/SonTungMTP.jpg' },
-  { name: 'Justin Bieber', img: 'https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/JustinBieber.jpg' },
+// Hero banners: a background video + the song/artist shown over it. The dots under
+// the banner switch between them. `artistTo` is the artist page (null = no page yet).
+const HERO_BANNERS = [
+  {
+    id: 'nerves',
+    video: `${BLOB}/videos/DPRIAN-Nerves-video.mp4`,
+    startAt: 10, // seconds - the clip is cued to its good part
+    title: 'Nerves',
+    artist: 'DPR IAN',
+    artistTo: null,
+    listenTo: '/lyrics/nerves',
+    blurb: "“Made a lot of bad decisions in my life You know for whatever it's worth I sure it built me to become who I am now. But... honestly, there are times where I regret a lot of my decisions “Nerves” was one of the songs that I had to make to express that”",
+  },
+  {
+    id: 'after-hours',
+    video: `${BLOB}/videos/TheWeeknd-AfterHours-video.mp4`,
+    startAt: 0,
+    title: 'After Hours',
+    artist: 'The Weeknd',
+    artistTo: '/artist/the-weeknd',
+    listenTo: '/lyrics/afterHours',
+    // From the song's own "About" text on its lyrics page.
+    blurb: "“After Hours” is the title track and the third promotional single for The Weeknd’s fourth studio album After Hours. The song addresses a failed relationship that ended in heartbreak and serves as an apology letter for his past transgressions, as he desires reconciliation.",
+  },
 ];
 
 const FAV_SONGS = [
@@ -162,7 +160,7 @@ function withParams(embedUrl, params) {
 }
 
 /**
- * A "click to play" facade over a YouTube embed, so the FAV SONGS section
+ * A "click to play" facade over a YouTube embed, so the RECOMMENDED TRACKS section
  * shows nothing but our own poster + play button until someone actually
  * wants to watch - not YouTube's own pre-play thumbnail card (channel
  * avatar, video title bar, the big red play button, "Watch on YouTube").
@@ -176,7 +174,7 @@ function withParams(embedUrl, params) {
  *
  * `isActive`/`onPlay`/`onStop` are lifted up to the parent list rather than
  * kept as local state, so only one of these can be "activated" (i.e. have
- * a live iframe) at a time across the whole FAV SONGS section - starting
+ * a live iframe) at a time across the whole RECOMMENDED TRACKS section - starting
  * another one flips this one back to the poster, which fully unmounts its
  * iframe and actually stops the audio instead of leaving it playing
  * unheard in the background.
@@ -244,27 +242,58 @@ function YouTubeFacade({ embed, title, isActive, onPlay, onStop }) {
   );
 }
 
+/** Photo card for the RECOMMENDED ARTISTS carousel - same design as the Albums cards
+ * on the artist page: full-bleed photo, black gradient at the foot, name centered over it.
+ * Links to the artist's page when there is one. The image can't be dragged or selected
+ * (dragging belongs to the carousel); hover + click only. */
+function ArtistCard({ artist }) {
+  const Comp = artist.to ? Link : 'div';
+  return (
+    <Comp
+      {...(artist.to ? { to: artist.to } : {})}
+      draggable={false}
+      className={cn(
+        'group/card relative block aspect-square w-48 select-none overflow-hidden rounded-[4px] bg-black md:w-64',
+        artist.to ? 'cursor-pointer' : 'cursor-default',
+      )}
+    >
+      <img
+        src={artist.img}
+        alt={artist.name}
+        draggable={false}
+        className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover/card:scale-[1.04]"
+        onError={handleImageError}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-3 text-center md:p-4">
+        <h3 className="truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white md:text-2xl">
+          {artist.name}
+        </h3>
+      </div>
+    </Comp>
+  );
+}
+
 export default function HomePage() {
   useDocumentTitle();
-  const videoRef = useRef(null);
   const [submitted, setSubmitted] = useState(false);
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactError, setContactError] = useState('');
   const [continueTrack, setContinueTrack] = useState(null);
   const [singerIndex, setSingerIndex] = useState(0);
+  const [bannerIndex, setBannerIndex] = useState(0);
   const [activeFavSong, setActiveFavSong] = useState(null);
   const playSong = usePlayerStore((s) => s.playSong);
   const activeSlug = usePlayerStore((s) => s.currentSong?.slug);
 
-  useEffect(() => {
-    if (videoRef.current) videoRef.current.currentTime = 10;
-  }, []);
+  const banner = HERO_BANNERS[bannerIndex];
+  const singer = RECOMMENDED_ARTISTS[singerIndex];
 
-  // "MY FAVORITE SINGER" slideshow - cycles the portrait + gold name
-  // together on a timer rather than staying pinned to one artist.
+  // "Who is this artist?" slideshow - cycles the portrait + gold name
+  // together on a timer through the recommended artists.
   useEffect(() => {
     const id = setInterval(() => {
-      setSingerIndex((i) => (i + 1) % FAVORITE_SINGERS.length);
+      setSingerIndex((i) => (i + 1) % RECOMMENDED_ARTISTS.length);
     }, 5000);
     return () => clearInterval(id);
   }, []);
@@ -319,49 +348,100 @@ export default function HomePage() {
 
       <section className="relative w-full overflow-hidden">
         <div className="relative h-[50vh] w-full md:h-screen">
-          <video
-            ref={videoRef}
-            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/videos/DPRIAN-Nerves-video.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover md:-mt-[4.3rem]"
-            onLoadedMetadata={() => {
-              if (videoRef.current) videoRef.current.currentTime = 10;
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-          {/* figcaption font-size cascades in the original (4em container, h1 at
-              2.2em of that = ~8.8em/141px on desktop) - reproduced directly with
-              explicit sizes here since Tailwind classes don't cascade em-on-em. */}
-          <figcaption className="absolute inset-x-0 top-[30%] px-6 text-center text-white sm:inset-x-auto sm:left-[10%] sm:max-w-2xl sm:px-0 sm:text-left">
-            <h1 className="font-[family-name:var(--font-display)] text-6xl font-bold leading-none sm:text-8xl md:text-[8.8em]">
-              Nerves
-            </h1>
-            <h6 className="mt-2 text-xl font-thin sm:text-2xl md:text-[2.8em]">
-              <span className="text-juow-accent">|</span>{' '}
-              <a href="#" className="font-[family-name:var(--font-anton)] font-bold hover:text-juow-accent hover:underline">
-                DPR IAN
-              </a>
-            </h6>
-            <SweepButton
-              as={Link}
-              to="/lyrics/nerves"
-              className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 font-[family-name:var(--font-anton)] text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:mt-8"
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={banner.id}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
             >
-              Listen Now
-            </SweepButton>
-          </figcaption>
+              <video
+                src={banner.video}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="h-full w-full object-cover md:-mt-[4.3rem]"
+                onLoadedMetadata={(e) => {
+                  if (banner.startAt) e.currentTarget.currentTime = banner.startAt;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+              {/* figcaption font-size cascades in the original (4em container, h1 at
+                  2.2em of that = ~8.8em/141px on desktop) - reproduced directly with
+                  explicit sizes here since Tailwind classes don't cascade em-on-em. */}
+              <figcaption className="absolute inset-x-0 top-[30%] px-6 text-center text-white sm:inset-x-auto sm:left-[10%] sm:max-w-2xl sm:px-0 sm:text-left">
+                <h1 className="font-[family-name:var(--font-display)] text-6xl font-bold leading-none sm:text-8xl md:text-[8.8em]">
+                  {banner.title}
+                </h1>
+                <h6 className="mt-2 text-xl font-thin sm:text-2xl md:text-[2.8em]">
+                  <span className="text-juow-accent">|</span>{' '}
+                  {banner.artistTo ? (
+                    <Link
+                      to={banner.artistTo}
+                      className="font-[family-name:var(--font-anton)] font-bold hover:text-juow-accent hover:underline"
+                    >
+                      {banner.artist}
+                    </Link>
+                  ) : (
+                    <span className="font-[family-name:var(--font-anton)] font-bold">{banner.artist}</span>
+                  )}
+                </h6>
+                <SweepButton
+                  as={Link}
+                  to={banner.listenTo}
+                  className="mt-6 border-2 border-juow-accent bg-black/60 px-4 py-2 font-[family-name:var(--font-anton)] text-xs font-bold uppercase tracking-widest text-white transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:mt-8"
+                >
+                  Listen Now
+                </SweepButton>
+              </figcaption>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* One dot per banner, centered under the banner text. */}
+          <div
+            role="tablist"
+            aria-label="Featured banners"
+            className="absolute inset-x-0 bottom-24 z-10 flex justify-center gap-1 md:bottom-32"
+          >
+            {HERO_BANNERS.map((b, i) => (
+              <button
+                key={b.id}
+                type="button"
+                role="tab"
+                aria-selected={i === bannerIndex}
+                aria-label={`Banner ${i + 1}: ${b.title} - ${b.artist}`}
+                onClick={() => setBannerIndex(i)}
+                className="group p-2"
+              >
+                <span
+                  className={cn(
+                    'block size-3 rounded-full border transition-all duration-300',
+                    i === bannerIndex
+                      ? 'scale-110 border-juow-accent bg-juow-accent'
+                      : 'border-white/70 bg-white/30 group-hover:bg-white/70',
+                  )}
+                />
+              </button>
+            ))}
+          </div>
         </div>
 
         <article className="relative -mt-16 bg-gradient-to-t from-black to-black/30 px-6 py-8 text-center text-base leading-relaxed text-juow-soft md:-mt-24 md:px-24 md:text-xl">
-          <p>
-            &ldquo;Made a lot of bad decisions in my life You know for whatever it&apos;s worth I sure it built me to
-            become who I am now. But... honestly, there are times where I regret a lot of my decisions &ldquo;Nerves&rdquo;
-            was one of the songs that I had to make to express that&rdquo;
-          </p>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.p
+              key={banner.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {banner.blurb}
+            </motion.p>
+          </AnimatePresence>
         </article>
       </section>
 
@@ -389,13 +469,16 @@ export default function HomePage() {
           </motion.button>
         )}
 
+        {/* #featured wraps the whole "Recommended Artists" part (heading, carousel and
+            the "Who is this artist?" slideshow) so the header's scroll-spy treats it
+            as one section. */}
+        <div id="featured" className="scroll-mt-24">
         <Reveal
           as={motion.h2}
           variant="textAppear"
-          id="featured"
-          className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]"
+          className="section-heading mt-24 text-4xl md:mt-32 md:text-[3.6em]"
         >
-          MY PLAYLIST
+          RECOMMENDED ARTISTS
         </Reveal>
 
         {/* Full-bleed wrapper: breaks the carousel out of <main>'s max-w-7xl
@@ -410,25 +493,17 @@ export default function HomePage() {
             the browser was treating that as real scrollable content,
             making the *whole page* swipeable sideways. */}
         <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          {/* A genuine 3D curved carousel - see PlaylistCarousel. Cards sit
-              at fixed angles around a ring (rotateY + translateZ) that's
-              only ever partially turned toward the viewer, so it reads as a
-              row curving away into the distance at both ends rather than a
-              flat strip. Auto-rotates right-to-left, and is fully
-              drag/momentum/wheel controllable on top of that. */}
+          {/* A genuine 3D curved carousel - see PlaylistCarousel. Cards sit at fixed
+              angles around a ring (rotateY + translateZ) that's only ever partially
+              turned toward the viewer, so it reads as a row curving away into the
+              distance at both ends. Auto-rotates right-to-left; the only way to move it
+              by hand is to press and drag/swipe (momentum on release) - the mouse wheel
+              and hovering do NOT scroll it (scrollWheel is off, so the page scrolls
+              normally while the cursor is over it). */}
           <PlaylistCarousel
-            items={PLAYLISTS}
-            itemKey={(item) => item.id}
-            renderItem={(item) => (
-              <button
-                type="button"
-                onClick={() => window.open(item.link, '_blank')}
-                className="group/card w-48 cursor-pointer border border-transparent transition-colors hover:border-juow-accent md:w-64"
-              >
-                <img src={item.img} alt={item.title} className="size-48 object-cover md:size-64" onError={handleImageError} />
-                <h3 className="mt-3 text-center text-lg font-light md:text-[1.5em]">{item.title}</h3>
-              </button>
-            )}
+            items={RECOMMENDED_ARTISTS}
+            itemKey={(artist) => artist.name}
+            renderItem={(artist) => <ArtistCard artist={artist} />}
             direction="right"
             speed={9}
             autoRotate
@@ -437,23 +512,19 @@ export default function HomePage() {
             dragSensitivity={0.35}
             momentum
             mobileDrag
-            scrollWheel
+            scrollWheel={false}
             perspective={1700}
-            // The ring itself only has the 10 (partly duplicated) playlists
-            // above, which alone is too coarse an angle-step for a gentle
-            // curve (36° apart) - repeatCount lays that same set end-to-end
-            // 3x around the ring (30 slots, 12° apart) purely so the curve
-            // reads as smooth and dense, matching the reference screenshot,
-            // without changing what's conceptually in the carousel.
-            repeatCount={3}
+            // 7 artists alone are too coarse an angle step (~51 deg) for a gentle curve -
+            // repeatCount lays the same set end-to-end 4x around the ring (28 slots,
+            // ~13 deg apart) purely so the curve reads as smooth and dense.
+            repeatCount={4}
             edgeFade={{ width: '14%', opacity: 0.95 }}
           />
         </div>
 
         <Reveal
           variant="slideLeft"
-          id="news"
-          className="scroll-mt-24 py-12 md:py-20"
+          className="py-12 md:py-20"
           viewport={{ once: false, amount: 0.15 }}
         >
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-32">
@@ -461,14 +532,14 @@ export default function HomePage() {
               <Reveal as={motion.h2} variant="textY" className="section-heading text-left text-3xl md:text-[3.6em]">
                 <AnimatePresence mode="wait">
                   <motion.span
-                    key={FAVORITE_SINGERS[singerIndex].name}
+                    key={singer.name}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.45, ease: 'easeOut' }}
                     className="inline-block"
                   >
-                    &apos; <span className="text-juow-accent">{FAVORITE_SINGERS[singerIndex].name}</span> &apos;
+                    &apos; <span className="text-juow-accent">{singer.name}</span> &apos;
                   </motion.span>
                 </AnimatePresence>
               </Reveal>
@@ -478,27 +549,37 @@ export default function HomePage() {
                 delay={0.15}
                 className="mt-2 font-[family-name:var(--font-anton)] text-xl font-light md:text-[3.6em]"
               >
-                MY FAVORITE SINGER
+                Who is this artist?
               </Reveal>
               <hr className="my-6 border-juow-accent" />
               <Reveal variant="scale" delay={0.3}>
-                <SweepButton
-                  href="#"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="h-auto w-full max-w-md border-2 border-juow-accent px-6 py-3 text-2xl font-bold text-juow-soft transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:text-[2.5em]"
-                >
-                  WHO IS HE?
-                </SweepButton>
+                {singer.to ? (
+                  <SweepButton
+                    as={Link}
+                    to={singer.to}
+                    className="flex h-auto w-full max-w-md items-center justify-center gap-3 border-2 border-juow-accent px-6 py-3 text-2xl font-bold text-juow-soft transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:text-[2.5em]"
+                  >
+                    VIEW PROFILE
+                    <ArrowRight className="size-6 shrink-0 md:size-10" />
+                  </SweepButton>
+                ) : (
+                  // This artist has no page yet (see data/recommendedArtists.js).
+                  <div
+                    aria-disabled="true"
+                    className="flex h-auto w-full max-w-md cursor-not-allowed items-center justify-center gap-3 border-2 border-white/15 px-6 py-3 text-2xl font-bold text-juow-soft/40 md:text-[2.5em]"
+                  >
+                    PROFILE COMING SOON
+                  </div>
+                )}
               </Reveal>
             </div>
 
             <div className="relative h-[25rem] w-[18rem] md:h-[40rem] md:w-[30rem]">
               <AnimatePresence>
                 <motion.img
-                  key={FAVORITE_SINGERS[singerIndex].img}
-                  src={FAVORITE_SINGERS[singerIndex].img}
-                  alt={FAVORITE_SINGERS[singerIndex].name}
+                  key={singer.img}
+                  src={singer.img}
+                  alt={singer.name}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -534,9 +615,12 @@ export default function HomePage() {
             </div>
           </div>
         </Reveal>
+        </div>
 
-        <Reveal as={motion.h2} variant="textAppear" id="songs" className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]">
-          FAV SONGS
+        {/* #songs wraps the heading and the track list (header scroll-spy section). */}
+        <div id="songs" className="scroll-mt-24">
+        <Reveal as={motion.h2} variant="textAppear" className="section-heading mt-24 text-4xl md:mt-32 md:text-[3.6em]">
+          RECOMMENDED TRACKS
         </Reveal>
 
         <section className="mt-10 space-y-10">
@@ -563,6 +647,7 @@ export default function HomePage() {
             </article>
           ))}
         </section>
+        </div>
 
         <Reveal as={motion.h2} variant="textAppear" id="contact" className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]">
           CONTACT

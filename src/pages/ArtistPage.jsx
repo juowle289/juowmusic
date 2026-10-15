@@ -8,8 +8,8 @@ import {
   MessageCircleQuestionMark,
   Music4,
   TrendingUp,
+  UserGroup,
   UserRoundSearch,
-  UsersRound,
 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Loader from '@/components/Loader';
@@ -39,6 +39,15 @@ const COLOR = {
 // size), unchanged from `sm:` up. Used wherever a card previously only had
 // a fixed inline `style={{ boxShadow: ... }}` (an inline style can't vary
 // by breakpoint the way a className can).
+// Bootstrap-style page container: centered, 12px side padding, and the same
+// max-widths as .container (540 / 720 / 960 / 1140 / 1320). Every block of the
+// page uses it so all content shares the same left/right edges.
+const CONTAINER = 'mx-auto w-full px-3 sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] 2xl:max-w-[1320px]';
+// One vertical gap between all page sections.
+const SECTION_GAP = 'mt-10';
+// Slightly stronger than CARD_SHADOW: photo cards sit straight on the #f5f5fc page, where
+// the very light card shadow is barely visible.
+const CARD_SHADOW_MEDIA = 'shadow-[0_2px_6px_rgba(0,0,0,0.16)] sm:shadow-[0_3px_10px_rgba(0,0,0,0.2)]';
 const CARD_SHADOW = 'shadow-[1px_1px_3px_rgba(0,0,0,0.06)] sm:shadow-[1px_1px_5px_rgba(0,0,0,0.1)]';
 const GLOW_SHADOW = 'drop-shadow-[0px_0px_4px_rgba(0,0,0,0.25)] sm:drop-shadow-[0px_0px_10px_rgba(0,0,0,0.5)]';
 
@@ -65,13 +74,13 @@ function resolveLink(link) {
 }
 
 /** Section title: icon + text, Geist (the site's sans stack), small, no divider line. */
-function SectionHeading({ id, icon: Icon, children, className = 'px-4 pb-2 pt-4' }) {
+function SectionHeading({ id, icon: Icon, children, className = 'pb-3' }) {
   return (
     <div className={cn('flex items-center gap-2.5', className)}>
       <Icon aria-hidden className="size-5 shrink-0 text-black sm:size-6" />
-      <h1 id={id} className="scroll-mt-24 truncate font-sans text-lg font-semibold text-black sm:text-2xl">
+      <h2 id={id} className="scroll-mt-24 truncate font-sans text-lg font-semibold text-black sm:text-2xl">
         {children}
-      </h1>
+      </h2>
     </div>
   );
 }
@@ -147,8 +156,8 @@ function CarouselEdge({ side, show, onClick }) {
     <div
       aria-hidden={!show}
       className={cn(
-        'pointer-events-none absolute inset-y-0 z-20 flex w-16 items-center from-[#f5f5fc] via-[#f5f5fc]/70 to-transparent transition-opacity duration-200 sm:w-28',
-        isLeft ? 'left-0 justify-start bg-gradient-to-r pl-2' : 'right-0 justify-end bg-gradient-to-l pr-2',
+        'pointer-events-none absolute inset-y-0 z-20 flex w-[4.75rem] items-center from-[#f5f5fc] via-[#f5f5fc]/70 to-transparent transition-opacity duration-200 sm:w-[7.75rem]',
+        isLeft ? '-left-3 justify-start bg-gradient-to-r pl-5' : '-right-3 justify-end bg-gradient-to-l pr-5',
         show ? 'opacity-100' : 'opacity-0',
       )}
     >
@@ -162,7 +171,7 @@ function CarouselEdge({ side, show, onClick }) {
           show ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
-        <Icon className="size-10" strokeWidth={2.25} />
+        <Icon className="size-10" strokeWidth={1.25} />
       </button>
     </div>
   );
@@ -228,15 +237,39 @@ function BioRow({ icon, label, value }) {
   );
 }
 
+const LINK_LABELS = {
+  spotify: 'Spotify',
+  youtube: 'YouTube',
+  apple: 'Apple Music',
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  'x-twitter': 'X (Twitter)',
+  twitter: 'Twitter',
+  tiktok: 'TikTok',
+  amazon: 'Amazon Music',
+  soundcloud: 'SoundCloud',
+  'house-chimney': 'Official website',
+  globe: 'Official website',
+};
+
+/** "fa-brands fa-spotify me-1" -> "Spotify" (the icon-only links need a name for screen readers). */
+function linkLabel(icon) {
+  const key = String(icon).match(/fa-(?!brands\b|solid\b|regular\b)([a-z0-9-]+)/)?.[1];
+  return LINK_LABELS[key] || (key ? key.replace(/-/g, ' ') : 'Link');
+}
+
 function LinkIcon({ href, icon, color }) {
+  const label = linkLabel(icon);
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
+      aria-label={`${label} (opens in a new tab)`}
+      title={label}
       className="grid size-8 place-items-center rounded-[2px] border border-[#ddd] text-center text-lg transition-colors duration-200 hover:border-black/40"
     >
-      <i className={icon} style={{ color: color || '#000' }} />
+      <i aria-hidden className={icon} style={{ color: color || '#000' }} />
     </a>
   );
 }
@@ -310,21 +343,21 @@ function FanbaseCard({ icon, iconColor, platform, number, label }) {
     <div
       ref={ref}
       className={cn(
-        'relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white px-2 py-3 text-center',
+        'relative overflow-hidden rounded-[4px] border border-[#e6e6ea] bg-white px-2 py-5 text-center sm:py-6',
         CARD_SHADOW,
       )}
     >
       {/* the platform icon lives in the tile's background */}
       <i
         aria-hidden
-        className={cn(iconClass, 'pointer-events-none absolute -bottom-2 -right-1 select-none text-[3.5rem] leading-none opacity-[0.12]')}
+        className={cn(iconClass, 'pointer-events-none absolute -bottom-3 -right-2 select-none text-[4.75rem] leading-none opacity-[0.12]')}
         style={{ color: iconColor }}
       />
-      <div className="relative font-[family-name:var(--font-anton)] text-xl leading-none tracking-wide text-black tabular-nums sm:text-2xl">
-        {display ?? <span className="text-base text-black/35">{number}</span>}
+      <div className="relative whitespace-nowrap font-[family-name:var(--font-anton)] text-3xl leading-none tracking-wide text-black tabular-nums lg:text-4xl">
+        {display ?? <span className="text-xl text-black/55">{number}</span>}
       </div>
-      <div className="relative mt-2 truncate text-[0.65rem] font-semibold uppercase tracking-wider text-black/75">{platform}</div>
-      <div className="relative truncate text-[0.6rem] uppercase tracking-wider text-black/40">{label}</div>
+      <div className="relative mt-3 truncate text-[0.65rem] font-semibold uppercase tracking-wider text-black/75">{platform}</div>
+      <div className="relative truncate text-[0.6rem] uppercase tracking-wider text-black/60">{label}</div>
     </div>
   );
 }
@@ -340,12 +373,12 @@ function SongCard({ img, title, artist, date, to }) {
         CARD_SHADOW,
       )}
     >
-      <img src={img} alt="" draggable={false} className="size-20 shrink-0 select-none rounded-[2px] object-cover [-webkit-user-drag:none] sm:size-24" onError={handleImageError} />
+      <img src={img} alt="" draggable={false} loading="lazy" decoding="async" className="size-20 shrink-0 select-none rounded-[2px] object-cover [-webkit-user-drag:none] sm:size-24" onError={handleImageError} />
       <div className="flex min-w-0 flex-col justify-between py-1">
         <div className="min-w-0 overflow-hidden border-b border-[#ddd] pb-1">
-          <h5 data-selectable className="select-text truncate text-sm font-bold sm:text-base" style={{ color: COLOR.blue }}>
+          <h3 data-selectable className="select-text truncate text-sm font-bold sm:text-base" style={{ color: COLOR.blue }}>
             {title}
-          </h5>
+          </h3>
           <span data-selectable className="select-text truncate text-xs text-black/60 sm:text-sm">{artist}</span>
         </div>
         <div className="flex items-center gap-1 text-xs text-black/60 sm:text-sm">
@@ -371,25 +404,27 @@ function AlbumCard({ img, title, meta }) {
     <div
       className={cn(
         'group relative aspect-square w-52 shrink-0 cursor-pointer select-none overflow-hidden rounded-[4px] bg-black sm:w-60',
-        CARD_SHADOW,
+        CARD_SHADOW_MEDIA,
       )}
     >
       <img
         src={img}
         alt=""
         draggable={false}
+        loading="lazy"
+        decoding="async"
         className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
         onError={handleImageError}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-0.5 p-3 text-center sm:p-4">
-        <h5
+        <h3
           data-selectable
           className="max-w-full select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
         >
           {title}
-        </h5>
-        <span data-selectable className="max-w-full select-text truncate text-xs text-white/70 sm:text-sm">
+        </h3>
+        <span data-selectable className="max-w-full select-text truncate text-xs text-white/85 sm:text-sm">
           {meta}
         </span>
       </div>
@@ -406,25 +441,29 @@ function RecommendedCard({ img, name, flag, to }) {
       className={cn(
         'group relative block aspect-[4/5] w-52 shrink-0 select-none overflow-hidden rounded-[4px] bg-black sm:w-60',
         to && 'cursor-pointer',
-        CARD_SHADOW,
+        CARD_SHADOW_MEDIA,
       )}
     >
       <img
         src={img}
         alt=""
         draggable={false}
+        loading="lazy"
+        decoding="async"
         className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
         onError={handleImageError}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 p-3 sm:p-4">
-        <h5
+        <h3
           data-selectable
           className="min-w-0 select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
         >
           {name}
-        </h5>
-        {flag && <img src={flag} alt="" draggable={false} className="h-4 w-auto shrink-0 select-none rounded-[1px]" onError={handleImageError} />}
+        </h3>
+        {flag && !flag.endsWith('/') && (
+          <img src={flag} alt="" draggable={false} loading="lazy" className="h-4 w-auto shrink-0 select-none rounded-[1px]" onError={handleImageError} />
+        )}
       </div>
     </Comp>
   );
@@ -436,7 +475,7 @@ function ArtistFaq({ items }) {
   if (!items?.length) return null;
   return (
     <div>
-      <SectionHeading id="artistFaq" icon={MessageCircleQuestionMark} className="px-0 pb-3">
+      <SectionHeading id="artistFaq" icon={MessageCircleQuestionMark}>
         Artist FAQ
       </SectionHeading>
       <div className="space-y-3">
@@ -529,29 +568,33 @@ export default function ArtistPage() {
       {/* figure carries the same dark-to-white gradient as the original CSS so the
           fixed photo blends into the page's white body as you scroll past it. */}
       <figure
-        className="relative flex h-[20em] w-full sm:h-[34em]"
+        id="artist-hero"
+        className="relative h-[20em] w-full sm:h-[34em]"
         style={{ background: `linear-gradient(rgba(0,0,0,0.25) 10%, ${COLOR.white})` }}
       >
-        {/* Avatar sits in the left ~35% column, not centered across the page
-            (matches figcaption{width:35%;margin-left:2.3%;padding-top:40vh}). */}
-        <figcaption className="flex w-full items-start justify-center pt-[12em] sm:w-[35%] sm:pt-[23em] sm:pl-[15%]">
-          <img
-            src={artist.avatarImg}
-            alt={artist.displayName}  
-            className="pointer-events-none size-32 rounded-full object-cover sm:size-72"
-            style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }} onError={handleImageError} />
-        </figcaption>
+        {/* Same container + 2-column split as the profile row below, so the avatar
+            stays centered over the left column at every width. */}
+        <div className={cn(CONTAINER, 'flex h-full')}>
+          <figcaption className="flex w-full items-start justify-center pt-[12em] sm:pt-[23em] md:w-1/2 md:pr-3">
+            <img
+              src={artist.avatarImg}
+              alt={artist.displayName}
+              fetchPriority="high"
+              className="pointer-events-none size-32 rounded-full object-cover sm:size-72"
+              style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }} onError={handleImageError} />
+          </figcaption>
+        </div>
       </figure>
 
-      <main className="-mt-4 bg-[#f5f5fc] pb-8">
+      <main className="-mt-4 bg-[#f5f5fc] pb-12">
         {/* Profile row */}
-        <section className="flex flex-wrap">
+        <section className={cn(CONTAINER, 'flex flex-wrap')}>
           {/* Left: profile / bio / links / about */}
-          <div className="w-full px-4 pt-16 sm:w-1/2 sm:px-6 sm:pt-40" id="section1">
+          <div className="w-full pt-16 sm:pt-40 md:w-1/2 md:pr-3" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
-              <p className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl">
+              <h1 className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl">
                 {artist.displayName}
-              </p>
+              </h1>
               <div className="mx-auto mt-1.5 flex w-full items-center justify-center gap-2 sm:w-3/4">
                 {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" onError={handleImageError} />}
                 <span className="text-sm text-black/90 sm:text-base">{artist.countryName}</span>
@@ -561,7 +604,7 @@ export default function ArtistPage() {
             {/* items-stretch (default) instead of items-start so both cards
                 match the height of the taller one (Bio Artist) - Links then
                 fills that same height and just centers its icon grid in it. */}
-            <div className="mb-6 flex flex-wrap items-stretch gap-3 sm:flex-nowrap">
+            <div className="flex flex-wrap items-stretch gap-3 sm:flex-nowrap">
               {/* Bio */}
               <div
                 className={cn('w-full rounded-[4px] border border-[#ddd] sm:w-[68%]', CARD_SHADOW)}
@@ -592,8 +635,8 @@ export default function ArtistPage() {
             </div>
 
             {/* Fanbase: six compact stats, two rows of three */}
-            <div className="mt-2 scroll-mt-24" id="section3">
-              <SectionHeading id="fanbase" icon={UsersRound} className="px-0 pb-3">
+            <div className={cn(SECTION_GAP, 'scroll-mt-24')} id="section3">
+              <SectionHeading id="fanbase" icon={UserGroup}>
                 Fanbase
               </SectionHeading>
               <div className="grid grid-cols-3 gap-2">
@@ -607,12 +650,12 @@ export default function ArtistPage() {
           </div>
 
           {/* Right: Top track */}
-          <div className="w-full px-4 pt-6 sm:w-1/2 sm:px-6 sm:pt-40" id="section2">
+          <div className="w-full pt-10 md:w-1/2 md:pl-3 md:pt-40" id="section2">
             <div className={cn("rounded-[4px]")}>
               <SectionHeading id="topTracks" icon={Music4}>Top Tracks</SectionHeading>
 
               <div
-                className="m-3 flex flex-wrap gap-4 rounded-[4px] p-3 sm:p-4"
+                className="mb-3 flex flex-wrap gap-4 rounded-[4px] p-3 sm:p-4"
                 style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
               >
                 <div className="relative flex w-full flex-col p-1 sm:w-[45%]">
@@ -645,7 +688,7 @@ export default function ArtistPage() {
 
               {/* About song: clamped text fading out into white, with a centered
                   "Read more" control sitting on the fade; "Show less" once open. */}
-              <div className="relative m-3 p-3 sm:p-4">
+              <div className="relative mt-4">
                 <div className="relative">
                   <div
                     className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[10]')}
@@ -671,11 +714,11 @@ export default function ArtistPage() {
         </section>
 
         {/* Popular Songs */}
-        <section className="mx-[1.6%] mt-6" id="section4">
+        <section className={cn(CONTAINER, SECTION_GAP)} id="section4">
           <SectionHeading id="popularSongs" icon={TrendingUp}>
             Popular Songs
           </SectionHeading>
-          <Carousel key={artist.slug} className="flex h-[21em] flex-col flex-wrap content-start gap-4 px-4 py-4">
+          <Carousel key={artist.slug} className="-mx-3 flex h-[21em] flex-col flex-wrap content-start gap-4 px-3 py-4">
             {popularLinks.map((s, i) => (
               <SongCard key={i} img={s.img} title={s.title} artist={s.artist} date={s.date} to={s.to} />
             ))}
@@ -683,11 +726,11 @@ export default function ArtistPage() {
         </section>
 
         {/* Albums */}
-        <section className="mx-[1.6%] mt-6" id="section5">
+        <section className={cn(CONTAINER, SECTION_GAP)} id="section5">
           <SectionHeading id="albums" icon={Disc3}>
             Albums
           </SectionHeading>
-          <Carousel key={artist.slug} className="flex gap-4 px-4 py-4">
+          <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
             {artist.albums.map((a, i) => (
               <AlbumCard key={i} {...a} />
             ))}
@@ -695,11 +738,11 @@ export default function ArtistPage() {
         </section>
 
         {/* Similar Artists */}
-        <section className="mx-[1.6%] mt-6" id="section6">
+        <section className={cn(CONTAINER, SECTION_GAP)} id="section6">
           <SectionHeading id="recommended" icon={UserRoundSearch}>
             Similar Artists
           </SectionHeading>
-          <Carousel key={artist.slug} className="flex gap-4 px-4 py-4">
+          <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
             {recommendedLinks.map((r, i) => (
               <RecommendedCard key={i} img={r.img} name={r.name} flag={r.flag} to={r.to} />
             ))}
@@ -707,7 +750,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Artist FAQ */}
-        <section className="mx-[1.6%] mt-8 pb-10" id="faq">
+        <section className={cn(CONTAINER, SECTION_GAP)} id="faq">
           <ArtistFaq key={artist.slug} items={artist.faq} />
         </section>
       </main>

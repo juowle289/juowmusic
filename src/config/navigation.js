@@ -1,8 +1,8 @@
+// The home page's own menu. Other pages (lyrics / artist / profile) show the
+// same items as links back to "/#id" until their own section menu takes over.
 export const HOME_NAV = [
-  { href: '#featured', label: 'Featured', id: 'featured' },
-  { href: '#news', label: 'News', id: 'news' },
-  { href: '#songs', label: 'Songs', id: 'songs' },
-  { href: '#contact', label: 'Contact', id: 'contact' },
+  { href: '#featured', label: 'Recommended Artists', id: 'featured' },
+  { href: '#songs', label: 'Recommended Tracks', id: 'songs' },
 ];
 
 export const LYRIC_NAV = [
@@ -13,10 +13,10 @@ export const LYRIC_NAV = [
 ];
 
 export const ARTIST_NAV = [
-  { href: '#section1', label: 'Profile', id: 'section1' },
   { href: '#section2', label: 'Top Tracks', id: 'section2' },
   { href: '#section3', label: 'Fanbase', id: 'section3' },
   { href: '#section4', label: 'Popular Songs', id: 'section4' },
   { href: '#section5', label: 'Albums', id: 'section5' },
   { href: '#section6', label: 'Similar Artists', id: 'section6' },
+  { href: '#faq', label: 'Artist FAQ', id: 'faq' },
 ];
