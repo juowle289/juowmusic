@@ -21,7 +21,7 @@
     {
       "icon": "fa-solid fa-drum me-1",
       "label": "Genres",
-      "value": "Pop, R&B/Soul, Electronic"
+      "value": "R&B/Soul"
     },
     {
       "icon": "fa-solid fa-location-dot me-1",
@@ -81,6 +81,7 @@
       "color": "rgba(0, 0, 0, 1)"
     }
   ],
+  "genre": "R&B/Soul",
   "faq": [
     {
       "question": "Who is The Weeknd?",

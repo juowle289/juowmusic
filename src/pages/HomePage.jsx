@@ -264,7 +264,7 @@ function ArtistCard({ artist }) {
         className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover/card:scale-[1.04]"
         onError={handleImageError}
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent opacity-70 transition-opacity duration-300 group-hover/card:opacity-100" />
       <div className="absolute inset-x-0 bottom-0 p-3 text-center md:p-4">
         <h3 className="truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white md:text-2xl">
           {artist.name}
@@ -372,9 +372,13 @@ export default function HomePage() {
 
               {/* figcaption font-size cascades in the original (4em container, h1 at
                   2.2em of that = ~8.8em/141px on desktop) - reproduced directly with
-                  explicit sizes here since Tailwind classes don't cascade em-on-em. */}
+                  explicit sizes here since Tailwind classes don't cascade em-on-em.
+                  Below `sm` (mobile) the title is allowed to wrap, with a fluid
+                  `clamp()` size so long titles shrink to keep fitting the viewport.
+                  From `sm` up it must stay on a single line - `whitespace-nowrap`
+                  plus `break-words` only applying pre-`sm` guarantees that. */}
               <figcaption className="absolute inset-x-0 top-[30%] px-6 text-center text-white sm:inset-x-auto sm:left-[10%] sm:max-w-2xl sm:px-0 sm:text-left">
-                <h1 className="font-[family-name:var(--font-display)] text-6xl font-bold leading-none sm:text-8xl md:text-[8.8em]">
+                <h1 className="max-w-full break-words font-[family-name:var(--font-display)] text-[clamp(2.25rem,11vw,3.75rem)] font-bold leading-[0.95] sm:whitespace-nowrap sm:text-8xl md:text-[8.8em]">
                   {banner.title}
                 </h1>
                 <h6 className="mt-2 text-xl font-thin sm:text-2xl md:text-[2.8em]">
@@ -518,7 +522,7 @@ export default function HomePage() {
             // repeatCount lays the same set end-to-end 4x around the ring (28 slots,
             // ~13 deg apart) purely so the curve reads as smooth and dense.
             repeatCount={4}
-            edgeFade={{ width: '14%', opacity: 0.95 }}
+            edgeFade={{ width: '20%', opacity: 0.95 }}
           />
         </div>
 
@@ -557,16 +561,18 @@ export default function HomePage() {
                   <SweepButton
                     as={Link}
                     to={singer.to}
-                    className="flex h-auto w-full max-w-md items-center justify-center gap-3 border-2 border-juow-accent px-6 py-3 text-2xl font-bold text-juow-soft transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:text-[2.5em]"
+                    className="flex h-auto w-full max-w-md items-center justify-center whitespace-nowrap border-2 border-juow-accent px-6 py-3 text-lg font-bold text-juow-soft transition-shadow duration-300 hover:shadow-[0_0_18px_4px_rgba(254,236,147,0.55)] md:text-[2em]"
                   >
-                    VIEW PROFILE
-                    <ArrowRight className="size-6 shrink-0 md:size-10" />
+                    <span className="inline-flex items-center justify-center gap-3">
+                      VIEW PROFILE
+                      <ArrowRight className="size-5 shrink-0 md:size-8" />
+                    </span>
                   </SweepButton>
                 ) : (
                   // This artist has no page yet (see data/recommendedArtists.js).
                   <div
                     aria-disabled="true"
-                    className="flex h-auto w-full max-w-md cursor-not-allowed items-center justify-center gap-3 border-2 border-white/15 px-6 py-3 text-2xl font-bold text-juow-soft/40 md:text-[2.5em]"
+                    className="flex h-auto w-full max-w-md cursor-not-allowed items-center justify-center gap-3 whitespace-nowrap border-2 border-white/15 px-6 py-3 text-lg font-bold text-juow-soft/40 md:text-[2em]"
                   >
                     PROFILE COMING SOON
                   </div>

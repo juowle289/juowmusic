@@ -4,9 +4,10 @@ const FALLBACK = {
   gradient: 'linear-gradient(#2a2a2a, #474747)',
   isLight: false,
   accent: '#feec93',
-  // Flat color matching the gradient above (its midpoint) - used where a
-  // gradient isn't wanted, e.g. the site header on the lyrics page.
-  solid: '#383838',
+  // Solid color matching the TOP (darker) stop of the gradient above - used
+  // where a gradient isn't wanted, e.g. the site header on the lyrics page,
+  // which sits right over the hero's top edge.
+  solid: '#242424',
 };
 
 function clampByte(n) {
@@ -176,9 +177,13 @@ export default function useCoverPalette(coverSrc) {
           gradient: `linear-gradient(#${toHex(top1)}${toHex(top2)}${toHex(top3)}, #${toHex(bot1)}${toHex(bot2)}${toHex(bot3)})`,
           isLight: luminance > 150,
           accent: `#${toHex(ar)}${toHex(ag)}${toHex(ab)}`,
-          // The gradient above is this color shaded -16% (top) to +16% (bottom),
-          // so the un-shaded base color is exactly its flat equivalent.
-          solid: `#${toHex(ar)}${toHex(ag)}${toHex(ab)}`,
+          // The gradient above runs top (-16%, darker) to bottom (+16%,
+          // lighter). Anything that wants a *solid* stand-in for that
+          // gradient - like the fixed header sitting right over the hero's
+          // top edge - should match that top stop, not the flat/un-shaded
+          // base color: matching the midpoint made the header look like a
+          // visibly different, disconnected color from the gradient below it.
+          solid: `#${toHex(top1)}${toHex(top2)}${toHex(top3)}`,
         });
       } catch {
         if (!cancelled) setPalette(FALLBACK);

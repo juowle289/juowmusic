@@ -1,8 +1,9 @@
 // The home page's own menu. Other pages (lyrics / artist / profile) show the
 // same items as links back to "/#id" until their own section menu takes over.
 export const HOME_NAV = [
-  { href: '#featured', label: 'Recommended Artists', id: 'featured' },
-  { href: '#songs', label: 'Recommended Tracks', id: 'songs' },
+  { href: '#featured', label: 'Artists', id: 'featured' },
+  { href: '#songs', label: 'Tracks', id: 'songs' },
+  { href: '#contact', label: 'Contact', id: 'contact' },
 ];
 
 export const LYRIC_NAV = [

@@ -372,7 +372,7 @@ export default function LyricPage() {
         <Comments slug={song.slug} />
       </main>
 
-      <SiteFooter dark />
+      <SiteFooter dark accent={palette.accent} />
 
       {selectionBubble && (
         <button

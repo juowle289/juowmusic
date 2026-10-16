@@ -21,7 +21,7 @@
     {
       "icon": "fa-solid fa-drum me-1",
       "label": "Genres",
-      "value": "Pop, Hip-Hop/Rap, Alternative"
+      "value": "Vietnamese Pop"
     },
     {
       "icon": "fa-solid fa-location-dot me-1",
@@ -81,6 +81,7 @@
       "color": "rgba(0, 0, 0, .19)"
     }
   ],
+  "genre": "Vietnamese Pop",
   "faq": [
     {
       "question": "Who is Sơn Tùng M-TP?",

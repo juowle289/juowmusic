@@ -27,6 +27,7 @@ import {
   Settings as SettingsIcon,
   Palette,
   ScrollText,
+  Bell,
 } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
 import ListeningWeather from "@/components/ListeningWeather";
@@ -40,12 +41,15 @@ import { useTheme } from "@/components/ThemeProvider";
 import { logActivity } from "@/utils/activityLog";
 import { syncCommentAuthorName } from "@/utils/syncCommentAuthorName";
 import ActivityLogPanel from "@/components/ActivityLogPanel";
+import NotificationsPanel from "@/components/NotificationsPanel";
 import { tracksBySlug } from "@/data/playableTracks";
 import useListeningHistory from "@/hooks/useListeningHistory";
 import useCountUp from "@/hooks/useCountUp";
 import StreakCard from "@/components/StreakCard";
 import { handleImageError } from "@/lib/imageFallback";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import { useFollowStore, buildFollowNotifications } from "@/stores/useFollowStore";
+import { ARTISTS_BY_SLUG } from "@/data/artists";
 
 const ACCENT = "#feec93";
 const TIME_SLOT_COLORS = ["#feec93", "#e0b84d", "#a0783a", "#4b3a2a"];
@@ -261,11 +265,20 @@ export default function ProfilePage() {
       ? "settings"
       : tabParam === "activity"
         ? "activity"
-        : "overview";
+        : tabParam === "notifications"
+          ? "notifications"
+          : "overview";
   const [settingsTab, setSettingsTab] = useState("account"); // 'account' | 'appearance'
   const displayName = user?.displayName || user?.email || "juowle";
   const { history, loading: historyLoading } = useListeningHistory(user?.uid);
   const stats = useMemo(() => buildRealStats(history), [history]);
+
+  const followedSlugs = useFollowStore((s) => s.followedSlugs);
+  const followSeen = useFollowStore((s) => s.seen);
+  const unreadNotifications = useMemo(
+    () => buildFollowNotifications(followedSlugs, followSeen, ARTISTS_BY_SLUG).filter((n) => n.unread).length,
+    [followedSlugs, followSeen],
+  );
 
   const [username, setUsername] = useState(user?.displayName ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -390,6 +403,22 @@ export default function ProfilePage() {
               icon={ScrollText}
             >
               {t("settings.tab.activity")}
+            </SidebarTabButton>
+            <SidebarTabButton
+              active={tab === "notifications"}
+              onClick={() =>
+                setSearchParams({ tab: "notifications" }, { replace: true })
+              }
+              icon={Bell}
+            >
+              <span className="flex flex-1 items-center justify-between gap-2">
+                {t("profile.tab.notifications")}
+                {unreadNotifications > 0 && (
+                  <span className="grid size-4 shrink-0 place-items-center rounded-full bg-juow-accent text-[0.6rem] font-bold text-black">
+                    {unreadNotifications}
+                  </span>
+                )}
+              </span>
             </SidebarTabButton>
           </nav>
 
@@ -876,6 +905,17 @@ export default function ProfilePage() {
                 transition={{ duration: 0.3 }}
               >
                 <ActivityLogPanel user={user} reauthenticate={reauthenticate} />
+              </motion.section>
+            )}
+
+            {tab === "notifications" && (
+              <motion.section
+                key="notifications"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <NotificationsPanel />
               </motion.section>
             )}
           </div>

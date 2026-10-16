@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  CircleCheck,
+  CirclePlus,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -16,15 +18,12 @@ import Loader from '@/components/Loader';
 import useCoverPalette from '@/hooks/useCoverPalette';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { useFollowStore } from '@/stores/useFollowStore';
 
-import sonTung from '@/data/artists/son-tung-mtp.json';
-import theWeeknd from '@/data/artists/the-weeknd.json';
+import { ARTISTS_BY_SLUG } from '@/data/artists';
+import { ALL_ARTISTS } from '@/data/recommendedArtists';
 import { handleImageError } from '@/lib/imageFallback';
-
-const ARTISTS = {
-  'son-tung-mtp': sonTung,
-  'the-weeknd': theWeeknd,
-};
 
 /** Palette lifted 1:1 from the original css/artist.css custom properties. */
 const COLOR = {
@@ -167,7 +166,7 @@ function CarouselEdge({ side, show, onClick }) {
         tabIndex={show ? 0 : -1}
         aria-label={isLeft ? 'Scroll left' : 'Scroll right'}
         className={cn(
-          'hidden size-14 place-items-center text-black transition-opacity duration-200 hover:opacity-60 sm:grid',
+          'hidden size-14 place-items-center text-black/40 transition-colors duration-200 hover:text-black/70 sm:grid',
           show ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
@@ -416,7 +415,7 @@ function AlbumCard({ img, title, meta }) {
         className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
         onError={handleImageError}
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-0.5 p-3 text-center sm:p-4">
         <h3
           data-selectable
@@ -432,7 +431,7 @@ function AlbumCard({ img, title, meta }) {
   );
 }
 
-function RecommendedCard({ img, name, flag, to }) {
+function RecommendedCard({ img, name, flag, genre, to }) {
   const Comp = to ? Link : 'div';
   return (
     <Comp
@@ -453,14 +452,21 @@ function RecommendedCard({ img, name, flag, to }) {
         className="size-full select-none object-cover transition-transform duration-500 [-webkit-user-drag:none] group-hover:scale-[1.04]"
         onError={handleImageError}
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 p-3 sm:p-4">
-        <h3
-          data-selectable
-          className="min-w-0 select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
-        >
-          {name}
-        </h3>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3 sm:p-4">
+        <div className="min-w-0">
+          <h3
+            data-selectable
+            className="select-text truncate font-[family-name:var(--font-anton)] text-xl leading-tight tracking-wide text-white"
+          >
+            {name}
+          </h3>
+          {genre && (
+            <p data-selectable className="select-text truncate text-xs uppercase tracking-wider text-white/70">
+              {genre}
+            </p>
+          )}
+        </div>
         {flag && !flag.endsWith('/') && (
           <img src={flag} alt="" draggable={false} loading="lazy" className="h-4 w-auto shrink-0 select-none rounded-[1px]" onError={handleImageError} />
         )}
@@ -523,9 +529,44 @@ function ExpandToggle({ expanded, onClick }) {
   );
 }
 
+/** Follow/unfollow toggle next to the artist's display name. Signed-out
+ * visitors are sent to /login instead of silently doing nothing. */
+function FollowButton({ slug, name, accent }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isFollowing = useFollowStore((s) => s.followedSlugs.includes(slug));
+  const toggleFollow = useFollowStore((s) => s.toggleFollow);
+
+  const handleClick = () => {
+    if (!user) {
+      navigate('/login', { state: { from: `/artist/${slug}` } });
+      return;
+    }
+    toggleFollow(slug);
+  };
+
+  const Icon = isFollowing ? CircleCheck : CirclePlus;
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-pressed={isFollowing}
+      title={isFollowing ? `Following ${name}` : `Follow ${name}`}
+      className={cn(
+        'inline-flex items-center justify-center rounded-full p-1 transition-colors duration-200',
+        isFollowing ? 'text-black' : 'text-black/40 hover:text-black',
+      )}
+      style={isFollowing ? { color: accent } : undefined}
+    >
+      <Icon className="size-6 sm:size-7" strokeWidth={1.75} />
+      <span className="sr-only">{isFollowing ? 'Unfollow' : 'Follow'}</span>
+    </button>
+  );
+}
+
 export default function ArtistPage() {
   const { slug } = useParams();
-  const artist = ARTISTS[slug];
+  const artist = ARTISTS_BY_SLUG[slug];
   useDocumentTitle(artist?.docTitle);
   const [songExpanded, setSongExpanded] = useState(false);
 
@@ -540,10 +581,17 @@ export default function ArtistPage() {
     () => artist?.popularSongs.map((s) => ({ ...s, to: resolveLink(s.link) })) ?? [],
     [artist],
   );
-  const recommendedLinks = useMemo(
-    () => artist?.recommended.map((r) => ({ ...r, to: resolveLink(r.link) })) ?? [],
-    [artist],
-  );
+  // Similar Artists: only artists that actually share this artist's genre -
+  // replacing the old hand-picked per-artist list. "Other Artists" is the
+  // fallback shown (with an explanatory note) when nobody matches yet.
+  const similarLinks = useMemo(() => {
+    if (!artist) return [];
+    return ALL_ARTISTS.filter((a) => a.name !== artist.displayName && a.genre === artist.genre);
+  }, [artist]);
+  const otherArtistLinks = useMemo(() => {
+    if (!artist) return [];
+    return ALL_ARTISTS.filter((a) => a.name !== artist.displayName && a.genre !== artist.genre);
+  }, [artist]);
 
   if (!artist) {
     return (
@@ -557,25 +605,24 @@ export default function ArtistPage() {
     <div className="text-black">
       <Loader />
 
-      {/* Cover photo: truly position:fixed (matches original #cover-img position-fixed z-n1),
-          so it stays put behind the page while everything else scrolls over it.
-          z-[-1] pins it behind every other section (matches the original's z-n1). */}
-      <img
-        src={artist.coverImg}
-        alt=""
-        className="pointer-events-none fixed inset-x-0 top-0 z-[-1] h-[70em] w-full object-cover" onError={handleImageError} />
-
-      {/* figure carries the same dark-to-white gradient as the original CSS so the
-          fixed photo blends into the page's white body as you scroll past it. */}
+      {/* figure's background is now the artist's own avatar palette fading into
+          the page's white (matches Bio/Links below) instead of a fixed cover
+          photo - no more separate position:fixed <img> behind the page. The
+          #f5f5fc stop sits at 90% (was 10%, back when it was fading out a
+          photo instead of a flat accent) so most of the hero reads as a
+          clean wash of the artist's color before it meets the white body. */}
       <figure
         id="artist-hero"
-        className="relative h-[20em] w-full sm:h-[34em]"
-        style={{ background: `linear-gradient(rgba(0,0,0,0.25) 10%, ${COLOR.white})` }}
+        className="relative z-10 h-[14em] w-full sm:h-[25em]"
+        style={{ background: `linear-gradient(${avatarPalette.accent}, ${COLOR.white} 90%)` }}
       >
         {/* Same container + 2-column split as the profile row below, so the avatar
-            stays centered over the left column at every width. */}
+            stays centered over the left column at every width. Padding is tuned so
+            the avatar's bottom half overlaps the white body below, proportional to
+            the shorter figure height now that there's no tall background photo to
+            place it against. */}
         <div className={cn(CONTAINER, 'flex h-full')}>
-          <figcaption className="flex w-full items-start justify-center pt-[12em] sm:pt-[23em] md:w-1/2 md:pr-3">
+          <figcaption className="flex w-full items-start justify-center pt-[10em] sm:pt-[16em] md:w-1/2 md:pr-3">
             <img
               src={artist.avatarImg}
               alt={artist.displayName}
@@ -589,12 +636,13 @@ export default function ArtistPage() {
       <main className="-mt-4 bg-[#f5f5fc] pb-12">
         {/* Profile row */}
         <section className={cn(CONTAINER, 'flex flex-wrap')}>
-          {/* Left: profile / bio / links / about */}
-          <div className="w-full pt-16 sm:pt-40 md:w-1/2 md:pr-3" id="section1">
+          {/* Left: profile / bio / links / fanbase*/}
+          <div className="w-full pt-24 sm:pt-40 md:w-1/2 md:pr-3" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
-              <h1 className="mx-auto w-full text-2xl font-bold sm:w-3/4 sm:text-3xl md:text-4xl">
-                {artist.displayName}
-              </h1>
+              <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
+                <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">{artist.displayName}</h1>
+                <FollowButton slug={artist.slug} name={artist.displayName} accent={avatarPalette.accent} />
+              </div>
               <div className="mx-auto mt-1.5 flex w-full items-center justify-center gap-2 sm:w-3/4">
                 {artist.countryFlag && <img src={artist.countryFlag} alt="" className="h-4 w-auto" onError={handleImageError} />}
                 <span className="text-sm text-black/90 sm:text-base">{artist.countryName}</span>
@@ -612,9 +660,11 @@ export default function ArtistPage() {
               >
                 <p className="rounded-t-[4px] border-b border-black px-3 py-1 font-medium">Bio Artist</p>
                 <div className="px-1">
-                  {artist.bio.map((row) => (
-                    <BioRow key={row.label} {...row} />
-                  ))}
+                  {artist.bio
+                    .filter((row) => row.label !== 'Active Years')
+                    .map((row) => (
+                      <BioRow key={row.label} {...row} />
+                    ))}
                 </div>
               </div>
 
@@ -742,11 +792,24 @@ export default function ArtistPage() {
           <SectionHeading id="recommended" icon={UserRoundSearch}>
             Similar Artists
           </SectionHeading>
-          <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
-            {recommendedLinks.map((r, i) => (
-              <RecommendedCard key={i} img={r.img} name={r.name} flag={r.flag} to={r.to} />
-            ))}
-          </Carousel>
+          {similarLinks.length > 0 ? (
+            <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
+              {similarLinks.map((r, i) => (
+                <RecommendedCard key={i} img={r.img} name={r.name} flag={r.flag} genre={r.genre} to={r.to} />
+              ))}
+            </Carousel>
+          ) : (
+            <>
+              <p className="pb-3 text-sm text-black/60">
+                We don&apos;t have a similar artist for {artist.displayName} yet - please check out these other artists below.
+              </p>
+              <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
+                {otherArtistLinks.map((r, i) => (
+                  <RecommendedCard key={i} img={r.img} name={r.name} flag={r.flag} genre={r.genre} to={r.to} />
+                ))}
+              </Carousel>
+            </>
+          )}
         </section>
 
         {/* Artist FAQ */}
@@ -755,7 +818,7 @@ export default function ArtistPage() {
         </section>
       </main>
 
-      <SiteFooter dark />
+      <SiteFooter dark accent={avatarPalette.accent} />
     </div>
   );
 }

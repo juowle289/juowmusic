@@ -54,71 +54,95 @@ const SOCIALS = [
   { label: "SoundCloud", href: "https://on.soundcloud.com/pCRdP4WEYNZZuDqQd9", Icon: SoundCloudIcon },
 ];
 
-export default function SiteFooter({ dark = false, className }) {
+const LEGAL_LINKS = ["Terms & conditions", "Privacy Policy", "Cookie Policy"];
+
+/**
+ * @param {boolean} [dark] - solid black background (the default site look).
+ * @param {string} [accent] - a hex color (e.g. an artist's avatarPalette.accent)
+ *   to tint this footer with instead of the default yellow juow-accent - used
+ *   on the artist and lyrics pages so the footer reads as part of that page's
+ *   own color instead of a generic, disconnected block at the bottom.
+ */
+export default function SiteFooter({ dark = false, accent, className }) {
   return (
     <footer
-      className={cn(
-        "relative z-[1] border-t border-white/10 px-6 py-12 text-sm text-juow-soft sm:px-10",
-        dark && "bg-black",
-        className,
-      )}
+      className={cn("relative z-[1] border-t border-white/10 text-juow-soft", dark && "bg-black", className)}
+      style={accent ? { '--footer-accent': accent, borderTopColor: `${accent}33` } : undefined}
     >
-      <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-x-12 gap-y-10">
-        <div className="max-w-xs">
-          <img
-            src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png" width={1254} height={1254}
-            alt=""
-            className="h-12 w-auto"
-            onError={handleImageError}
-          />
-          <p className="mt-4 text-white/50">A solo-built home for the songs I keep coming back to.</p>
-        </div>
+      <div className="mx-auto max-w-6xl px-6 py-10 sm:px-10">
+        <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
+          {/* Brand */}
+          <Link to="/" className="flex w-fit items-center gap-3">
+            <img
+              src="https://c47ipy4nf5mpbbsp.public.blob.vercel-storage.com/images/logo-juowmusic.png"
+              width={1254}
+              height={1254}
+              alt="Juowle"
+              className="h-9 w-auto"
+              onError={handleImageError}
+            />
+            <span className="font-[family-name:var(--font-anton)] text-lg tracking-wide text-white">Juowle</span>
+          </Link>
 
-        <nav aria-label="Footer">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Explore</p>
-          <ul className="flex flex-col gap-2">
-            {FOOTER_LINKS.map((link) =>
-              link.href.startsWith("/#") ? (
-                <li key={link.label}>
-                  <a href={link.href} className="transition-colors hover:text-juow-accent">
-                    {link.label}
+          {/* Nav + Legal, side by side on larger screens */}
+          <div className="flex flex-wrap gap-x-16 gap-y-8">
+            <nav aria-label="Footer">
+              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.15em] text-white/35">Explore</p>
+              <ul className="flex flex-col gap-2 text-sm">
+                {FOOTER_LINKS.map((link) =>
+                  link.href.startsWith("/#") ? (
+                    <li key={link.label}>
+                      <a href={link.href} className="footer-link transition-colors">
+                        {link.label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      <Link to={link.href} className="footer-link transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </nav>
+
+            <div>
+              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.15em] text-white/35">Legal</p>
+              <ul className="flex flex-col gap-2 text-sm">
+                {LEGAL_LINKS.map((label) => (
+                  <li key={label} className="footer-link w-fit cursor-pointer transition-colors">
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.15em] text-white/35">Follow</p>
+              <div className="flex items-center gap-3.5">
+                {SOCIALS.map(({ label, href, Icon }) => (
+                  <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} className="footer-link">
+                    <Icon className="size-[1.1rem] transition-colors" />
                   </a>
-                </li>
-              ) : (
-                <li key={link.label}>
-                  <Link to={link.href} className="transition-colors hover:text-juow-accent">
-                    {link.label}
-                  </Link>
-                </li>
-              ),
-            )}
-          </ul>
-        </nav>
-
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Legal</p>
-          <ul className="flex flex-col gap-2">
-            <li className="cursor-pointer transition-colors hover:text-juow-accent">Terms & conditions.</li>
-            <li className="cursor-pointer transition-colors hover:text-juow-accent">Privacy Policy.</li>
-            <li className="cursor-pointer transition-colors hover:text-juow-accent">Cookie Policy.</li>
-          </ul>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Follow</p>
-          <div className="flex items-center gap-4 text-lg">
-            {SOCIALS.map(({ label, href, Icon }) => (
-              <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}>
-                <Icon className="size-5 transition-colors hover:text-juow-accent" />
-              </a>
-            ))}
-          </div>
+        <div className="mt-10 flex flex-col-reverse items-center gap-3 border-t border-white/10 pt-6 text-xs text-white/35 sm:flex-row sm:justify-between">
+          <p>&copy; {new Date().getFullYear()} Juowle. All rights reserved.</p>
+          <p className="text-white/25">A solo-built home for the songs I keep coming back to.</p>
         </div>
       </div>
 
-      <p className="mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-xs text-white/40">
-        &copy;2024 Juowle. All Rights Reserved.
-      </p>
+      {/* .footer-link's hover color: the passed-in accent when set, the
+          site's default yellow otherwise - scoped here instead of inline on
+          every link above. */}
+      <style>{`
+        .footer-link:hover { color: var(--footer-accent, #feec93); }
+      `}</style>
     </footer>
   );
 }
