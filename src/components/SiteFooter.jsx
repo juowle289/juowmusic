@@ -66,8 +66,19 @@ const LEGAL_LINKS = ["Terms & conditions", "Privacy Policy", "Cookie Policy"];
 export default function SiteFooter({ dark = false, accent, className }) {
   return (
     <footer
-      className={cn("relative z-[1] border-t border-white/10 text-juow-soft", dark && "bg-black", className)}
-      style={accent ? { '--footer-accent': accent, borderTopColor: `${accent}33` } : undefined}
+      className={cn("relative z-[1] border-t border-white/10 text-juow-soft", dark && !accent && "bg-black", className)}
+      style={
+        accent
+          ? {
+              '--footer-accent': accent,
+              borderTopColor: `${accent}33`,
+              // The footer itself washes from the artist/song's own accent
+              // color down into near-black, instead of a flat bg-black -
+              // keeps it visually tied to the page's palette above it.
+              background: `linear-gradient(165deg, ${accent} 0%, #050505 65%)`,
+            }
+          : undefined
+      }
     >
       <div className="mx-auto max-w-6xl px-6 py-10 sm:px-10">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">

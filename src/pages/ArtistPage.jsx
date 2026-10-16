@@ -607,22 +607,16 @@ export default function ArtistPage() {
 
       {/* figure's background is now the artist's own avatar palette fading into
           the page's white (matches Bio/Links below) instead of a fixed cover
-          photo - no more separate position:fixed <img> behind the page. The
-          #f5f5fc stop sits at 90% (was 10%, back when it was fading out a
-          photo instead of a flat accent) so most of the hero reads as a
-          clean wash of the artist's color before it meets the white body. */}
+          photo - no more separate position:fixed <img> behind the page. */}
       <figure
         id="artist-hero"
-        className="relative z-10 h-[14em] w-full sm:h-[25em]"
-        style={{ background: `linear-gradient(${avatarPalette.accent}, ${COLOR.white} 90%)` }}
+        className="relative z-10 h-[14em] w-full sm:h-[50vh]"
+        style={{ background: `linear-gradient(${avatarPalette.accent}, ${COLOR.white})` }}
       >
         {/* Same container + 2-column split as the profile row below, so the avatar
-            stays centered over the left column at every width. Padding is tuned so
-            the avatar's bottom half overlaps the white body below, proportional to
-            the shorter figure height now that there's no tall background photo to
-            place it against. */}
+            stays centered over the left column at every width. */}
         <div className={cn(CONTAINER, 'flex h-full')}>
-          <figcaption className="flex w-full items-start justify-center pt-[10em] sm:pt-[16em] md:w-1/2 md:pr-3">
+          <figcaption className="flex w-full items-start justify-center sm:pt-[10%] md:w-1/2 md:pr-3">
             <img
               src={artist.avatarImg}
               alt={artist.displayName}
@@ -637,7 +631,7 @@ export default function ArtistPage() {
         {/* Profile row */}
         <section className={cn(CONTAINER, 'flex flex-wrap')}>
           {/* Left: profile / bio / links / fanbase*/}
-          <div className="w-full pt-24 sm:pt-40 md:w-1/2 md:pr-3" id="section1">
+          <div className="w-full pt-24 sm:pt-20 md:w-1/2 md:pr-3" id="section1">
             <div className="py-3 text-center font-[family-name:var(--font-anton)]">
               <div className="mx-auto flex w-full items-center justify-center gap-2 sm:w-3/4">
                 <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">{artist.displayName}</h1>
@@ -700,7 +694,7 @@ export default function ArtistPage() {
           </div>
 
           {/* Right: Top track */}
-          <div className="w-full pt-10 md:w-1/2 md:pl-3 md:pt-40" id="section2">
+          <div className="w-full pt-10 md:w-1/2 md:pl-3 md:pt-10" id="section2">
             <div className={cn("rounded-[4px]")}>
               <SectionHeading id="topTracks" icon={Music4}>Top Tracks</SectionHeading>
 
@@ -813,7 +807,7 @@ export default function ArtistPage() {
         </section>
 
         {/* Artist FAQ */}
-        <section className={cn(CONTAINER, SECTION_GAP)} id="faq">
+        <section className={cn(CONTAINER, SECTION_GAP)} id="section7">
           <ArtistFaq key={artist.slug} items={artist.faq} />
         </section>
       </main>

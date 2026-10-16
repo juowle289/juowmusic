@@ -19,5 +19,5 @@ export const ARTIST_NAV = [
   { href: '#section4', label: 'Popular Songs', id: 'section4' },
   { href: '#section5', label: 'Albums', id: 'section5' },
   { href: '#section6', label: 'Similar Artists', id: 'section6' },
-  { href: '#faq', label: 'Artist FAQ', id: 'faq' },
+  { href: '#section7', label: 'Artist FAQ', id: 'section7' },
 ];

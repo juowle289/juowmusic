@@ -27,7 +27,7 @@ import { artists } from "@/data/songs";
 const SEEK_STEP = 5; // seconds, for the ArrowLeft/ArrowRight shortcuts
 const BAR_COUNT = 9;
 const BAR_COUNT_FULLSCREEN = 14;
-const MINIMIZE_HOLD_MS = 1000; // hold the cover/title block this long to collapse into the vinyl
+const MINIMIZE_HOLD_MS = 500; // hold the cover/title block this long to collapse into the vinyl
 // The bright circle only starts growing after this short delay, so an ordinary
 // click on the title/artist links does not flash it. Total time from press
 // to minimize is still MINIMIZE_HOLD_MS.
