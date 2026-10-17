@@ -610,13 +610,13 @@ export default function ArtistPage() {
           photo - no more separate position:fixed <img> behind the page. */}
       <figure
         id="artist-hero"
-        className="relative z-10 h-[14em] w-full sm:h-[50vh]"
+        className="relative z-10 h-[14em] w-full sm:h-[25em]"
         style={{ background: `linear-gradient(${avatarPalette.accent}, ${COLOR.white})` }}
       >
         {/* Same container + 2-column split as the profile row below, so the avatar
             stays centered over the left column at every width. */}
         <div className={cn(CONTAINER, 'flex h-full')}>
-          <figcaption className="flex w-full items-start justify-center sm:pt-[10%] md:w-1/2 md:pr-3">
+          <figcaption className="flex w-full items-start justify-center sm:pt-[10em] md:w-1/2 md:pr-3">
             <img
               src={artist.avatarImg}
               alt={artist.displayName}
