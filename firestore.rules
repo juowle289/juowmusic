@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// EDIT THE EMAIL LIST BELOW to whichever accounts should have admin access -
+// must match ADMIN_EMAILS in Vercel's env vars (same accounts, same
+// enforcement, just two separate systems: Firestore here, and the
+// /api/blob-upload function for file uploads).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null &&
+        request.auth.token.email in [
+          'you@example.com'
+        ];
+    }
+
+    match /parties/{partyId} {
+      allow read, create, update: if true;
+      match /messages/{messageId} {
+        allow read, create: if true;
+      }
+    }
+
+    match /users/{uid}/listeningEvents/{eventId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid}/activityLog/{logId} {
+      allow read, create: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Bình luận: Cho phép update để sửa comment chính chủ
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    match /reports/{reportId} {
+      allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
+      allow read: if false;
+    }
+
+    // Admin dashboard: songs/{id} and artists/{id} - readable by anyone,
+    // writable only by an admin account.
+    match /songs/{songId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /artists/{artistId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

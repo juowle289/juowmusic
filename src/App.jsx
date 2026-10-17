@@ -19,6 +19,15 @@ const ExplorePage = lazy(() => import('@/pages/ExplorePage'));
 const LyricSyncTool = lazy(() => import('@/pages/LyricSyncTool'));
 const PartyPage = lazy(() => import('@/pages/PartyPage'));
 
+// Everything under /admin: nobody but a signed-in admin ever hits this, so
+// it stays entirely out of the main bundle.
+const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminSongsList = lazy(() => import('@/pages/admin/AdminSongsList'));
+const AdminSongForm = lazy(() => import('@/pages/admin/AdminSongForm'));
+const AdminArtistsList = lazy(() => import('@/pages/admin/AdminArtistsList'));
+const AdminArtistForm = lazy(() => import('@/pages/admin/AdminArtistForm'));
+
 function LazyFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
@@ -82,6 +91,21 @@ export default function App() {
             </Suspense>
           }
         />
+
+        <Route
+          path="/admin"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <AdminLayout />
+            </Suspense>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="songs" element={<AdminSongsList />} />
+          <Route path="songs/:id" element={<AdminSongForm />} />
+          <Route path="artists" element={<AdminArtistsList />} />
+          <Route path="artists/:id" element={<AdminArtistForm />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

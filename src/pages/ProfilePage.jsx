@@ -28,6 +28,7 @@ import {
   Palette,
   ScrollText,
   Bell,
+  ShieldCheck,
 } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
 import ListeningWeather from "@/components/ListeningWeather";
@@ -50,6 +51,7 @@ import { handleImageError } from "@/lib/imageFallback";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { useFollowStore, buildFollowNotifications } from "@/stores/useFollowStore";
 import { ARTISTS_BY_SLUG } from "@/data/artists";
+import useIsAdmin from "@/hooks/useIsAdmin";
 
 const ACCENT = "#feec93";
 const TIME_SLOT_COLORS = ["#feec93", "#e0b84d", "#a0783a", "#4b3a2a"];
@@ -273,6 +275,7 @@ export default function ProfilePage() {
   const { history, loading: historyLoading } = useListeningHistory(user?.uid);
   const stats = useMemo(() => buildRealStats(history), [history]);
 
+  const isAdmin = useIsAdmin();
   const followedSlugs = useFollowStore((s) => s.followedSlugs);
   const followSeen = useFollowStore((s) => s.seen);
   const unreadNotifications = useMemo(
@@ -420,6 +423,15 @@ export default function ProfilePage() {
                 )}
               </span>
             </SidebarTabButton>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="mt-2 flex w-full items-center gap-2.5 border-l-2 border-transparent px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-juow-accent/80 transition-colors hover:bg-white/5 hover:text-juow-accent"
+              >
+                <ShieldCheck className="size-4 shrink-0" />
+                Admin dashboard
+              </Link>
+            )}
           </nav>
 
           {tab === "settings" && (

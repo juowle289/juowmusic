@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const FALLBACK = {
-  gradient: 'linear-gradient(#2a2a2a, #474747)',
+  gradient: 'linear-gradient(#2a2a2a 0%, #2a2a2a 20%, #474747 100%)',
   isLight: false,
   accent: '#feec93',
   // Solid color matching the TOP (darker) stop of the gradient above - used
@@ -173,8 +173,18 @@ export default function useCoverPalette(coverSrc) {
         const [bot1, bot2, bot3] = shade([ar, ag, ab], 0.16);
         const luminance = 0.2126 * ar + 0.7152 * ag + 0.0722 * ab;
 
+        const topHex = `${toHex(top1)}${toHex(top2)}${toHex(top3)}`;
+        const botHex = `${toHex(bot1)}${toHex(bot2)}${toHex(bot3)}`;
+
         setPalette({
-          gradient: `linear-gradient(#${toHex(top1)}${toHex(top2)}${toHex(top3)}, #${toHex(bot1)}${toHex(bot2)}${toHex(bot3)})`,
+          // Holds flat at the top color through the first 20% before fading to
+          // the bottom color. The fixed site header sits on top of that first
+          // slice of the hero (~17% of its height on the lyrics page), so
+          // without this buffer the header's flat `solid` color and the strip
+          // of gradient peeking out right below it would already have
+          // drifted apart - two visibly different colors at the seam. Past
+          // that buffer it still reads as darker-top/lighter-bottom overall.
+          gradient: `linear-gradient(#${topHex} 0%, #${topHex} 20%, #${botHex} 100%)`,
           isLight: luminance > 150,
           accent: `#${toHex(ar)}${toHex(ag)}${toHex(ab)}`,
           // The gradient above runs top (-16%, darker) to bottom (+16%,
