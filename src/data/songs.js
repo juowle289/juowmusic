@@ -1,3 +1,5 @@
+import { usePublicSongsStore } from '@/lib/publicSongsCache';
+
 // Data used to power the header search suggestions across every page.
 // Mirrors the `songs` array that used to live in js/home.js and js/lyric.js.
 export const songs = [
@@ -33,8 +35,14 @@ function stripDiacritics(str) {
 export function searchAll(query) {
   const q = stripDiacritics(query.trim());
   if (!q) return { matchedSongs: [], matchedArtists: [] };
+  // Admin-created songs (Firestore) are merged in on top of this hand-written
+  // list - see src/lib/publicSongsCache.js. That store is preloaded once in
+  // AppLayout, so by the time someone actually types a query it's usually
+  // already populated; worst case the very first search of a session misses
+  // brand-new songs for a moment.
+  const allSongs = [...songs, ...usePublicSongsStore.getState().songs];
   return {
-    matchedSongs: songs.filter((s) => stripDiacritics(s.title).includes(q)),
+    matchedSongs: allSongs.filter((s) => s.title && stripDiacritics(s.title).includes(q)),
     matchedArtists: artists.filter((a) => stripDiacritics(a.nameArtist).includes(q)),
   };
 }

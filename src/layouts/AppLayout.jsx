@@ -7,6 +7,7 @@ import useListeningTracker from '@/hooks/useListeningTracker';
 import useHashScroll from '@/hooks/useHashScroll';
 import { useAuth } from '@/context/AuthContext';
 import { useFollowStore } from '@/stores/useFollowStore';
+import { usePublicSongsStore } from '@/lib/publicSongsCache';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
 
 function useHeaderConfig() {
@@ -51,6 +52,12 @@ export default function AppLayout() {
   useEffect(() => {
     setFollowUser(user?.uid ?? null);
   }, [user?.uid, setFollowUser]);
+
+  // Preloads admin-created songs once per session so search can merge them
+  // in alongside the static list right away (see src/data/songs.js).
+  useEffect(() => {
+    usePublicSongsStore.getState().loadAll();
+  }, []);
 
   return (
     <>

@@ -18,6 +18,7 @@ import { findClickedLineIndex } from "@/lib/lyricLines";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
 import { cn } from "@/lib/utils";
+import { adaptFirestoreSong, fetchFirestoreSong } from "@/lib/publicSongsCache";
 
 import afterHours from "@/data/lyrics/afterHours.json";
 import ballroomExtravaganza from "@/data/lyrics/ballroomExtravaganza.json";
@@ -42,7 +43,28 @@ const SONGS = {
 
 export default function LyricPage() {
   const { slug } = useParams();
-  const song = SONGS[slug];
+  const staticSong = SONGS[slug];
+
+  // Admin-created songs live in Firestore, not in the SONGS map above - look
+  // one up by slug only when it's not one of the hand-written songs, so
+  // every existing page keeps rendering purely from the static import (no
+  // network round-trip, no flash of a loading state).
+  const [firestoreSong, setFirestoreSong] = useState(undefined); // undefined = not checked yet, null = checked, not found
+  useEffect(() => {
+    if (staticSong) return undefined;
+    let cancelled = false;
+    setFirestoreSong(undefined);
+    fetchFirestoreSong(slug).then((data) => {
+      if (cancelled) return;
+      setFirestoreSong(data ? adaptFirestoreSong(slug, data) : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, staticSong]);
+
+  const song = staticSong || firestoreSong || undefined;
+  const stillCheckingFirestore = !staticSong && firestoreSong === undefined;
   useDocumentTitle(song?.docTitle);
   useInlineStyle(song?.customStyle);
   const palette = useCoverPalette(song?.coverSrc);
@@ -170,6 +192,9 @@ export default function LyricPage() {
   };
 
   if (!song) {
+    if (stillCheckingFirestore) {
+      return <Loader />;
+    }
     return (
       <main className="flex min-h-screen items-center justify-center px-8 pt-24 text-juow-soft">
         <h1 className="font-[family-name:var(--font-anton)] text-3xl">
