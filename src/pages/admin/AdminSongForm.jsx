@@ -32,6 +32,8 @@ function slugify(title) {
     .replace(/(^-|-$)/g, '');
 }
 
+const CACHE_KEY = 'admin_song_form_draft';
+
 export default function AdminSongForm() {
   const { id } = useParams();
   const isNew = id === 'new';
@@ -39,7 +41,18 @@ export default function AdminSongForm() {
   useDocumentTitle(isNew ? 'Admin · New song' : 'Admin · Edit song');
 
   const [slug, setSlug] = useState('');
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => {
+    // Load draft từ localStorage nếu tạo song mới, hoặc EMPTY nếu edit
+    if (isNew) {
+      try {
+        const draft = localStorage.getItem(CACHE_KEY);
+        return draft ? JSON.parse(draft) : EMPTY;
+      } catch {
+        return EMPTY;
+      }
+    }
+    return EMPTY;
+  });
   const [tab, setTab] = useState('Details');
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -61,7 +74,29 @@ export default function AdminSongForm() {
   }, [id, isNew]);
 
   function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      // Auto-save draft to localStorage mỗi lần user nhập (chỉ khi tạo mới)
+      if (isNew) {
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(next));
+        } catch {
+          // localStorage unavailable - không sao, dịch vụ degraded gracefully
+        }
+      }
+      return next;
+    });
+  }
+
+  // Clear draft khi save thành công
+  function clearDraft() {
+    if (isNew) {
+      try {
+        localStorage.removeItem(CACHE_KEY);
+      } catch {
+        // ignore
+      }
+    }
   }
 
   async function handleSubmit(e) {
@@ -79,6 +114,7 @@ export default function AdminSongForm() {
       } else {
         await songsAdmin.update(finalSlug, form);
       }
+      clearDraft();
       navigate('/admin/songs');
     } catch (err) {
       setError(err.message || 'Could not save this song.');

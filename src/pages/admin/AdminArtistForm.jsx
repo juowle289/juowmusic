@@ -27,6 +27,8 @@ function slugify(name) {
     .replace(/(^-|-$)/g, '');
 }
 
+const CACHE_KEY = 'admin_artist_form_draft';
+
 export default function AdminArtistForm() {
   const { id } = useParams();
   const isNew = id === 'new';
@@ -34,7 +36,17 @@ export default function AdminArtistForm() {
   useDocumentTitle(isNew ? 'Admin · New artist' : 'Admin · Edit artist');
 
   const [slug, setSlug] = useState('');
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => {
+    if (isNew) {
+      try {
+        const draft = localStorage.getItem(CACHE_KEY);
+        return draft ? JSON.parse(draft) : EMPTY;
+      } catch {
+        return EMPTY;
+      }
+    }
+    return EMPTY;
+  });
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -55,7 +67,27 @@ export default function AdminArtistForm() {
   }, [id, isNew]);
 
   function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      if (isNew) {
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  }
+
+  function clearDraft() {
+    if (isNew) {
+      try {
+        localStorage.removeItem(CACHE_KEY);
+      } catch {
+        // ignore
+      }
+    }
   }
 
   async function handleSubmit(e) {
@@ -73,6 +105,7 @@ export default function AdminArtistForm() {
       } else {
         await artistsAdmin.update(finalSlug, form);
       }
+      clearDraft();
       navigate('/admin/artists');
     } catch (err) {
       setError(err.message || 'Could not save this artist.');
