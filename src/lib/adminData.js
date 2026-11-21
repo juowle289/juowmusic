@@ -19,14 +19,13 @@ import { db } from '@/firebase';
  * validation/shape baked in here) so both screens share the same read/write
  * path; each screen's form owns its own field list.
  *
- * NOTE for whoever picks this up next: this is a *separate* data store from
- * the static files the public site actually reads (src/data/songs.js,
- * src/data/playableTracks.js, src/data/artists/*.json, src/data/lyrics/*.json).
- * Saving a song/artist here does NOT yet change what visitors see - that
- * needs a follow-up pass to point the public pages at Firestore too (or an
- * export/build step that regenerates those static files from here). Treat
- * this as the content-management layer; wiring it into the live site is the
- * next milestone.
+ * NOTE for whoever picks this up next: the original, hand-written songs
+ * still live in static files (src/data/songs.js, src/data/playableTracks.js,
+ * src/data/artists/*.json, src/data/lyrics/*.json) and are untouched by this.
+ * Anything saved here (Firestore) is merged in on top for search and for
+ * /lyrics/:slug and /artist/:slug - see src/lib/publicSongsCache.js and
+ * publicArtistsCache.js - but it does NOT appear in the static Home/Explore
+ * grids, which still only show the hand-written songs.
  */
 export function makeAdminCollection(name) {
   const col = collection(db, name);
@@ -45,11 +44,19 @@ export function makeAdminCollection(name) {
 
     /** Creates a new doc. If `id` is given (e.g. a slug) it's used as the
      * document id so the record is reachable/predictable by slug; otherwise
-     * Firestore auto-generates one. */
+     * Firestore auto-generates one. Throws if a doc with that id already
+     * exists, rather than silently overwriting it - `setDoc` alone has no
+     * such guard, and a slug collision would otherwise quietly replace
+     * someone else's song/artist. */
     async create(data, id) {
       const payload = { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
       if (id) {
-        await setDoc(doc(db, name, id), payload);
+        const ref = doc(db, name, id);
+        const existing = await getDoc(ref);
+        if (existing.exists()) {
+          throw new Error(`"${id}" already exists - pick a different slug.`);
+        }
+        await setDoc(ref, payload);
         return id;
       }
       const ref = await addDoc(col, payload);

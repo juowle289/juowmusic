@@ -33,20 +33,20 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
 
   return (
     <div>
-      {label && <p className="mb-1.5 text-xs font-medium text-juow-soft/60">{label}</p>}
+      {label && <p className="mb-1.5 text-xs font-medium text-muted-foreground">{label}</p>}
 
       <div className="flex items-start gap-3">
         {kind === 'image' ? (
-          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/30">
             {value ? (
               <img src={value} alt="" className="size-full object-cover" />
             ) : (
-              <Upload className="size-5 text-juow-soft/30" />
+              <Upload className="size-5 text-muted-foreground" />
             )}
           </div>
         ) : (
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
-            <Music4 className="size-5 text-juow-soft/30" />
+          <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/30">
+            <Music4 className="size-5 text-muted-foreground" />
           </div>
         )}
 
@@ -56,7 +56,6 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
               value={value || ''}
               onChange={(e) => onChange(e.target.value)}
               placeholder="https://... or upload a file"
-              className="bg-white/5 text-juow-soft"
             />
             <Button
               type="button"
@@ -64,7 +63,7 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
               size="default"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="shrink-0 border-white/15 bg-transparent text-juow-soft hover:bg-white/10"
+              className="shrink-0"
             >
               {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             </Button>
@@ -74,7 +73,7 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
                 variant="ghost"
                 size="icon"
                 onClick={() => onChange('')}
-                className="shrink-0 text-juow-soft/50 hover:text-juow-soft"
+                className="shrink-0"
                 aria-label="Clear"
               >
                 <X className="size-4" />
@@ -91,14 +90,14 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
           />
 
           {uploading && (
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className={cn('h-full rounded-full bg-juow-accent transition-all')}
                 style={{ width: `${progress}%` }}
               />
             </div>
           )}
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-destructive">{error}</p>}
           {kind === 'audio' && value && <audio src={value} controls className="h-8 w-full" />}
         </div>
       </div>

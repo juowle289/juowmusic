@@ -1,4 +1,5 @@
 import { usePublicSongsStore } from '@/lib/publicSongsCache';
+import { usePublicArtistsStore } from '@/lib/publicArtistsCache';
 
 // Data used to power the header search suggestions across every page.
 // Mirrors the `songs` array that used to live in js/home.js and js/lyric.js.
@@ -41,8 +42,9 @@ export function searchAll(query) {
   // already populated; worst case the very first search of a session misses
   // brand-new songs for a moment.
   const allSongs = [...songs, ...usePublicSongsStore.getState().songs];
+  const allArtists = [...artists, ...usePublicArtistsStore.getState().artists];
   return {
     matchedSongs: allSongs.filter((s) => s.title && stripDiacritics(s.title).includes(q)),
-    matchedArtists: artists.filter((a) => stripDiacritics(a.nameArtist).includes(q)),
+    matchedArtists: allArtists.filter((a) => a.nameArtist && stripDiacritics(a.nameArtist).includes(q)),
   };
 }

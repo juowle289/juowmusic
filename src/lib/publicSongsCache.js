@@ -93,7 +93,14 @@ export function adaptFirestoreSong(slug, data) {
     tinyAboutHtml: data.description ?? '',
     aboutHtml: data.description ? `<p>${data.description}</p>` : '',
     lyricHtml: lyricsToHtml(data.lyrics),
-    qa: [],
+    qa: (data.qa ?? []).map((q) => ({
+      question: q.question,
+      answerHtml: (q.answer ?? '')
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => `<p>${line}</p>`)
+        .join('\n'),
+    })),
     recommended: [],
     lineTimestamps: data.lineTimestamps ?? null,
   };

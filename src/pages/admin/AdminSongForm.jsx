@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import FileUploadField from '@/components/admin/FileUploadField';
+import QaListField from '@/components/admin/QaListField';
 import { cn } from '@/lib/utils';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 
@@ -19,9 +20,10 @@ const EMPTY = {
   producers: '',
   description: '',
   lyrics: '',
+  qa: [],
 };
 
-const TABS = ['Details', 'Lyrics', 'Media'];
+const TABS = ['Details', 'Lyrics', 'Q&A', 'Media'];
 
 function slugify(title) {
   return title
@@ -126,18 +128,18 @@ export default function AdminSongForm() {
   if (loading) {
     return (
       <div className="grid place-items-center py-20">
-        <Loader2 className="size-6 animate-spin text-juow-soft/40" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl">
-      <h1 className="mb-6 font-[family-name:var(--font-anton)] text-2xl font-bold text-white">
+      <h1 className="mb-6 font-[family-name:var(--font-anton)] text-2xl font-bold text-foreground">
         {isNew ? 'New song' : `Edit "${form.songTitle || slug}"`}
       </h1>
 
-      <div className="mb-6 flex gap-1 border-b border-white/10">
+      <div className="mb-6 flex gap-1 border-b border-border">
         {TABS.map((t) => (
           <button
             key={t}
@@ -145,7 +147,9 @@ export default function AdminSongForm() {
             onClick={() => setTab(t)}
             className={cn(
               'border-b-2 px-3 py-2 text-sm font-medium transition-colors',
-              tab === t ? 'border-juow-accent text-juow-accent' : 'border-transparent text-juow-soft/50 hover:text-juow-soft',
+              tab === t
+                ? 'border-juow-accent text-amber-600 dark:text-juow-accent'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {t}
@@ -156,10 +160,10 @@ export default function AdminSongForm() {
       {tab === 'Details' && (
         <div className="space-y-4">
           <Field label="Song title">
-            <Input value={form.songTitle} onChange={(e) => set('songTitle', e.target.value)} required className="bg-white/5 text-juow-soft" />
+            <Input value={form.songTitle} onChange={(e) => set('songTitle', e.target.value)} required />
           </Field>
           <Field label="Artist name">
-            <Input value={form.artistName} onChange={(e) => set('artistName', e.target.value)} required className="bg-white/5 text-juow-soft" />
+            <Input value={form.artistName} onChange={(e) => set('artistName', e.target.value)} required />
           </Field>
           <Field label={`Slug (URL: /lyrics/${slug || '...'})`}>
             <Input
@@ -167,29 +171,28 @@ export default function AdminSongForm() {
               onChange={(e) => setSlug(slugify(e.target.value))}
               disabled={!isNew}
               placeholder={isNew ? slugify(form.songTitle) || 'auto from title' : undefined}
-              className="bg-white/5 text-juow-soft disabled:opacity-50"
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Release date">
-              <Input value={form.releaseDate} onChange={(e) => set('releaseDate', e.target.value)} placeholder="Feb. 19, 2020" className="bg-white/5 text-juow-soft" />
+              <Input value={form.releaseDate} onChange={(e) => set('releaseDate', e.target.value)} placeholder="Feb. 19, 2020" />
             </Field>
             <Field label="Views">
-              <Input value={form.views} onChange={(e) => set('views', e.target.value)} placeholder="270M" className="bg-white/5 text-juow-soft" />
+              <Input value={form.views} onChange={(e) => set('views', e.target.value)} placeholder="270M" />
             </Field>
           </div>
           <Field label="Producer(s)">
-            <Input value={form.producers} onChange={(e) => set('producers', e.target.value)} placeholder="Illangelo, DaHeala" className="bg-white/5 text-juow-soft" />
+            <Input value={form.producers} onChange={(e) => set('producers', e.target.value)} placeholder="Illangelo, DaHeala" />
           </Field>
           <Field label="Short description">
-            <Textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={4} className="bg-white/5 text-juow-soft" />
+            <Textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={4} />
           </Field>
         </div>
       )}
 
       {tab === 'Lyrics' && (
         <div>
-          <p className="mb-2 text-xs text-juow-soft/50">
+          <p className="mb-2 text-xs text-muted-foreground">
             Plain text. Start a section with a line in brackets (e.g. <code>[Verse 1]</code>), leave a blank line
             between sections.
           </p>
@@ -197,10 +200,12 @@ export default function AdminSongForm() {
             value={form.lyrics}
             onChange={(e) => set('lyrics', e.target.value)}
             rows={18}
-            className="bg-white/5 font-mono text-sm text-juow-soft"
+            className="font-mono text-sm"
           />
         </div>
       )}
+
+      {tab === 'Q&A' && <QaListField value={form.qa} onChange={(v) => set('qa', v)} />}
 
       {tab === 'Media' && (
         <div className="space-y-5">
@@ -209,14 +214,14 @@ export default function AdminSongForm() {
         </div>
       )}
 
-      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
       <div className="mt-8 flex gap-3">
         <Button type="submit" disabled={saving} className="gap-1.5 bg-juow-accent text-black hover:bg-juow-accent/85">
           {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
           {isNew ? 'Create song' : 'Save changes'}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => navigate('/admin/songs')} className="text-juow-soft/60 hover:text-juow-soft">
+        <Button type="button" variant="ghost" onClick={() => navigate('/admin/songs')}>
           Cancel
         </Button>
       </div>
@@ -227,7 +232,7 @@ export default function AdminSongForm() {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-juow-soft/60">{label}</span>
+      <span className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</span>
       {children}
     </label>
   );

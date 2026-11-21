@@ -24,6 +24,7 @@ import { useFollowStore } from '@/stores/useFollowStore';
 import { ARTISTS_BY_SLUG } from '@/data/artists';
 import { ALL_ARTISTS } from '@/data/recommendedArtists';
 import { handleImageError } from '@/lib/imageFallback';
+import { adaptFirestoreArtist, fetchFirestoreArtist } from '@/lib/publicArtistsCache';
 
 /** Palette lifted 1:1 from the original css/artist.css custom properties. */
 const COLOR = {
@@ -566,7 +567,26 @@ function FollowButton({ slug, name, accent }) {
 
 export default function ArtistPage() {
   const { slug } = useParams();
-  const artist = ARTISTS_BY_SLUG[slug];
+  const staticArtist = ARTISTS_BY_SLUG[slug];
+
+  // Admin-created artists live in Firestore, not in ARTISTS_BY_SLUG - look
+  // one up by slug only when it's not one of the hand-written artists.
+  const [firestoreArtist, setFirestoreArtist] = useState(undefined); // undefined = not checked, null = checked/not found
+  useEffect(() => {
+    if (staticArtist) return undefined;
+    let cancelled = false;
+    setFirestoreArtist(undefined);
+    fetchFirestoreArtist(slug).then((data) => {
+      if (cancelled) return;
+      setFirestoreArtist(data ? adaptFirestoreArtist(slug, data) : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, staticArtist]);
+
+  const artist = staticArtist || firestoreArtist || undefined;
+  const stillCheckingFirestore = !staticArtist && firestoreArtist === undefined;
   useDocumentTitle(artist?.docTitle);
   const [songExpanded, setSongExpanded] = useState(false);
 
@@ -578,7 +598,7 @@ export default function ArtistPage() {
   const bioBg = `linear-gradient(270deg, ${tint(avatarPalette.accent, 0.35, 1)} 0%, ${tint(avatarPalette.accent, 0.35, 0.1)} 100%, rgb(245,245,251) 100%)`;
 
   const popularLinks = useMemo(
-    () => artist?.popularSongs.map((s) => ({ ...s, to: resolveLink(s.link) })) ?? [],
+    () => (artist?.popularSongs ?? []).map((s) => ({ ...s, to: resolveLink(s.link) })),
     [artist],
   );
   // Similar Artists: only artists that actually share this artist's genre -
@@ -594,6 +614,7 @@ export default function ArtistPage() {
   }, [artist]);
 
   if (!artist) {
+    if (stillCheckingFirestore) return <Loader />;
     return (
       <main className="flex min-h-screen items-center justify-center pt-24 text-white">
         <h1 className="text-3xl">Artist not found</h1>
@@ -669,7 +690,7 @@ export default function ArtistPage() {
               >
                 <p className="rounded-t-[4px] border-b border-black px-3 py-1 font-medium">Links</p>
                 <div className="grid flex-1 grid-cols-4 content-center gap-3 p-3">
-                  {artist.links.map((l, i) => (
+                  {(artist.links ?? []).map((l, i) => (
                     <div key={i} className="flex justify-center">
                       <LinkIcon {...l} />
                     </div>
@@ -684,7 +705,7 @@ export default function ArtistPage() {
                 Fanbase
               </SectionHeading>
               <div className="grid grid-cols-3 gap-2">
-                {FAN_ORDER.map((name) => artist.fanbase.find((f) => f.platform === name))
+                {FAN_ORDER.map((name) => (artist.fanbase ?? []).find((f) => f.platform === name))
                   .filter(Boolean)
                   .map((f) => (
                     <FanbaseCard key={f.platform} {...f} />
@@ -698,61 +719,67 @@ export default function ArtistPage() {
             <div className={cn("rounded-[4px]")}>
               <SectionHeading id="topTracks" icon={Music4}>Top Tracks</SectionHeading>
 
-              <div
-                className="mb-3 flex flex-wrap gap-4 rounded-[4px] p-3 sm:p-4"
-                style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
-              >
-                <div className="relative flex w-full flex-col p-1 sm:w-[45%]">
-                  <img
-                    src={artist.topTrack.img}
-                    alt=""
-                    className="aspect-square w-full rounded-[2px] object-cover"
-                    onError={handleImageError}
-                  />
-                  <p className="mt-3 text-center text-lg font-bold font-[family-name:var(--font-anton)] sm:text-xl">
-                    {artist.topTrack.title}
-                  </p>
-                </div>
-
-                {/* Achievements: a top border/padding when stacked full-width
-                    below the image on mobile, switching to the original
-                    left border + left padding once it sits beside the image
-                    on sm+. */}
-                <div className="w-full border-t-4 border-[#ddd] pt-4 sm:w-auto sm:flex-1 sm:border-l-4 sm:border-t-0 sm:pl-6 sm:pt-0">
-                  {artist.topTrack.achievements.map((a, i) => (
-                    <div key={i} className="mb-4">
-                      <div className="text-lg font-bold uppercase sm:text-xl" style={{ color: COLOR.blue }}>
-                        {a.number}
-                      </div>
-                      <span className="text-sm uppercase text-black/70">{a.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* About song: clamped text fading out into white, with a centered
-                  "Read more" control sitting on the fade; "Show less" once open. */}
-              <div className="relative mt-4">
-                <div className="relative">
+              {artist.topTrack ? (
+                <>
                   <div
-                    className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[10]')}
-                    dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
-                  />
-                  {!songExpanded && (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#f5f5fc] via-[#f5f5fc]/85 to-transparent" />
-                  )}
-                  {!songExpanded && (
-                    <div className="absolute inset-x-0 bottom-0 flex justify-center">
-                      <ExpandToggle expanded={false} onClick={() => setSongExpanded(true)} />
+                    className="mb-3 flex flex-wrap gap-4 rounded-[4px] p-3 sm:p-4"
+                    style={{ border: '0.12em solid rgb(8,176,195)', background: 'rgba(8,176,195,0.03)' }}
+                  >
+                    <div className="relative flex w-full flex-col p-1 sm:w-[45%]">
+                      <img
+                        src={artist.topTrack.img}
+                        alt=""
+                        className="aspect-square w-full rounded-[2px] object-cover"
+                        onError={handleImageError}
+                      />
+                      <p className="mt-3 text-center text-lg font-bold font-[family-name:var(--font-anton)] sm:text-xl">
+                        {artist.topTrack.title}
+                      </p>
                     </div>
-                  )}
-                </div>
-                {songExpanded && (
-                  <div className="mt-3 flex justify-center">
-                    <ExpandToggle expanded onClick={() => setSongExpanded(false)} />
+
+                    {/* Achievements: a top border/padding when stacked full-width
+                        below the image on mobile, switching to the original
+                        left border + left padding once it sits beside the image
+                        on sm+. */}
+                    <div className="w-full border-t-4 border-[#ddd] pt-4 sm:w-auto sm:flex-1 sm:border-l-4 sm:border-t-0 sm:pl-6 sm:pt-0">
+                      {(artist.topTrack.achievements ?? []).map((a, i) => (
+                        <div key={i} className="mb-4">
+                          <div className="text-lg font-bold uppercase sm:text-xl" style={{ color: COLOR.blue }}>
+                            {a.number}
+                          </div>
+                          <span className="text-sm uppercase text-black/70">{a.label}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  {/* About song: clamped text fading out into white, with a centered
+                      "Read more" control sitting on the fade; "Show less" once open. */}
+                  <div className="relative mt-4">
+                    <div className="relative">
+                      <div
+                        className={cn('text-sm leading-relaxed sm:text-[1.05em]', !songExpanded && 'line-clamp-6 sm:line-clamp-[10]')}
+                        dangerouslySetInnerHTML={{ __html: artist.topTrack.aboutHtml }}
+                      />
+                      {!songExpanded && (
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#f5f5fc] via-[#f5f5fc]/85 to-transparent" />
+                      )}
+                      {!songExpanded && (
+                        <div className="absolute inset-x-0 bottom-0 flex justify-center">
+                          <ExpandToggle expanded={false} onClick={() => setSongExpanded(true)} />
+                        </div>
+                      )}
+                    </div>
+                    {songExpanded && (
+                      <div className="mt-3 flex justify-center">
+                        <ExpandToggle expanded onClick={() => setSongExpanded(false)} />
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-black/50">No top track set yet.</p>
+              )}
             </div>
           </div>
         </section>
@@ -775,7 +802,7 @@ export default function ArtistPage() {
             Albums
           </SectionHeading>
           <Carousel key={artist.slug} className="-mx-3 flex gap-4 px-3 py-4">
-            {artist.albums.map((a, i) => (
+            {(artist.albums ?? []).map((a, i) => (
               <AlbumCard key={i} {...a} />
             ))}
           </Carousel>
@@ -808,7 +835,7 @@ export default function ArtistPage() {
 
         {/* Artist FAQ */}
         <section className={cn(CONTAINER, SECTION_GAP)} id="section7">
-          <ArtistFaq key={artist.slug} items={artist.faq} />
+          <ArtistFaq key={artist.slug} items={artist.faq ?? []} />
         </section>
       </main>
 
