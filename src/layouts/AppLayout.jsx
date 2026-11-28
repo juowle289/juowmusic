@@ -7,6 +7,7 @@ import useListeningTracker from '@/hooks/useListeningTracker';
 import useHashScroll from '@/hooks/useHashScroll';
 import { useAuth } from '@/context/AuthContext';
 import { useFollowStore } from '@/stores/useFollowStore';
+import { useLikesStore } from '@/stores/useLikesStore';
 import { usePublicSongsStore } from '@/lib/publicSongsCache';
 import { usePublicArtistsStore } from '@/lib/publicArtistsCache';
 import { ARTIST_NAV, HOME_NAV, LYRIC_NAV } from '@/config/navigation';
@@ -50,9 +51,11 @@ export default function AppLayout() {
   // signed out), across every page under this layout.
   const { user } = useAuth();
   const setFollowUser = useFollowStore((s) => s.setUser);
+  const setLikesUser = useLikesStore((s) => s.setUser);
   useEffect(() => {
     setFollowUser(user?.uid ?? null);
-  }, [user?.uid, setFollowUser]);
+    setLikesUser(user?.uid ?? null);
+  }, [user?.uid, setFollowUser, setLikesUser]);
 
   // Preloads admin-created songs once per session so search can merge them
   // in alongside the static list right away (see src/data/songs.js).

@@ -6,6 +6,7 @@ import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import LyricPage from '@/pages/LyricPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 import MusicLoader from '@/components/MusicLoader';
 
 // Code-split the heaviest pages: ArtistPage (large per-artist JSON payloads)
@@ -27,6 +28,9 @@ const AdminSongsList = lazy(() => import('@/pages/admin/AdminSongsList'));
 const AdminSongForm = lazy(() => import('@/pages/admin/AdminSongForm'));
 const AdminArtistsList = lazy(() => import('@/pages/admin/AdminArtistsList'));
 const AdminArtistForm = lazy(() => import('@/pages/admin/AdminArtistForm'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const AdminComments = lazy(() => import('@/pages/admin/AdminComments'));
+const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
 
 function LazyFallback() {
   return (
@@ -75,7 +79,7 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route path="*" element={<HomePage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
@@ -105,6 +109,9 @@ export default function App() {
           <Route path="songs/:id" element={<AdminSongForm />} />
           <Route path="artists" element={<AdminArtistsList />} />
           <Route path="artists/:id" element={<AdminArtistForm />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="comments" element={<AdminComments />} />
+          <Route path="audit-log" element={<AdminAuditLog />} />
         </Route>
       </Routes>
     </BrowserRouter>

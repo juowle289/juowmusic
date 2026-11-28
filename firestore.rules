@@ -1,16 +1,32 @@
 rules_version = '2';
 
-// EDIT THE EMAIL LIST BELOW to whichever accounts should have admin access -
-// must match ADMIN_EMAILS in Vercel's env vars (same accounts, same
-// enforcement, just two separate systems: Firestore here, and the
-// /api/blob-upload function for file uploads).
+// EDIT THE EMAIL LIST BELOW to whichever accounts should always have admin
+// access, no matter what - must match ADMIN_EMAILS in Vercel's env vars
+// (same accounts, same enforcement, just two separate systems: Firestore
+// here, and the /api/* functions for file uploads and user management).
+// This list is the *bootstrap* path: once at least one of these accounts
+// has signed in, they can grant admin to other accounts from the admin
+// Users tab (which just adds/removes a doc under admins/{uid} below) without
+// ever needing to touch this file or Vercel's env vars again.
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
+    function isHardcodedAdmin() {
       return request.auth != null &&
         request.auth.token.email in [
           'you@example.com'
         ];
+    }
+    function isAdmin() {
+      return isHardcodedAdmin() ||
+        (request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Role management: a doc existing here (any fields) means that uid is
+    // an admin. Only admins can read/manage this list - and since isAdmin()
+    // above also accepts the hardcoded email list, the first admin can
+    // always get in here even before anyone has a doc in this collection.
+    match /admins/{uid} {
+      allow read, write: if isAdmin();
     }
 
     match /parties/{partyId} {
@@ -30,30 +46,62 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+      // Admins can list the profile mirror (used by /admin/users as a
+      // fallback when the server API isn't available).
+      allow read: if isAdmin();
     }
 
-    // Bình luận: Cho phép update để sửa comment chính chủ
+    // Bình luận: Cho phép update để sửa comment chính chủ, hoặc xoá bởi admin
+    // (kiểm duyệt - xem trang Admin > Comments).
     match /comments/{commentId} {
       allow read: if true;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == resource.data.uid;
+      allow delete: if (request.auth != null && resource.data.uid == request.auth.uid) || isAdmin();
     }
 
     match /reports/{reportId} {
       allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
-      allow read: if false;
+      // Only admins read these - that's the whole point of the Admin >
+      // Comments moderation queue.
+      allow read: if isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // Admin dashboard: songs/{id} and artists/{id} - readable by anyone,
-    // writable only by an admin account.
+    // Admin dashboard: songs/{id} and artists/{id}.
+    //  - Visitors can GET one published song/artist (drafts are admin-only -
+    //    this is real enforcement, not just a UI filter) but can NOT list the
+    //    collections; the public site reads the lightweight `meta/publicIndex`
+    //    doc below instead of downloading every song with its full lyrics.
+    //  - Anyone (even signed out) can bump a song's view count when they open
+    //    its lyrics page - ONLY that: a single `views` field, up by exactly 1.
     match /songs/{songId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow get: if isAdmin() || resource.data.get('status', 'published') != 'draft';
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) &&
+         request.resource.data.views == resource.data.get('views', 0) + 1);
     }
 
     match /artists/{artistId} {
+      allow get: if isAdmin() || resource.data.get('status', 'published') != 'draft';
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Lightweight public search/recommendation index (published items only,
+    // no lyrics), rebuilt by the admin UI after every save.
+    match /meta/{docId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Audit log of every admin create/edit/delete - append-only, admin-only.
+    match /adminAuditLog/{entryId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
     }
   }
 }

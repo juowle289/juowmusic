@@ -29,9 +29,13 @@ import {
   ScrollText,
   Bell,
   ShieldCheck,
+  User,
+  Flame,
+  Heart,
 } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
 import ListeningWeather from "@/components/ListeningWeather";
+import LibraryPanel from "@/components/LibraryPanel";
 import MusicLoader from "@/components/MusicLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +48,7 @@ import { syncCommentAuthorName } from "@/utils/syncCommentAuthorName";
 import ActivityLogPanel from "@/components/ActivityLogPanel";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import { tracksBySlug } from "@/data/playableTracks";
+import { usePublicSongsStore, getFirestoreTracksBySlug } from "@/lib/publicSongsCache";
 import useListeningHistory from "@/hooks/useListeningHistory";
 import useCountUp from "@/hooks/useCountUp";
 import StreakCard from "@/components/StreakCard";
@@ -74,7 +79,7 @@ function timeOfDayBucket(hour) {
  * useListeningTracker, synced from Firestore by useListeningHistory) into
  * everything the Overview tab shows. A brand new account with no plays yet
  * gets honest zeroes, not filler numbers. */
-function buildRealStats(history) {
+function buildRealStats(history, firestoreTracksBySlug) {
   const plays = history.filter((e) => e.type === "play");
   const listens = history.filter((e) => e.type === "listen");
 
@@ -84,7 +89,11 @@ function buildRealStats(history) {
       countBySlug.set(p.slug, (countBySlug.get(p.slug) ?? 0) + 1);
     return [...countBySlug.entries()]
       .map(([slug, count]) => {
-        const track = tracksBySlug[slug];
+        // Falls back to an admin-created (Firestore) song when it's not in
+        // the static catalogue - otherwise a play of one of those was
+        // recorded fine but silently vanished from "Top songs" here because
+        // there was nowhere to get its title/cover art from.
+        const track = tracksBySlug[slug] ?? firestoreTracksBySlug[slug];
         return track ? { ...track, plays: count } : null;
       })
       .filter(Boolean)
@@ -135,18 +144,13 @@ function buildRealStats(history) {
     }
   }
 
-  // Consecutive days (including today) with at least one play, walking
-  // backward from today - a single missed day breaks the chain. This
-  // naturally excludes "today" until it's actually been played (see
-  // streakInsights below for the friendlier "you can still extend it"
-  // framing while today's still in progress).
+  // Total distinct days with at least one play, ever - never goes down.
+  // Whichever day you listen, that day counts toward it; a day with no
+  // listening just leaves it exactly where it was (frozen), and it only
+  // moves up the next time a *new* day gets a play. No "miss a day and
+  // lose it all" reset like a classic consecutive-day streak.
   const activeDays = new Set(plays.map((p) => startOfDay(p.timestamp)));
-  let streakDays = 0;
-  let cursor = startOfDay(Date.now());
-  while (activeDays.has(cursor)) {
-    streakDays++;
-    cursor -= DAY_MS;
-  }
+  const streakDays = activeDays.size;
 
   const streakInsights = buildStreakInsights(activeDays, timeOfDay);
 
@@ -168,28 +172,13 @@ function buildRealStats(history) {
  * reads as "here's what you've done before", not just a reset to zero. */
 function buildStreakInsights(activeDays, timeOfDay) {
   const today = startOfDay(Date.now());
-  const yesterday = today - DAY_MS;
-
   const hasPlayedToday = activeDays.has(today);
-  const yesterdayActive = activeDays.has(yesterday);
-
-  let bestStreak = 0;
-  for (const day of activeDays) {
-    if (activeDays.has(day - DAY_MS)) continue; // not the start of a run
-    let len = 0;
-    let cursor = day;
-    while (activeDays.has(cursor)) {
-      len++;
-      cursor += DAY_MS;
-    }
-    bestStreak = Math.max(bestStreak, len);
-  }
 
   const favoriteBucket = [...timeOfDay].sort((a, b) => b.value - a.value)[0];
   const favoriteBucketName =
     favoriteBucket && favoriteBucket.value > 0 ? favoriteBucket.name : null;
 
-  return { hasPlayedToday, yesterdayActive, bestStreak, favoriteBucketName };
+  return { hasPlayedToday, favoriteBucketName };
 }
 
 function StatCard({
@@ -269,13 +258,21 @@ export default function ProfilePage() {
         ? "activity"
         : tabParam === "notifications"
           ? "notifications"
-          : "overview";
+          : tabParam === "library"
+            ? "library"
+            : "overview";
   const [settingsTab, setSettingsTab] = useState("account"); // 'account' | 'appearance'
   const displayName = user?.displayName || user?.email || "juowle";
   const { history, loading: historyLoading } = useListeningHistory(user?.uid);
-  const stats = useMemo(() => buildRealStats(history), [history]);
+  // Subscribing (rather than reading getState() once) means stats recompute
+  // if this loads in just after the page does, instead of needing a refresh.
+  const firestoreSongsLoaded = usePublicSongsStore((s) => s.loaded);
+  const stats = useMemo(
+    () => buildRealStats(history, getFirestoreTracksBySlug()),
+    [history, firestoreSongsLoaded],
+  );
 
-  const isAdmin = useIsAdmin();
+  const { isAdmin } = useIsAdmin();
   const followedSlugs = useFollowStore((s) => s.followedSlugs);
   const followSeen = useFollowStore((s) => s.seen);
   const unreadNotifications = useMemo(
@@ -357,8 +354,8 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-28">
-      <header className="border-b border-white/10 px-4 pt-24 pb-5 sm:px-8 md:px-16 lg:px-0">
-        <div className="mx-auto lg:w-4/5 lg:max-w-[1400px]">
+      <header className="border-b border-white/10 px-4 pt-24 pb-5 sm:px-8 md:px-16">
+        <div className="w-full">
           <button
             type="button"
             onClick={goBack}
@@ -367,19 +364,43 @@ export default function ProfilePage() {
             <ArrowLeft className="size-4" /> {t("profile.back")}
           </button>
 
-          <p className="text-xs uppercase tracking-widest text-juow-accent">
-            Account
-          </p>
-          <h1 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl">
-            Hi, {displayName}
-          </h1>
-          <p className="mt-1 text-sm text-juow-soft/60">
-            Manage your account and see how you&apos;ve been listening.
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-juow-soft text-[color:var(--juow-on-soft,#000)]">
+              <User className="size-6" />
+            </span>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-juow-accent">
+                Account
+              </p>
+              <h1 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl">
+                Hi, {displayName}
+              </h1>
+              <p className="mt-1 text-sm text-juow-soft/60">
+                Manage your account and see how you&apos;ve been listening.
+              </p>
+            </div>
+
+            {!historyLoading && (
+              <div className="ml-auto flex items-center gap-5 pl-1">
+                <div className="text-right">
+                  <p className="flex items-center justify-end gap-1 text-lg font-bold text-white">
+                    <Headphones className="size-4 text-juow-accent" /> {stats.totalPlays}
+                  </p>
+                  <p className="text-xs text-juow-soft/50">plays</p>
+                </div>
+                <div className="text-right">
+                  <p className="flex items-center justify-end gap-1 text-lg font-bold text-white">
+                    <Flame className="size-4 text-juow-accent" /> {stats.streakDays}
+                  </p>
+                  <p className="text-xs text-juow-soft/50">day streak</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto px-4 py-10 sm:px-8 md:px-16 lg:w-4/5 lg:max-w-[1400px] lg:px-0">
+      <main className="w-full px-4 py-10 sm:px-8 md:px-16">
         <div className="flex flex-col gap-8 md:flex-row">
           <nav className="flex shrink-0 divide-x divide-white/10 border border-white/10 md:w-48 md:flex-col md:divide-x-0 md:divide-y">
             <SidebarTabButton
@@ -388,6 +409,15 @@ export default function ProfilePage() {
               icon={LayoutDashboard}
             >
               {t("profile.tab.overview")}
+            </SidebarTabButton>
+            <SidebarTabButton
+              active={tab === "library"}
+              onClick={() =>
+                setSearchParams({ tab: "library" }, { replace: true })
+              }
+              icon={Heart}
+            >
+              Library
             </SidebarTabButton>
             <SidebarTabButton
               active={tab === "settings"}
@@ -920,6 +950,16 @@ export default function ProfilePage() {
               </motion.section>
             )}
 
+            {tab === "library" && (
+              <motion.section
+                key="library"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <LibraryPanel />
+              </motion.section>
+            )}
             {tab === "notifications" && (
               <motion.section
                 key="notifications"

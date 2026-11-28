@@ -53,15 +53,26 @@ export const usePlayerStore = create((set, get) => ({
   playSong: (song, autoplay = true) => {
     const { currentSong, playlist } = get();
     const isSameTrack = currentSong?.slug === song.slug;
-    const playlistIndex = playlist.findIndex((track) => track.slug === song.slug);
+    let playlistIndex = playlist.findIndex((track) => track.slug === song.slug);
+    let nextPlaylist = playlist;
+    if (playlistIndex < 0) {
+      // `song` isn't part of the current queue (e.g. it's not in the static
+      // catalogue at all - an admin-created song). Append it instead of
+      // falling back to index 0: that used to silently point the queue
+      // panel's "Now playing" row at whatever track was first in the list,
+      // a different song than what was actually playing.
+      nextPlaylist = [...playlist, song];
+      playlistIndex = nextPlaylist.length - 1;
+    }
 
     saveLastPlayed(song.slug);
     set({
       currentSong: song,
+      playlist: nextPlaylist,
       isPlaying: autoplay,
       currentTime: isSameTrack ? get().currentTime : 0,
       duration: isSameTrack ? get().duration : 0,
-      playlistIndex: playlistIndex >= 0 ? playlistIndex : 0,
+      playlistIndex,
     });
   },
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Play, X } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
+import NewArrivals from '@/components/NewArrivals';
 import Loader from '@/components/Loader';
 import SweepButton from '@/components/SweepButton';
 import PlaylistCarousel from '@/components/PlaylistCarousel';
@@ -654,6 +655,8 @@ export default function HomePage() {
           ))}
         </section>
         </div>
+
+        <NewArrivals />
 
         <Reveal as={motion.h2} variant="textAppear" id="contact" className="section-heading mt-24 scroll-mt-24 text-4xl md:mt-32 md:text-[3.6em]">
           CONTACT

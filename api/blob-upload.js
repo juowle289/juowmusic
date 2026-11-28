@@ -1,36 +1,28 @@
 import { handleUpload } from '@vercel/blob/client';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { requireAdmin } from './_lib/requireAdmin.js';
 
-// Firebase ID tokens are standard JWTs signed by Google - verifiable with
-// just the project id and Google's public keys below, no service-account
-// secret needed. Set FIREBASE_PROJECT_ID in Vercel if it ever differs from
-// the default (matches src/firebase.js's `projectId`).
-const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'juowmusic';
-const JWKS = createRemoteJWKSet(
-  new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'),
-);
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+// Browsers report the same audio format under different MIME types (an .m4a
+// is often "audio/x-m4a", a .wav "audio/x-wav", an .mp3 sometimes "audio/mp3"),
+// so the old 3-type list rejected perfectly good files.
+const AUDIO_TYPES = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/aac',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/ogg',
+  'audio/flac',
+  'audio/x-flac',
+];
 
-/** Verifies the caller is signed in AND their email is on the ADMIN_EMAILS
- * allowlist (comma-separated, set in Vercel - never exposed to the client). */
-async function requireAdmin(request) {
-  const authHeader = request.headers.authorization || request.headers.Authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token) throw new Error('Missing Authorization header');
+const MB = 1024 * 1024;
 
-  const { payload } = await jwtVerify(token, JWKS, {
-    issuer: `https://securetoken.google.com/${PROJECT_ID}`,
-    audience: PROJECT_ID,
-  });
-
-  const allowed = (process.env.ADMIN_EMAILS || '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  const email = String(payload.email || '').toLowerCase();
-  if (!email || !allowed.includes(email)) throw new Error('Not an admin account');
-  return payload;
-}
+// The admin forms only ever upload under these folders (see FileUploadField's
+// `folder` prop) - refuse anything else, plus any path-traversal attempt.
+const ALLOWED_PATH = /^(songs|artists)\/[a-z0-9._/-]+$/i;
 
 /**
  * Issues short-lived, scoped upload tokens for @vercel/blob's client-side
@@ -51,20 +43,19 @@ export default async function handler(request, response) {
     const jsonResponse = await handleUpload({
       body: request.body,
       request,
-      onBeforeGenerateToken: async (pathname) => ({
-        allowedContentTypes: [
-          'image/jpeg',
-          'image/png',
-          'image/webp',
-          'image/gif',
-          'audio/mpeg',
-          'audio/mp4',
-          'audio/wav',
-        ],
-        addRandomSuffix: true,
-        maximumSizeInBytes: 50 * 1024 * 1024, // 50MB covers cover art + a full song
-        tokenPayload: JSON.stringify({ pathname }),
-      }),
+      onBeforeGenerateToken: async (pathname) => {
+        if (!ALLOWED_PATH.test(pathname) || pathname.includes('..')) {
+          throw new Error('Uploads are only allowed under songs/ and artists/.');
+        }
+        const isAudio = pathname.startsWith('songs/audio/');
+        return {
+          allowedContentTypes: isAudio ? AUDIO_TYPES : IMAGE_TYPES,
+          addRandomSuffix: true,
+          // Audio: a full song. Images: cover art/avatars never need more than 10MB.
+          maximumSizeInBytes: isAudio ? 50 * MB : 10 * MB,
+          tokenPayload: JSON.stringify({ pathname }),
+        };
+      },
       onUploadCompleted: async () => {
         // Nothing to do server-side - the admin form reads the resulting
         // blob URL straight from the client-side upload() result and saves

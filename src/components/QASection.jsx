@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function QASection({ items }) {
+export default function QASection({ items, accentColor }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section id="qa" className="QapsA scroll-mt-24 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0">
+    <section
+      id="qa"
+      className="QapsA scroll-mt-24 border-b-[0.3em] px-4 py-12 sm:px-8 md:w-3/5 md:px-0"
+      style={accentColor ? { borderBottomColor: accentColor } : undefined}
+    >
       <h2 className="section-heading mb-8 text-black">Q&amp;A</h2>
 
       <div className="mx-auto max-w-3xl space-y-3">

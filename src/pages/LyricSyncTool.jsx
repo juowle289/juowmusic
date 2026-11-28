@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, Copy, Pause, Play, RotateCcw, Undo2 } from 'lucide-react';
+import { ArrowLeft, Check, Copy, Loader2, Pause, Play, RotateCcw, Save, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractLyricLines } from '@/lib/lyricLines';
 import { formatTime } from '@/stores/usePlayerStore';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
+import useIsAdmin from '@/hooks/useIsAdmin';
+import { songsAdmin } from '@/lib/adminData';
+import { adaptFirestoreSong, fetchFirestoreSong } from '@/lib/publicSongsCache';
 import { cn } from '@/lib/utils';
 
 import afterHours from '@/data/lyrics/afterHours.json';
@@ -37,7 +40,26 @@ const SONGS = {
  */
 export default function LyricSyncTool() {
   const { slug } = useParams();
-  const song = SONGS[slug];
+  const staticSong = SONGS[slug];
+  const { isAdmin } = useIsAdmin();
+
+  // Songs created in the admin live in Firestore - load one when the slug
+  // isn't a hand-written song, so they can be synced too.
+  const [remoteSong, setRemoteSong] = useState(undefined); // undefined = loading, null = not found
+  useEffect(() => {
+    if (staticSong) return undefined;
+    let cancelled = false;
+    setRemoteSong(undefined);
+    fetchFirestoreSong(slug, { allowDraft: true }).then((data) => {
+      if (!cancelled) setRemoteSong(data ? adaptFirestoreSong(slug, data) : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, staticSong]);
+
+  const song = staticSong || remoteSong || undefined;
+  const loadingSong = !staticSong && remoteSong === undefined;
   useDocumentTitle(song ? `Juowle | Lyric Sync - ${song.songTitle}` : 'Juowle | Lyric Sync Tool');
   const lines = useMemo(() => extractLyricLines(song?.lyricHtml), [song]);
 
@@ -46,13 +68,25 @@ export default function LyricSyncTool() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   // times[i] = recorded timestamp for lines[i], or undefined if not tapped yet.
-  const [times, setTimes] = useState(() => Array(lines.length).fill(undefined));
+  const [times, setTimes] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [saveState, setSaveState] = useState({ status: 'idle', message: '' }); // idle | saving | saved | error
 
   // Explicit (not purely derived) so clicking any line - tapped or not -
   // can jump the "next tap goes here" cursor there directly, for fixing a
   // mistake in the middle of the list without losing everything after it.
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // (Re)start whenever the song's lines are known: start from its existing
+  // timestamps when they still match the lyrics, so re-opening the tool to
+  // fix one line doesn't throw away the rest.
+  useEffect(() => {
+    const existing = song?.lineTimestamps;
+    const usable = Array.isArray(existing) && existing.length === lines.length;
+    setTimes(usable ? existing.slice() : Array(lines.length).fill(undefined));
+    setActiveIndex(0);
+    setSaveState({ status: 'idle', message: '' });
+  }, [song, lines.length]);
   const listRef = useRef(null);
   const activeRowRef = useRef(null);
 
@@ -74,7 +108,9 @@ export default function LyricSyncTool() {
       audio.removeEventListener('loadedmetadata', onMeta);
       audio.removeEventListener('ended', onEnd);
     };
-  }, []);
+    // Re-run once the song has loaded: for a Firestore song the <audio> element
+    // doesn't exist on the first render, so a mount-only effect never attached.
+  }, [song]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -161,6 +197,26 @@ export default function LyricSyncTool() {
       // JSON is still right there in the textarea to select manually.
     }
   };
+
+  /** Writes the timestamps straight onto the Firestore song (admin songs
+   * only - the hand-written ones still take a paste into their JSON file). */
+  const saveToSong = async () => {
+    setSaveState({ status: 'saving', message: '' });
+    try {
+      await songsAdmin.update(slug, { lineTimestamps: times.map((t) => t ?? 0) });
+      setSaveState({ status: 'saved', message: 'Saved to the song - it takes effect on the lyrics page right away.' });
+    } catch (err) {
+      setSaveState({ status: 'error', message: err.message || 'Could not save.' });
+    }
+  };
+
+  if (loadingSong) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        <Loader2 className="size-6 animate-spin text-white/60" />
+      </div>
+    );
+  }
 
   if (!song) {
     return (
@@ -269,10 +325,34 @@ export default function LyricSyncTool() {
             rows={4}
             className="w-full rounded-md border border-white/10 bg-white/5 p-3 font-mono text-xs text-white/70"
           />
-          <p className="mt-2 text-xs text-white/40">
-            Paste this array into <code>src/data/lyrics/{slug}.json</code> as a new field: <code>&quot;lineTimestamps&quot;: [...]</code>.
-            Index i is the time (seconds) that line i above starts.
-          </p>
+          {!staticSong && isAdmin && (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                onClick={saveToSong}
+                disabled={saveState.status === 'saving' || tappedCount === 0}
+                className="h-9 gap-1.5 bg-juow-accent text-black hover:bg-juow-accent/90 disabled:opacity-40"
+              >
+                {saveState.status === 'saving' ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Save to song
+              </Button>
+              {saveState.message && (
+                <span className={cn('text-xs', saveState.status === 'error' ? 'text-red-400' : 'text-emerald-400')}>
+                  {saveState.message}
+                </span>
+              )}
+            </div>
+          )}
+          {staticSong ? (
+            <p className="mt-2 text-xs text-white/40">
+              Paste this array into <code>src/data/lyrics/{slug}.json</code> as a new field: <code>&quot;lineTimestamps&quot;: [...]</code>.
+              Index i is the time (seconds) that line i above starts.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-white/40">
+              Index i is the time (seconds) that line i above starts. {isAdmin ? '' : 'Sign in as an admin to save these onto the song.'}
+            </p>
+          )}
         </div>
       </div>
     </div>

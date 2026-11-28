@@ -30,26 +30,21 @@ function getTier(streakDays) {
   return TIERS.find((t) => streakDays >= t.min) ?? TIERS[TIERS.length - 1];
 }
 
-/** The "no-punishment" nudge line: today's still winnable until it fully
- * passes, and a lapsed streak gets acknowledged for what it was instead of
- * just showing 0 with no context. Returns null when there's nothing
- * useful to say (streak already logged today, or no history at all). */
+/** This streak never resets - it only ever holds steady or grows, so the
+ * nudge is always encouraging, never a "you lost it" message. Returns null
+ * when there's nothing useful to say (no history at all). */
 function getNudge(streakDays, insights) {
   if (!insights) return null;
-  const { hasPlayedToday, yesterdayActive, bestStreak, favoriteBucketName } = insights;
+  const { hasPlayedToday, favoriteBucketName } = insights;
 
-  if (hasPlayedToday) return { tone: 'good', text: "Kept today's streak — see you tomorrow." };
+  if (hasPlayedToday) return { tone: 'good', text: "Today's counted — see you tomorrow." };
 
-  if (yesterdayActive && streakDays > 0) {
+  if (streakDays > 0) {
     const when = favoriteBucketName ? ` in the ${favoriteBucketName.toLowerCase()}` : '';
     return { tone: 'nudge', text: `You usually listen${when} — play something today to make it ${streakDays + 1}.` };
   }
 
-  if (!yesterdayActive && bestStreak > 0) {
-    return { tone: 'reset', text: `Your longest run was ${bestStreak} day${bestStreak === 1 ? '' : 's'} — today counts as a fresh start.` };
-  }
-
-  return null;
+  return { tone: 'nudge', text: 'Play a song today to start your streak.' };
 }
 
 export default function StreakCard({ streakDays, insights, delay = 0 }) {
@@ -101,8 +96,8 @@ export default function StreakCard({ streakDays, insights, delay = 0 }) {
             <div className="absolute top-full right-0 z-20 mt-2 w-64 rounded-lg border border-white/10 bg-[#111] p-4 text-xs leading-relaxed text-juow-soft/80 shadow-2xl">
               <p className="mb-1.5 font-medium text-juow-soft">How streaks work</p>
               <p>
-                Your streak counts consecutive days you&apos;ve listened to at least one song. Miss a day and it resets
-                to zero.
+                Your streak counts every day you&apos;ve listened to at least one song. It never resets - a quiet day
+                just holds it steady, and it only grows the next time you listen.
               </p>
               <p className="mt-2">
                 The flame levels up as it grows: <span className="text-juow-soft">1 → 3 → 7 → 10 → 15 → 20 → 25 →
@@ -124,7 +119,6 @@ export default function StreakCard({ streakDays, insights, delay = 0 }) {
             'mt-3 border-t border-white/10 pt-3 text-xs leading-relaxed',
             nudge.tone === 'good' && 'text-emerald-400/80',
             nudge.tone === 'nudge' && 'text-juow-accent/90',
-            nudge.tone === 'reset' && 'text-juow-soft/60',
           )}
         >
           {nudge.text}

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Radio, Search, X } from 'lucide-react';
 import CountryGlobe from '@/components/CountryGlobe';
 import SiteFooter from '@/components/SiteFooter';
+import NewArrivals from '@/components/NewArrivals';
 import { playableTracks } from '@/data/playableTracks';
 import { SONG_COUNTRY_ID, COUNTRY_NAMES_BY_ID } from '@/data/songCountries';
 import { handleImageError } from '@/lib/imageFallback';
@@ -348,6 +349,8 @@ export default function ExplorePage() {
             </div>
           )}
         </Reveal>
+
+        <NewArrivals className="px-4 pb-16 sm:px-8 md:px-16" />
       </main>
 
       <SiteFooter dark />

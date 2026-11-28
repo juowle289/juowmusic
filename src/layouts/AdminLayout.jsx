@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { Link, Navigate, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Music4, Users, ShieldAlert, Menu, X, Moon, Sun } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Music4,
+  Users,
+  UserCog,
+  MessageSquareWarning,
+  History,
+  ShieldAlert,
+  Menu,
+  X,
+  Moon,
+  Sun,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import useIsAdmin from '@/hooks/useIsAdmin';
 import MusicLoader from '@/components/MusicLoader';
@@ -11,6 +23,9 @@ const NAV = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/songs', label: 'Songs', icon: Music4 },
   { to: '/admin/artists', label: 'Artists', icon: Users },
+  { to: '/admin/comments', label: 'Comments', icon: MessageSquareWarning },
+  { to: '/admin/users', label: 'Users', icon: UserCog },
+  { to: '/admin/audit-log', label: 'Audit log', icon: History },
 ];
 
 function ThemeToggle({ className }) {
@@ -45,7 +60,7 @@ function SidebarNav({ onNavigate }) {
               cn(
                 'flex items-center gap-2.5 border-l-2 px-5 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'border-juow-accent bg-sidebar-accent text-amber-600 dark:text-juow-accent'
+                  ? 'border-juow-accent bg-sidebar-accent text-[#8a6d00] dark:text-juow-accent'
                   : 'border-transparent text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground',
               )
             }
@@ -68,10 +83,10 @@ function SidebarNav({ onNavigate }) {
 
 export default function AdminLayout() {
   const { user, initializing } = useAuth();
-  const isAdmin = useIsAdmin();
+  const { isAdmin, loading: adminCheckLoading } = useIsAdmin();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  if (initializing) {
+  if (initializing || (user && adminCheckLoading)) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <MusicLoader />
@@ -85,12 +100,12 @@ export default function AdminLayout() {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-6 text-center text-foreground">
         <div>
-          <ShieldAlert className="mx-auto mb-4 size-10 text-amber-600 dark:text-juow-accent" />
+          <ShieldAlert className="mx-auto mb-4 size-10 text-[#8a6d00] dark:text-juow-accent" />
           <h1 className="mb-2 text-xl font-bold">Not an admin account</h1>
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">
             {user.email} isn&apos;t on the admin allowlist. Ask whoever runs this site to add it.
           </p>
-          <Link to="/" className="mt-6 inline-block text-sm text-amber-600 underline-offset-4 hover:underline dark:text-juow-accent">
+          <Link to="/" className="mt-6 inline-block text-sm text-[#8a6d00] underline-offset-4 hover:underline dark:text-juow-accent">
             Back to the site
           </Link>
         </div>
@@ -99,7 +114,13 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="admin-scope flex min-h-screen bg-background text-foreground">
+      {/* The whole site's shared UI kit (Button/Input/Textarea, plus any
+          rounded-lg/xl we use directly) is built on one shared --radius
+          variable. The public site barely rounds anything - this scopes a
+          much sharper radius to just the admin area instead of overriding
+          every single rounded-* class by hand. */}
+      <style>{`.admin-scope { --radius: 2px; }`}</style>
       {/* Desktop sidebar */}
       <aside className="hidden w-56 shrink-0 border-r border-sidebar-border bg-sidebar py-6 sm:block">
         <div className="mb-8 flex items-center justify-between px-5">

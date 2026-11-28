@@ -183,7 +183,7 @@ function CommentRow({
   );
 }
 
-export default function Comments({ slug }) {
+export default function Comments({ slug, accentColor }) {
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -357,7 +357,11 @@ export default function Comments({ slug }) {
   }, [confirmTarget, t]);
 
   return (
-    <section id="cmt" className="comments scroll-mt-24 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0">
+    <section
+      id="cmt"
+      className="comments scroll-mt-24 border-b-[0.3em] px-4 py-12 sm:px-8 md:w-3/5 md:px-0"
+      style={accentColor ? { borderBottomColor: accentColor } : undefined}
+    >
       <h2 className="section-heading mb-8 text-black">{t('comments.heading')}</h2>
 
       <div className="mx-auto max-w-3xl space-y-6">

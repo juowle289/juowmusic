@@ -16,6 +16,7 @@ import {
 } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 import { auth } from '@/firebase';
+import { syncUserProfile } from '@/lib/userProfileSync';
 import { getFriendlyAuthError } from '@/utils/authErrors';
 import { EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_WELCOME_TEMPLATE_ID } from '@/config/emailjs';
 
@@ -45,12 +46,14 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(toUserSnapshot(firebaseUser));
       setInitializing(false);
+      syncUserProfile(firebaseUser);
     });
     return unsubscribe;
   }, []);
 
   function refreshUser() {
     setUser(toUserSnapshot(auth.currentUser));
+    syncUserProfile(auth.currentUser); // keep the admin-visible mirror current after profile edits
   }
 
   async function register(email, password, username) {

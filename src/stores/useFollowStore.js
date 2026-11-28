@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { pullUserField, pushUserField } from '@/lib/userCloud';
 
 const FOLLOWS_PREFIX = 'juowmusic-follows:';
 const SEEN_PREFIX = 'juowmusic-follows-seen:';
@@ -68,7 +69,21 @@ export const useFollowStore = create((set, get) => ({
    * account's follows/seen-state load in. */
   setUser: (uid) => {
     if (get().uid === uid) return;
-    set({ uid, followedSlugs: loadFollows(uid), seen: loadSeen(uid) });
+    const local = loadFollows(uid);
+    set({ uid, followedSlugs: local, seen: loadSeen(uid) });
+    if (!uid) return;
+    // Sync with the account's Firestore doc so follows follow the person
+    // across devices: if the cloud already has a list it wins; otherwise
+    // this browser's list is uploaded.
+    pullUserField(uid, 'followedArtists').then((remote) => {
+      if (get().uid !== uid) return;
+      if (remote) {
+        saveFollows(uid, remote);
+        set({ followedSlugs: remote });
+      } else if (local.length > 0) {
+        pushUserField(uid, 'followedArtists', local);
+      }
+    });
   },
 
   isFollowing: (slug) => get().followedSlugs.includes(slug),
@@ -82,6 +97,7 @@ export const useFollowStore = create((set, get) => ({
       ? followedSlugs.filter((s) => s !== slug)
       : [...followedSlugs, slug];
     saveFollows(uid, next);
+    pushUserField(uid, 'followedArtists', next);
     set({ followedSlugs: next });
     return true;
   },

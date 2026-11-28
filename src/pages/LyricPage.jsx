@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import LikeButton from "@/components/LikeButton";
 import { ArrowDown, Share2 } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
 import Loader from "@/components/Loader";
@@ -18,7 +19,12 @@ import { findClickedLineIndex } from "@/lib/lyricLines";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useHeaderThemeStore } from "@/stores/useHeaderThemeStore";
 import { cn } from "@/lib/utils";
-import { adaptFirestoreSong, fetchFirestoreSong } from "@/lib/publicSongsCache";
+import {
+  adaptFirestoreSong,
+  fetchFirestoreSong,
+  getRecommendedSongs,
+  incrementSongViews,
+} from "@/lib/publicSongsCache";
 
 import afterHours from "@/data/lyrics/afterHours.json";
 import ballroomExtravaganza from "@/data/lyrics/ballroomExtravaganza.json";
@@ -50,24 +56,43 @@ export default function LyricPage() {
   // every existing page keeps rendering purely from the static import (no
   // network round-trip, no flash of a loading state).
   const [firestoreSong, setFirestoreSong] = useState(undefined); // undefined = not checked yet, null = checked, not found
+  // Draft songs are hidden from the public; the admin's "Preview" link adds
+  // ?preview=1 to open one anyway (and such a visit isn't counted as a view).
+  const [searchParams] = useSearchParams();
+  const allowDraft = searchParams.get("preview") === "1";
   useEffect(() => {
     if (staticSong) return undefined;
     let cancelled = false;
     setFirestoreSong(undefined);
-    fetchFirestoreSong(slug).then((data) => {
+    (async () => {
+      const data = await fetchFirestoreSong(slug, { allowDraft });
       if (cancelled) return;
-      setFirestoreSong(data ? adaptFirestoreSong(slug, data) : null);
-    });
+      if (!data) {
+        setFirestoreSong(null);
+        return;
+      }
+      const recommended = await getRecommendedSongs(slug, data);
+      if (cancelled) return;
+      setFirestoreSong(adaptFirestoreSong(slug, data, recommended));
+      if (!allowDraft) incrementSongViews(slug);
+    })();
     return () => {
       cancelled = true;
     };
-  }, [slug, staticSong]);
+  }, [slug, staticSong, allowDraft]);
 
   const song = staticSong || firestoreSong || undefined;
   const stillCheckingFirestore = !staticSong && firestoreSong === undefined;
   useDocumentTitle(song?.docTitle);
   useInlineStyle(song?.customStyle);
   const palette = useCoverPalette(song?.coverSrc);
+  // Each hand-written song's customStyle already sets its own border color
+  // for the About/Q&A/Comments sections (":is(.about, .QapsA, .comments) {
+  // border-bottom: ... }") - leave those alone. A song with no customStyle
+  // (e.g. one created in the admin) had been falling back to a hardcoded
+  // dark red instead; this uses the same cover-derived accent the header
+  // already uses for those.
+  const sectionBorderAccent = song?.customStyle ? null : palette.accent;
 
   // Tint the site header with the cover's flat dominant color (same hue as the
   // hero's gradient, just without the gradient). Cleared when leaving the page.
@@ -207,6 +232,11 @@ export default function LyricPage() {
   return (
     <div className="lyric-page bg-white">
       <Loader />
+      {song.isDraft && (
+        <div className="fixed inset-x-0 bottom-0 z-[200] bg-black px-4 py-2 text-center text-xs text-juow-accent">
+          Draft preview - this song is not public yet.
+        </div>
+      )}
 
       {/* Hero: colored per-song gradient set via useInlineStyle(customStyle), white text.
           .song-hero is the scoped target for each song's customStyle "nav {...}" rule
@@ -272,9 +302,12 @@ export default function LyricPage() {
             )}
           >
             <div className="min-w-0">
-              <h1 className="font-[family-name:var(--font-anton)] text-[1.875rem] font-medium leading-tight md:text-5xl">
-                {song.songTitle}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="font-[family-name:var(--font-anton)] text-[1.875rem] font-medium leading-tight md:text-5xl">
+                  {song.songTitle}
+                </h1>
+                <LikeButton slug={slug} size="size-7 md:size-8" />
+              </div>
               <h2
                 className={cn(
                   "mt-3 text-[0.9375rem] [&_a:hover]:underline md:text-base",
@@ -358,7 +391,7 @@ export default function LyricPage() {
             {song.recommended.map((rec) => (
               <Link
                 to={rec.link}
-                key={rec.title}
+                key={rec.link || rec.title}
                 className="flex items-center gap-4 border-x border-b border-dashed border-black p-4 transition-colors hover:bg-gray-100"
               >
                 <img
@@ -384,7 +417,8 @@ export default function LyricPage() {
             not the narrower 60% column the original design used. */}
         <section
           id="about"
-          className="about scroll-mt-24 mb-12 border-b-[0.3em] border-[#a00000] px-4 py-12 sm:px-8 md:w-3/5 md:px-0"
+          className="about scroll-mt-24 mb-12 border-b-[0.3em] px-4 py-12 sm:px-8 md:w-3/5 md:px-0"
+          style={sectionBorderAccent ? { borderBottomColor: sectionBorderAccent } : undefined}
         >
           <h1 className="section-heading mb-8 text-black">About</h1>
           <div
@@ -393,8 +427,8 @@ export default function LyricPage() {
           />
         </section>
 
-        <QASection items={song.qa} />
-        <Comments slug={song.slug} />
+        <QASection items={song.qa} accentColor={sectionBorderAccent} />
+        <Comments slug={song.slug} accentColor={sectionBorderAccent} />
       </main>
 
       <SiteFooter dark accent={palette.accent} />

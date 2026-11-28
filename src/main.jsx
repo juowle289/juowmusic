@@ -4,6 +4,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider } from "@/context/AuthContext";
 import App from "@/App.jsx";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "@/index.css";
 
 createRoot(document.getElementById("root")).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById("root")).render(
     <ThemeProvider defaultTheme="dark">
       <LanguageProvider>
         <AuthProvider>
-          <App />
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

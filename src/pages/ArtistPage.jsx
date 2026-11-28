@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   CircleCheck,
   CirclePlus,
@@ -24,7 +24,7 @@ import { useFollowStore } from '@/stores/useFollowStore';
 import { ARTISTS_BY_SLUG } from '@/data/artists';
 import { ALL_ARTISTS } from '@/data/recommendedArtists';
 import { handleImageError } from '@/lib/imageFallback';
-import { adaptFirestoreArtist, fetchFirestoreArtist } from '@/lib/publicArtistsCache';
+import { adaptFirestoreArtist, fetchFirestoreArtist, usePublicArtistsStore } from '@/lib/publicArtistsCache';
 
 /** Palette lifted 1:1 from the original css/artist.css custom properties. */
 const COLOR = {
@@ -68,6 +68,7 @@ function tint(hex, amount, alpha = 1) {
 
 function resolveLink(link) {
   if (!link) return null;
+  if (typeof link === 'string') return link;
   if (link.type === 'artist') return `/artist/${link.slug}`;
   if (link.type === 'lyric') return `/lyrics/${link.slug}`;
   return null;
@@ -565,6 +566,40 @@ function FollowButton({ slug, name, accent }) {
   );
 }
 
+/** Labelled Follow / Following button shown right under the artist's avatar. */
+function FollowPill({ slug, name, accent }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isFollowing = useFollowStore((s) => s.followedSlugs.includes(slug));
+  const toggleFollow = useFollowStore((s) => s.toggleFollow);
+
+  const handleClick = () => {
+    if (!user) {
+      navigate('/login', { state: { from: `/artist/${slug}` } });
+      return;
+    }
+    toggleFollow(slug);
+  };
+
+  const Icon = isFollowing ? CircleCheck : CirclePlus;
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-pressed={isFollowing}
+      title={isFollowing ? `Unfollow ${name}` : `Follow ${name}`}
+      className={cn(
+        'mt-4 inline-flex items-center gap-2 rounded-full border-2 px-5 py-1.5 text-sm font-semibold transition-colors duration-200',
+        isFollowing ? 'bg-black/80 text-white' : 'border-white/80 bg-white/90 text-black hover:bg-white',
+      )}
+      style={isFollowing ? { borderColor: accent, color: accent } : undefined}
+    >
+      <Icon className="size-4" strokeWidth={2} />
+      {isFollowing ? 'Following' : 'Follow'}
+    </button>
+  );
+}
+
 export default function ArtistPage() {
   const { slug } = useParams();
   const staticArtist = ARTISTS_BY_SLUG[slug];
@@ -572,18 +607,28 @@ export default function ArtistPage() {
   // Admin-created artists live in Firestore, not in ARTISTS_BY_SLUG - look
   // one up by slug only when it's not one of the hand-written artists.
   const [firestoreArtist, setFirestoreArtist] = useState(undefined); // undefined = not checked, null = checked/not found
+  // Draft artists are hidden from the public; the admin's "Preview" link
+  // adds ?preview=1 to open one anyway.
+  const [searchParams] = useSearchParams();
+  const allowDraft = searchParams.get('preview') === '1';
   useEffect(() => {
     if (staticArtist) return undefined;
     let cancelled = false;
     setFirestoreArtist(undefined);
-    fetchFirestoreArtist(slug).then((data) => {
+    fetchFirestoreArtist(slug, { allowDraft }).then((result) => {
       if (cancelled) return;
-      setFirestoreArtist(data ? adaptFirestoreArtist(slug, data) : null);
+      setFirestoreArtist(
+        result ? { ...adaptFirestoreArtist(slug, result.data, result.popularSongs), isDraft: result.data.status === 'draft' } : null,
+      );
     });
     return () => {
       cancelled = true;
     };
-  }, [slug, staticArtist]);
+  }, [slug, staticArtist, allowDraft]);
+
+  // Admin-created artists (already loaded once per session by AppLayout)
+  // join the hand-written ALL_ARTISTS list for "Similar Artists".
+  const firestoreArtistCards = usePublicArtistsStore((s) => s.artists);
 
   const artist = staticArtist || firestoreArtist || undefined;
   const stillCheckingFirestore = !staticArtist && firestoreArtist === undefined;
@@ -604,14 +649,18 @@ export default function ArtistPage() {
   // Similar Artists: only artists that actually share this artist's genre -
   // replacing the old hand-picked per-artist list. "Other Artists" is the
   // fallback shown (with an explanatory note) when nobody matches yet.
+  const everyArtist = useMemo(() => {
+    const known = new Set(ALL_ARTISTS.map((a) => a.name));
+    return [...ALL_ARTISTS, ...firestoreArtistCards.filter((a) => a.name && !known.has(a.name))];
+  }, [firestoreArtistCards]);
   const similarLinks = useMemo(() => {
     if (!artist) return [];
-    return ALL_ARTISTS.filter((a) => a.name !== artist.displayName && a.genre === artist.genre);
-  }, [artist]);
+    return everyArtist.filter((a) => a.name !== artist.displayName && a.genre === artist.genre);
+  }, [artist, everyArtist]);
   const otherArtistLinks = useMemo(() => {
     if (!artist) return [];
-    return ALL_ARTISTS.filter((a) => a.name !== artist.displayName && a.genre !== artist.genre);
-  }, [artist]);
+    return everyArtist.filter((a) => a.name !== artist.displayName && a.genre !== artist.genre);
+  }, [artist, everyArtist]);
 
   if (!artist) {
     if (stillCheckingFirestore) return <Loader />;
@@ -625,6 +674,11 @@ export default function ArtistPage() {
   return (
     <div className="text-black">
       <Loader />
+      {artist.isDraft && (
+        <div className="fixed inset-x-0 bottom-0 z-[200] bg-black px-4 py-2 text-center text-xs text-[#feec93]">
+          Draft preview - this artist is not public yet.
+        </div>
+      )}
 
       {/* figure's background is now the artist's own avatar palette fading into
           the page's white (matches Bio/Links below) instead of a fixed cover
@@ -637,13 +691,14 @@ export default function ArtistPage() {
         {/* Same container + 2-column split as the profile row below, so the avatar
             stays centered over the left column at every width. */}
         <div className={cn(CONTAINER, 'flex h-full')}>
-          <figcaption className="flex w-full items-start justify-center sm:pt-[10%] md:w-1/2 md:pr-3">
+          <figcaption className="flex w-full flex-col items-center justify-start sm:pt-[10%] md:w-1/2 md:pr-3">
             <img
               src={artist.avatarImg}
               alt={artist.displayName}
               fetchPriority="high"
               className="pointer-events-none size-32 rounded-full object-cover sm:size-72"
               style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.35))' }} onError={handleImageError} />
+            <FollowPill slug={artist.slug} name={artist.displayName} accent={avatarPalette.accent} />
           </figcaption>
         </div>
       </figure>

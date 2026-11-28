@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Loader2, Music4, Upload, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { uploadAdminFile } from '@/lib/blobUpload';
+import { uploadAdminFile, validateUploadFile } from '@/lib/blobUpload';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,6 +19,12 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
   async function handleFile(file) {
     if (!file) return;
     setError('');
+    const problem = validateUploadFile(file, kind);
+    if (problem) {
+      setError(problem);
+      if (inputRef.current) inputRef.current.value = '';
+      return;
+    }
     setUploading(true);
     setProgress(0);
     try {
@@ -28,6 +34,8 @@ export default function FileUploadField({ label, value, onChange, folder, kind =
       setError(err.message || 'Upload failed');
     } finally {
       setUploading(false);
+      // Lets the same file be picked again after an error/clear.
+      if (inputRef.current) inputRef.current.value = '';
     }
   }
 
